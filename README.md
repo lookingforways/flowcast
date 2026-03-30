@@ -13,7 +13,70 @@ Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:
 
 ---
 
-## Inicio rápido
+## Deploy en VPS (Ubuntu 24.04 x86)
+
+### 1. Instalar Docker
+
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### 2. Agregar SSH key del VPS a GitHub
+
+```bash
+ssh-keygen -t ed25519 -C "flowcast-vps"
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copiá la clave pública y agrégala en GitHub: **Settings → SSH and GPG keys → New SSH key**.
+
+### 3. Clonar el repositorio
+
+```bash
+git clone git@github.com:lookingforways/flowcast.git
+cd flowcast
+```
+
+### 4. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Completá como mínimo:
+
+```env
+RSS_FEED_URL=https://tu-podcast.com/feed.xml
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+APP_BASE_URL=http://IP-DE-TU-VPS:8000
+SECRET_KEY=una-clave-aleatoria-larga
+```
+
+### 5. Arrancar
+
+```bash
+docker compose up -d
+```
+
+Accedé a `http://IP-DE-TU-VPS:8000`.
+
+Para ver los logs:
+```bash
+docker compose logs -f flowcast
+```
+
+Para actualizar cuando haya cambios:
+```bash
+git pull && docker compose up -d --build
+```
+
+---
+
+## Inicio rápido (desarrollo local)
 
 ### 1. Clonar y configurar
 
