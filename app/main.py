@@ -4,10 +4,11 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.auth.middleware import AuthMiddleware
+from app.auth.session import is_fully_authenticated
 from app.config import settings
 from app.database import init_db
 from app.routers import auth, episodes, jobs, podcasts, templates, ui, youtube
@@ -18,6 +19,8 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health")
 
 
 @asynccontextmanager
@@ -57,7 +60,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(AuthMiddleware)
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+    if any(path.startswith(p) for p in _PUBLIC_PREFIXES):
+        return await call_next(request)
+    if not is_fully_authenticated(request):
+        return RedirectResponse("/login", status_code=302)
+    return await call_next(request)
+
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth.router)
