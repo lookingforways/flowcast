@@ -52,7 +52,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="1.0.0",
+    version="0.1.0",
     lifespan=lifespan,
 )
 
