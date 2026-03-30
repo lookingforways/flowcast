@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Editar plantilla: {{ template.name }} — Flowcast{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="/templates" class="text-decoration-none text-muted"><i class="bi bi-arrow-left me-1"></i>Volver a plantillas</a>
+</div>
+
+<h2 class="mb-4"><i class="bi bi-palette me-2"></i>Editar: {{ template.name }}</h2>
+
+<div class="row g-4">
+  <!-- Preview -->
+  <div class="col-lg-7">
+    <div class="card sticky-top" style="top: 1rem">
+      <div class="card-header d-flex justify-content-between">
+        <span><i class="bi bi-eye me-1"></i>Vista previa (aproximada)</span>
+        <span class="badge bg-secondary">1920×1080</span>
+      </div>
+      <div class="card-body p-0 bg-dark">
+        <canvas id="previewCanvas" style="width:100%;height:auto;display:block"></canvas>
+      </div>
+      <div class="card-footer">
+        <div class="row g-2">
+          <div class="col">
+            <label class="form-label small">Imagen de fondo</label>
+            <input type="file" class="form-control form-control-sm" id="bgUpload" accept="image/jpeg,image/png,image/webp">
+          </div>
+          <div class="col">
+            <label class="form-label small">Watermark / Logo</label>
+            <input type="file" class="form-control form-control-sm" id="wmUpload" accept="image/jpeg,image/png,image/webp">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="col-lg-5">
+    <form id="templateForm">
+      <div class="card mb-3">
+        <div class="card-header">General</div>
+        <div class="card-body">
+          <label class="form-label">Nombre de la plantilla</label>
+          <input type="text" class="form-control" id="tmplName" value="{{ template.name }}">
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-waveform me-1"></i>Forma de onda</div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Color</label>
+              <input type="color" class="form-control form-control-color" id="waveColor" value="{{ template.waveform_color }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Modo</label>
+              <select class="form-select form-select-sm" id="waveMode">
+                <option value="cline" {% if template.waveform_mode == 'cline' %}selected{% endif %}>Línea centrada</option>
+                <option value="p2p" {% if template.waveform_mode == 'p2p' %}selected{% endif %}>Punto a punto</option>
+                <option value="cbuffer" {% if template.waveform_mode == 'cbuffer' %}selected{% endif %}>Relleno</option>
+                <option value="showfreqs" {% if template.waveform_mode == 'showfreqs' %}selected{% endif %}>Frecuencias</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Posición Y</label>
+              <input type="range" class="form-range" id="waveY" min="0" max="810" value="{{ template.waveform_y }}">
+              <span class="small text-muted" id="waveYVal">{{ template.waveform_y }}px</span>
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Altura</label>
+              <input type="range" class="form-range" id="waveH" min="50" max="540" value="{{ template.waveform_h }}">
+              <span class="small text-muted" id="waveHVal">{{ template.waveform_h }}px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-type me-1"></i>Título del episodio</div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Color del texto</label>
+              <input type="color" class="form-control form-control-color" id="titleColor" value="{{ template.title_color }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Tamaño (px)</label>
+              <input type="number" class="form-control form-control-sm" id="titleSize" value="{{ template.title_font_size }}" min="12" max="200">
+            </div>
+            <div class="col-12">
+              <label class="form-label small">Posición Y</label>
+              <input type="range" class="form-range" id="titleY" min="0" max="1000" value="{{ template.title_y }}">
+              <span class="small text-muted" id="titleYVal">{{ template.title_y }}px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">Opciones</div>
+        <div class="card-body">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="showDuration" {% if template.show_duration %}checked{% endif %}>
+            <label class="form-check-label" for="showDuration">Mostrar duración del episodio</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary flex-grow-1" id="saveBtn">
+          <i class="bi bi-floppy me-1"></i>Guardar cambios
+        </button>
+        <a href="/templates" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TMPL_ID = {{ template.id }};
+const canvas = document.getElementById('previewCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 1920;
+canvas.height = 1080;
+
+let bgImage = null;
+let wmImage = null;
+
+function loadCurrentBg() {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { bgImage = img; drawPreview(); };
+  img.src = `/api/templates/${TMPL_ID}/background?t=${Date.now()}`;
+}
+
+function drawPreview() {
+  const waveY = parseInt(document.getElementById('waveY').value);
+  const waveH = parseInt(document.getElementById('waveH').value);
+  const waveColor = document.getElementById('waveColor').value;
+  const titleColor = document.getElementById('titleColor').value;
+  const titleSize = parseInt(document.getElementById('titleSize').value);
+  const titleY = parseInt(document.getElementById('titleY').value);
+
+  ctx.clearRect(0, 0, 1920, 1080);
+
+  // Background
+  if (bgImage) {
+    ctx.drawImage(bgImage, 0, 0, 1920, 1080);
+  } else {
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, 1920, 1080);
+  }
+
+  // Waveform simulation
+  ctx.fillStyle = waveColor + '33';
+  ctx.fillRect(0, waveY, 1920, waveH);
+  ctx.strokeStyle = waveColor;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const mid = waveY + waveH / 2;
+  for (let x = 0; x < 1920; x += 4) {
+    const amp = (Math.sin(x * 0.05) + Math.sin(x * 0.13) * 0.5) * (waveH * 0.4);
+    if (x === 0) ctx.moveTo(x, mid + amp);
+    else ctx.lineTo(x, mid + amp);
+  }
+  ctx.stroke();
+
+  // Title text
+  ctx.font = `bold ${titleSize}px sans-serif`;
+  ctx.fillStyle = titleColor;
+  ctx.textAlign = 'center';
+  ctx.fillText('Título del episodio de ejemplo', 960, titleY);
+
+  // Watermark
+  if (wmImage) {
+    ctx.globalAlpha = 0.85;
+    const wmW = 200;
+    const wmH = wmImage.height * (wmW / wmImage.width);
+    ctx.drawImage(wmImage, 1920 - wmW - 40, 40, wmW, wmH);
+    ctx.globalAlpha = 1;
+  }
+
+  // Duration badge
+  if (document.getElementById('showDuration').checked) {
+    ctx.font = '36px sans-serif';
+    ctx.fillStyle = '#CCCCCC';
+    ctx.textAlign = 'left';
+    ctx.fillText('45:23', 40, 80);
+  }
+}
+
+// Sync range labels
+['waveY', 'waveH', 'titleY'].forEach(id => {
+  const el = document.getElementById(id);
+  const label = document.getElementById(id + 'Val');
+  el.addEventListener('input', () => { label.textContent = el.value + 'px'; drawPreview(); });
+});
+['waveColor', 'titleColor', 'titleSize', 'showDuration', 'waveMode'].forEach(id => {
+  document.getElementById(id).addEventListener('change', drawPreview);
+  document.getElementById(id).addEventListener('input', drawPreview);
+});
+
+// Background upload
+document.getElementById('bgUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  const resp = await fetch(`/api/templates/${TMPL_ID}/background`, {method: 'POST', body: fd});
+  if (resp.ok) {
+    const url = URL.createObjectURL(file);
+    bgImage = new Image();
+    bgImage.onload = drawPreview;
+    bgImage.src = url;
+  } else {
+    alert('Error al subir la imagen de fondo');
+  }
+});
+
+// Watermark upload
+document.getElementById('wmUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  const resp = await fetch(`/api/templates/${TMPL_ID}/watermark`, {method: 'POST', body: fd});
+  if (resp.ok) {
+    const url = URL.createObjectURL(file);
+    wmImage = new Image();
+    wmImage.onload = drawPreview;
+    wmImage.src = url;
+  }
+});
+
+// Save
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const payload = {
+    name: document.getElementById('tmplName').value,
+    waveform_color: document.getElementById('waveColor').value,
+    waveform_mode: document.getElementById('waveMode').value,
+    waveform_y: parseInt(document.getElementById('waveY').value),
+    waveform_h: parseInt(document.getElementById('waveH').value),
+    title_color: document.getElementById('titleColor').value,
+    title_font_size: parseInt(document.getElementById('titleSize').value),
+    title_y: parseInt(document.getElementById('titleY').value),
+    show_duration: document.getElementById('showDuration').checked,
+  };
+  const resp = await fetch(`/api/templates/${TMPL_ID}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (resp.ok) {
+    const btn = document.getElementById('saveBtn');
+    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Guardado';
+    btn.classList.replace('btn-primary', 'btn-success');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="bi bi-floppy me-1"></i>Guardar cambios';
+      btn.classList.replace('btn-success', 'btn-primary');
+    }, 2000);
+  } else {
+    alert('Error al guardar');
+  }
+});
+
+loadCurrentBg();
+drawPreview();
+</script>
+{% endblock %}

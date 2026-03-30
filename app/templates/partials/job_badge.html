@@ -1,0 +1,5 @@
+{% if job.status == 'done' %}<span class="badge bg-success">Listo</span>
+{% elif job.status == 'running' %}<span class="badge bg-primary"><span class="spinner-border spinner-border-sm me-1"></span>Renderizando</span>
+{% elif job.status == 'queued' %}<span class="badge bg-secondary">En cola</span>
+{% elif job.status == 'failed' %}<span class="badge bg-danger">Error</span>
+{% else %}<span class="badge bg-light text-dark">{{ job.status }}</span>{% endif %}

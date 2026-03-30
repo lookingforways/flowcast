@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ episode.title[:60] }} — Flowcast{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="/episodes" class="text-decoration-none text-muted"><i class="bi bi-arrow-left me-1"></i>Volver a episodios</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-mic me-2"></i>{{ episode.title }}</h5>
+        <span class="badge status-{{ episode.status }} fs-6">{{ episode.status }}</span>
+      </div>
+      <div class="card-body">
+        {% if episode.pub_date %}
+        <p class="text-muted small mb-1"><i class="bi bi-calendar me-1"></i>{{ episode.pub_date.strftime('%d de %B, %Y') }}</p>
+        {% endif %}
+        {% if episode.duration_secs %}
+        <p class="text-muted small mb-3"><i class="bi bi-clock me-1"></i>{{ (episode.duration_secs // 3600) }}h {{ ((episode.duration_secs % 3600) // 60) }}min</p>
+        {% endif %}
+
+        {% if episode.youtube_id %}
+        <div class="ratio ratio-16x9 mb-3">
+          <iframe src="https://www.youtube.com/embed/{{ episode.youtube_id }}" allowfullscreen></iframe>
+        </div>
+        <a href="https://youtu.be/{{ episode.youtube_id }}" target="_blank" class="btn btn-danger btn-sm mb-3">
+          <i class="bi bi-youtube me-1"></i>Ver en YouTube
+        </a>
+        {% endif %}
+
+        {% if episode.description %}
+        <h6 class="fw-semibold mt-3">Notas del episodio</h6>
+        <div class="show-notes border rounded p-3 bg-light" style="max-height:300px;overflow-y:auto">
+          {{ episode.description | safe }}
+        </div>
+        {% endif %}
+
+        {% if episode.error_msg %}
+        <div class="alert alert-danger mt-3">
+          <strong>Error:</strong> {{ episode.error_msg }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Render jobs -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-terminal me-1"></i>Trabajos de render</div>
+      <div class="card-body p-0">
+        {% if jobs %}
+        <div class="accordion" id="jobsAccordion">
+          {% for job in jobs %}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#job{{ job.id }}">
+                <span class="badge status-job-{{ job.status }} me-2">
+                  {% if job.status == 'done' %}Listo
+                  {% elif job.status == 'running' %}Renderizando
+                  {% elif job.status == 'queued' %}En cola
+                  {% else %}Error{% endif %}
+                </span>
+                Job #{{ job.id }} — {{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else 'pendiente' }}
+              </button>
+            </h2>
+            <div id="job{{ job.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}">
+              <div class="accordion-body">
+                {% if job.error_msg %}
+                <div class="alert alert-danger py-2">{{ job.error_msg }}</div>
+                {% endif %}
+                {% if job.ffmpeg_log %}
+                <pre class="bg-dark text-light p-2 rounded small" style="max-height:200px;overflow-y:auto;font-size:0.75rem">{{ job.ffmpeg_log[-2000:] }}</pre>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-3 text-muted text-center">Sin trabajos de render</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-play-circle me-1"></i>Acciones</div>
+      <div class="card-body d-grid gap-2">
+        {% if episode.status in ('discovered', 'failed') %}
+        <button class="btn btn-primary" data-action="download" data-id="{{ episode.id }}">
+          <i class="bi bi-download me-1"></i>Descargar MP3
+        </button>
+        {% endif %}
+
+        {% if episode.status in ('downloaded', 'rendered', 'failed') %}
+        <div>
+          <label class="form-label fw-semibold">Plantilla</label>
+          <select class="form-select mb-2" id="detailTemplateSelect">
+            {% for t in templates %}
+            <option value="{{ t.id }}" {% if t.is_default %}selected{% endif %}>
+              {{ t.name }}{% if t.is_default %} ✓{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-warning w-100" data-action="render" data-id="{{ episode.id }}">
+            <i class="bi bi-film me-1"></i>Crear Audiograma
+          </button>
+        </div>
+        {% endif %}
+
+        {% if episode.status == 'rendered' and youtube_connected %}
+        <button class="btn btn-danger" data-action="publish" data-id="{{ episode.id }}">
+          <i class="bi bi-youtube me-1"></i>Publicar en YouTube
+        </button>
+        {% endif %}
+
+        {% if episode.mp3_path %}
+        <a href="/api/episodes/{{ episode.id }}/audio" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-file-music me-1"></i>MP3 local disponible
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-info-circle me-1"></i>Metadatos</div>
+      <div class="card-body">
+        <dl class="mb-0">
+          <dt class="small text-muted">GUID</dt>
+          <dd class="small text-break">{{ episode.guid[:80] }}{% if episode.guid|length > 80 %}…{% endif %}</dd>
+          <dt class="small text-muted">URL del MP3</dt>
+          <dd class="small text-break"><a href="{{ episode.mp3_url }}" target="_blank">enlace</a></dd>
+          {% if episode.youtube_id %}
+          <dt class="small text-muted">YouTube ID</dt>
+          <dd class="small"><a href="https://youtu.be/{{ episode.youtube_id }}" target="_blank">{{ episode.youtube_id }}</a></dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const episodeId = {{ episode.id }};
+document.querySelectorAll('[data-action]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Procesando...';
+    try {
+      let url = `/api/episodes/${id}/${action}`;
+      if (action === 'render') {
+        const tmpl = document.getElementById('detailTemplateSelect')?.value;
+        if (tmpl) url += `?template_id=${tmpl}`;
+      }
+      const resp = await fetch(url, { method: 'POST' });
+      if (!resp.ok) {
+        const err = await resp.json();
+        alert('Error: ' + (err.detail || JSON.stringify(err)));
+      } else {
+        setTimeout(() => location.reload(), 1500);
+      }
+    } catch(e) { alert(e); } finally { btn.disabled = false; }
+  });
+});
+</script>
+{% endblock %}

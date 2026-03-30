@@ -1,0 +1,32 @@
+services:
+  flowcast:
+    build: .
+    container_name: flowcast
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: nginx reverse proxy with HTTPS
+  # Uncomment and configure for production use
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: flowcast_nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./data/certbot/conf:/etc/letsencrypt:ro
+  #     - ./data/certbot/www:/var/www/certbot:ro
+  #   depends_on:
+  #     - flowcast

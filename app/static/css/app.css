@@ -1,0 +1,63 @@
+/* Flowcast UI Styles */
+
+body {
+  background-color: #f0f2f5;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+/* Status badge colors */
+.badge.status-discovered, .status-discovered { background-color: #6c757d !important; color: #fff; }
+.badge.status-downloaded, .status-downloaded { background-color: #0d6efd !important; color: #fff; }
+.badge.status-rendered, .status-rendered     { background-color: #fd7e14 !important; color: #fff; }
+.badge.status-published, .status-published   { background-color: #198754 !important; color: #fff; }
+.badge.status-failed, .status-failed         { background-color: #dc3545 !important; color: #fff; }
+
+/* Job status badge colors */
+.badge.status-job-done    { background-color: #198754 !important; color: #fff; }
+.badge.status-job-running { background-color: #0d6efd !important; color: #fff; }
+.badge.status-job-queued  { background-color: #6c757d !important; color: #fff; }
+.badge.status-job-failed  { background-color: #dc3545 !important; color: #fff; }
+
+/* Stat cards */
+.card {
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.card-header {
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: rgba(0,0,0,.03);
+}
+
+/* Episode table */
+#episodesTable td {
+  vertical-align: middle;
+}
+
+/* Show notes */
+.show-notes img {
+  max-width: 100%;
+}
+
+/* Canvas preview */
+#previewCanvas {
+  border-radius: 0;
+}
+
+/* Loading spinner in badges */
+.spinner-border-sm {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-width: 0.1em;
+}
+
+/* Alert sm */
+.alert-sm {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+}
