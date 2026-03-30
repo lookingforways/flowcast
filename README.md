@@ -4,11 +4,12 @@ Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:
 
 ## Características
 
+- **Multi-podcast**: gestiona varios podcasts, cada uno con su feed RSS y playlist de YouTube
 - **Audiogramas 1920×1080** con forma de onda animada (FFmpeg)
-- **Plantillas personalizables**: fondo, colores, posición de onda y título
+- **Plantillas personalizables**: fondo, colores, posición de onda y título por podcast
 - **Modo manual**: procesa episodios existentes uno a uno
 - **Modo automático**: detecta nuevos episodios via RSS → descarga → renderiza → publica
-- **Publicación en YouTube** con OAuth2 (título, descripción, privacidad configurables)
+- **Publicación en YouTube** con OAuth2 — asigna automáticamente la playlist del podcast
 - **Self-hosted**: corre en tu VPS con Docker
 
 ---
@@ -138,10 +139,45 @@ Accede a `http://localhost:8000` (o tu dominio).
 
 ---
 
+## Agregar podcasts
+
+1. Ve a `/podcasts` → **Agregar podcast**
+2. Completá nombre, URL del feed RSS y opcionalmente la Playlist ID de YouTube
+3. Click en **Revisar feed** para importar los episodios existentes
+
+> **Importante**: la URL del feed debe ser la URL directa del RSS (termina en `.rss`, `.xml` o similar), no la URL del perfil del podcast en la plataforma.
+
+---
+
+## Rendimiento de render
+
+| VPS | Episodio 20 min | Episodio 60 min |
+|-----|----------------|----------------|
+| 2 cores / 4GB | ~15-20 min | ~45-60 min |
+| 4 cores / 8GB | ~8-10 min | ~20-25 min |
+
+El render usa todos los cores disponibles. Se recomienda procesar episodios en lotes fuera del horario de publicación.
+
+---
+
+## Actualizar schema de base de datos
+
+Si actualizás Flowcast y hay cambios en el schema de la DB:
+
+```bash
+rm ~/flowcast/data/db/flowcast.db
+docker compose restart flowcast
+```
+
+> Esto borra todos los datos. Hacelo solo en instalaciones nuevas o cuando se indique explícitamente en el CHANGELOG.
+
+---
+
 ## Uso manual (episodios existentes)
 
 1. Ve a `/episodes` — verás los episodios descubiertos del feed
-2. Para cada episodio que quieras procesar:
+2. Filtrá por podcast si tenés varios
+3. Para cada episodio que quieras procesar:
    - Click en **Descargar** → descarga el MP3
    - Click en **Crear Audiograma** → selecciona plantilla → renderiza
    - Click en **Publicar en YouTube** → sube el video

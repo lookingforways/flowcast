@@ -6,6 +6,16 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.2.1] — 2026-03-30
+
+### Notas de la primera puesta en producción
+- Primer render exitoso en VPS 2 cores / 4GB RAM
+- Tiempo de render ~15-20 min por episodio de 20 min en VPS de 2 cores
+- Feed RSS debe ser la URL directa del feed (no la URL del perfil del podcast)
+- Al actualizar schema de DB es necesario eliminar `data/db/flowcast.db` para que se recree
+
+---
+
 ## [0.2.0] — 2026-03-29
 
 ### Añadido
