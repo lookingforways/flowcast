@@ -6,6 +6,20 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.3.0] — 2026-03-30
+
+### Añadido
+- Autenticación con formulario de login propio (usuario + contraseña)
+- 2FA con TOTP (Google Authenticator, Authy, 1Password, etc.)
+- Primer login muestra QR para vincular la app de autenticación
+- Cookie de sesión firmada con `itsdangerous` (7 días de duración)
+- Auto-submit del código 2FA al ingresar 6 dígitos
+- Botón de logout en el navbar
+- Variables `ADMIN_USERNAME` y `ADMIN_PASSWORD` en `.env`
+- Secreto TOTP generado automáticamente en `data/tokens/totp_secret.txt`
+
+---
+
 ## [0.2.1] — 2026-03-30
 
 ### Notas de la primera puesta en producción

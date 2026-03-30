@@ -7,9 +7,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.auth.middleware import AuthMiddleware
 from app.config import settings
 from app.database import init_db
-from app.routers import episodes, jobs, podcasts, templates, ui, youtube
+from app.routers import auth, episodes, jobs, podcasts, templates, ui, youtube
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(
@@ -52,12 +53,14 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.2.1",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
+app.add_middleware(AuthMiddleware)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+app.include_router(auth.router)
 app.include_router(ui.router)
 app.include_router(podcasts.router)
 app.include_router(episodes.router)
@@ -68,4 +71,4 @@ app.include_router(youtube.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "1.0.0"}
+    return {"status": "ok", "version": "0.3.0"}

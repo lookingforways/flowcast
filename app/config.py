@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     app_base_url: str = "http://localhost:8000"
 
+    # Authentication
+    admin_username: str = "admin"
+    admin_password: str = "changeme"
+    session_max_age: int = 86400 * 7  # 7 days in seconds
+
     # Derived paths (computed properties)
     @property
     def db_path(self) -> Path:
@@ -59,6 +64,10 @@ class Settings(BaseSettings):
     @property
     def tokens_dir(self) -> Path:
         return self.data_dir / "tokens"
+
+    @property
+    def totp_secret_path(self) -> Path:
+        return self.data_dir / "tokens" / "totp_secret.txt"
 
     @property
     def youtube_token_path(self) -> Path:

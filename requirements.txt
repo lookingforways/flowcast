@@ -17,3 +17,6 @@ google-auth-oauthlib==1.2.1
 google-api-python-client==2.157.0
 filelock==3.16.1
 python-dotenv==1.0.1
+itsdangerous==2.2.0
+pyotp==2.9.0
+qrcode[pil]==8.0
