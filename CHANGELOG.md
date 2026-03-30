@@ -6,6 +6,15 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.3.1] — 2026-03-30
+
+### Corregido
+- Middleware de autenticación no interceptaba las requests (BaseHTTPMiddleware no funciona con el stack async de FastAPI + StaticFiles)
+- Reemplazado por decorador `@app.middleware("http")` directamente en `main.py`
+- Confirmado funcionando en producción (VPS 2 cores / 4GB RAM)
+
+---
+
 ## [0.3.0] — 2026-03-30
 
 ### Añadido

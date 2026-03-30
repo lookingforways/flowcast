@@ -10,6 +10,7 @@ Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:
 - **Modo manual**: procesa episodios existentes uno a uno
 - **Modo automático**: detecta nuevos episodios via RSS → descarga → renderiza → publica
 - **Publicación en YouTube** con OAuth2 — asigna automáticamente la playlist del podcast
+- **Autenticación**: login con usuario/contraseña + 2FA TOTP (Google Authenticator, Authy, 1Password)
 - **Self-hosted**: corre en tu VPS con Docker
 
 ---
@@ -50,11 +51,12 @@ nano .env
 Completá como mínimo:
 
 ```env
-RSS_FEED_URL=https://tu-podcast.com/feed.xml
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 APP_BASE_URL=http://IP-DE-TU-VPS:8000
 SECRET_KEY=una-clave-aleatoria-larga
+ADMIN_USERNAME=tu-usuario
+ADMIN_PASSWORD=una-contraseña-segura
 ```
 
 ### 5. Arrancar
@@ -103,6 +105,22 @@ docker compose up -d
 ```
 
 Accede a `http://localhost:8000` (o tu dominio).
+
+---
+
+## Autenticación y 2FA
+
+Flowcast protege toda la interfaz con usuario/contraseña + TOTP (autenticación de dos factores).
+
+### Primer acceso
+
+1. Accedé a la app — serás redirigido a `/login`
+2. Ingresá el usuario y contraseña definidos en `.env` (`ADMIN_USERNAME` / `ADMIN_PASSWORD`)
+3. En el primer login verás un **código QR** — escanealo con tu app de autenticación (Google Authenticator, Authy, 1Password, etc.)
+4. Ingresá el código de 6 dígitos que aparece en la app
+5. A partir de ese momento cada login pedirá usuario/contraseña + código TOTP
+
+> El secreto TOTP se guarda en `data/tokens/totp_secret.txt`. Si perdés el acceso al autenticador, eliminá ese archivo y volvé a escanear el QR en el próximo login.
 
 ---
 
@@ -228,6 +246,9 @@ Reinicia el contenedor. A partir de ahora:
 | `DATA_DIR` | `/app/data` | Directorio de datos (DB, descargas, renders) |
 | `APP_BASE_URL` | `http://localhost:8000` | URL pública de la app (para OAuth2 callback) |
 | `SECRET_KEY` | `change-me` | Clave secreta de sesión (¡cámbiala!) |
+| `ADMIN_USERNAME` | `admin` | Usuario del panel de administración |
+| `ADMIN_PASSWORD` | `change-me` | Contraseña del panel (¡cámbiala!) |
+| `SESSION_MAX_AGE` | `604800` | Duración de la sesión en segundos (default: 7 días) |
 | `LOG_LEVEL` | `INFO` | Nivel de log: DEBUG, INFO, WARNING, ERROR |
 
 ---
@@ -252,6 +273,8 @@ app/
 │   ├── pipeline.py      # Construcción y ejecución del comando FFmpeg
 │   └── escape.py        # Escape seguro para drawtext
 └── auth/
+    ├── session.py       # Cookie de sesión firmada (itsdangerous)
+    ├── totp.py          # TOTP 2FA (pyotp + qrcode)
     └── youtube_oauth.py # OAuth2 flow para YouTube
 ```
 
