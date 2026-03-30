@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import init_db
-from app.routers import episodes, jobs, templates, ui, youtube
+from app.routers import episodes, jobs, podcasts, templates, ui, youtube
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(
@@ -52,13 +52,14 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(ui.router)
+app.include_router(podcasts.router)
 app.include_router(episodes.router)
 app.include_router(templates.router)
 app.include_router(jobs.router)

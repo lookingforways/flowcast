@@ -19,6 +19,9 @@
       <a class="nav-link {% if request.url.path == '/' %}active{% endif %}" href="/">
         <i class="bi bi-speedometer2"></i> Dashboard
       </a>
+      <a class="nav-link {% if '/podcasts' in request.url.path %}active{% endif %}" href="/podcasts">
+        <i class="bi bi-broadcast"></i> Podcasts
+      </a>
       <a class="nav-link {% if '/episodes' in request.url.path %}active{% endif %}" href="/episodes">
         <i class="bi bi-mic"></i> Episodios
       </a>

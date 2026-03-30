@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Feed
+    # Feed (legacy single-feed setting, now managed per-podcast in DB)
     rss_feed_url: str = ""
     poll_interval_minutes: int = 60
 

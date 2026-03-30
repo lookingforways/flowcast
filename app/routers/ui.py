@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
@@ -9,6 +9,7 @@ from app.config import settings
 from app.database import get_session
 from app.models.episode import Episode
 from app.models.job import RenderJob
+from app.models.podcast import Podcast
 from app.models.template import Template
 
 router = APIRouter(tags=["ui"])
@@ -34,6 +35,7 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
             select(func.count(Episode.id)).where(Episode.status.in_(["discovered", "downloaded"]))
         )
     ).scalar_one()
+    total_podcasts = (await session.execute(select(func.count(Podcast.id)))).scalar_one()
     recent_jobs = (
         await session.execute(select(RenderJob).order_by(RenderJob.created_at.desc()).limit(10))
     ).scalars().all()
@@ -48,23 +50,50 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
             "total_eps": total_eps,
             "published": published,
             "pending": pending,
+            "total_podcasts": total_podcasts,
             "recent_jobs": recent_jobs,
             "recent_episodes": recent_episodes,
         },
     )
 
 
-@router.get("/episodes", response_class=HTMLResponse)
-async def episodes_page(request: Request, session: AsyncSession = Depends(get_session)):
-    episodes = (
-        await session.execute(
-            select(Episode).order_by(Episode.pub_date.desc().nullslast(), Episode.created_at.desc())
-        )
-    ).scalars().all()
+@router.get("/podcasts", response_class=HTMLResponse)
+async def podcasts_page(request: Request, session: AsyncSession = Depends(get_session)):
+    podcast_list = (await session.execute(select(Podcast).order_by(Podcast.id))).scalars().all()
     tmpl_list = (await session.execute(select(Template).order_by(Template.is_default.desc()))).scalars().all()
     return templates.TemplateResponse(
+        "podcasts.html",
+        {**_base_ctx(request), "podcasts": podcast_list, "templates": tmpl_list},
+    )
+
+
+@router.get("/episodes", response_class=HTMLResponse)
+async def episodes_page(
+    request: Request,
+    podcast_id: int | None = Query(None),
+    session: AsyncSession = Depends(get_session),
+):
+    q = select(Episode).order_by(Episode.pub_date.desc().nullslast(), Episode.created_at.desc())
+    if podcast_id:
+        q = q.where(Episode.podcast_id == podcast_id)
+
+    episodes = (await session.execute(q)).scalars().all()
+    tmpl_list = (await session.execute(select(Template).order_by(Template.is_default.desc()))).scalars().all()
+    podcast_list = (await session.execute(select(Podcast).order_by(Podcast.id))).scalars().all()
+
+    current_podcast = None
+    if podcast_id:
+        current_podcast = await session.get(Podcast, podcast_id)
+
+    return templates.TemplateResponse(
         "episodes.html",
-        {**_base_ctx(request), "episodes": episodes, "templates": tmpl_list},
+        {
+            **_base_ctx(request),
+            "episodes": episodes,
+            "templates": tmpl_list,
+            "podcasts": podcast_list,
+            "current_podcast": current_podcast,
+        },
     )
 
 
@@ -83,9 +112,10 @@ async def episode_detail(episode_id: int, request: Request, session: AsyncSessio
         )
     ).scalars().all()
     tmpl_list = (await session.execute(select(Template).order_by(Template.is_default.desc()))).scalars().all()
+    podcast = await session.get(Podcast, ep.podcast_id) if ep.podcast_id else None
     return templates.TemplateResponse(
         "episode_detail.html",
-        {**_base_ctx(request), "episode": ep, "jobs": jobs, "templates": tmpl_list},
+        {**_base_ctx(request), "episode": ep, "jobs": jobs, "templates": tmpl_list, "podcast": podcast},
     )
 
 
@@ -125,7 +155,6 @@ async def settings_page(request: Request):
         "settings.html",
         {
             **_base_ctx(request),
-            "rss_feed_url": settings.rss_feed_url,
             "poll_interval": settings.poll_interval_minutes,
             "auto_publish": settings.flowcast_auto_publish,
             "youtube_privacy": settings.youtube_privacy,

@@ -6,6 +6,23 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.2.0] — 2026-03-29
+
+### Añadido
+- Soporte multi-podcast: cada podcast tiene su propio feed RSS y playlist de YouTube
+- Tabla `podcasts` con nombre, feed URL, playlist ID y plantilla por defecto
+- Página de gestión de podcasts (`/podcasts`) con alta, edición y polling manual
+- Filtro de episodios por podcast en `/episodes`
+- Publicación automática asigna el video a la playlist del podcast correspondiente
+- Scheduler ahora pollea todos los podcasts activos (en lugar de un único feed global)
+
+### Cambiado
+- `RSS_FEED_URL` en `.env` ya no es necesario (los feeds se gestionan en la DB)
+- Dashboard muestra contador de podcasts
+- Settings simplificado: feeds RSS gestionados desde la página de Podcasts
+
+---
+
 ## [0.1.0] — 2026-03-29
 
 ### Añadido

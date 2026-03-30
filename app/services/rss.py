@@ -12,7 +12,6 @@ import feedparser
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.models.episode import Episode
 
 logger = logging.getLogger(__name__)
@@ -29,13 +28,11 @@ class ParsedEpisode:
 
 
 def _extract_mp3_url(entry: feedparser.FeedParserDict) -> Optional[str]:
-    """Return the first enclosure URL that looks like an audio file."""
     for enc in getattr(entry, "enclosures", []):
         url = enc.get("href", "") or enc.get("url", "")
         mime = enc.get("type", "")
         if "audio" in mime or url.lower().endswith(".mp3"):
             return url
-    # Some feeds put the link directly
     link = getattr(entry, "link", "")
     if link and link.lower().endswith(".mp3"):
         return link
@@ -43,7 +40,6 @@ def _extract_mp3_url(entry: feedparser.FeedParserDict) -> Optional[str]:
 
 
 def _parse_duration(entry: feedparser.FeedParserDict) -> Optional[int]:
-    """Return duration in seconds from itunes:duration or similar."""
     itunes = getattr(entry, "itunes_duration", None)
     if itunes:
         parts = str(itunes).split(":")
@@ -69,11 +65,6 @@ def _parse_pub_date(entry: feedparser.FeedParserDict) -> Optional[datetime]:
     return None
 
 
-def _clean_html(text: str) -> str:
-    """Strip HTML tags for plain-text description fallback."""
-    return re.sub(r"<[^>]+>", "", text).strip()
-
-
 def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
     """Parse the RSS feed and return a list of ParsedEpisode objects."""
     feed = feedparser.parse(feed_url)
@@ -90,7 +81,6 @@ def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
         guid = entry.get("id") or entry.get("guid") or mp3_url
         title = entry.get("title", "Untitled Episode")
 
-        # Prefer content over summary for show notes
         content = ""
         if hasattr(entry, "content") and entry.content:
             content = entry.content[0].get("value", "")
@@ -112,7 +102,12 @@ def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
     return episodes
 
 
-async def diff_feed(session: AsyncSession, parsed: list[ParsedEpisode]) -> list[ParsedEpisode]:
+async def diff_feed(
+    session: AsyncSession,
+    parsed: list[ParsedEpisode],
+    podcast_id: int,
+    feed_url: str = "",
+) -> list[ParsedEpisode]:
     """Return only episodes not already in the database. Insert new ones."""
     if not parsed:
         return []
@@ -128,7 +123,8 @@ async def diff_feed(session: AsyncSession, parsed: list[ParsedEpisode]) -> list[
         if ep.guid not in existing:
             db_ep = Episode(
                 guid=ep.guid,
-                feed_url=settings.rss_feed_url,
+                podcast_id=podcast_id,
+                feed_url=feed_url,
                 title=ep.title,
                 description=ep.description,
                 mp3_url=ep.mp3_url,
@@ -141,6 +137,6 @@ async def diff_feed(session: AsyncSession, parsed: list[ParsedEpisode]) -> list[
 
     if new_episodes:
         await session.commit()
-        logger.info("Discovered %d new episodes", len(new_episodes))
+        logger.info("Discovered %d new episodes (podcast_id=%d)", len(new_episodes), podcast_id)
 
     return new_episodes

@@ -1,7 +1,6 @@
 """APScheduler jobs for RSS polling and automatic pipeline."""
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -11,44 +10,42 @@ from sqlalchemy import select
 from app.config import settings
 from app.database import AsyncSessionLocal
 from app.models.episode import Episode
+from app.models.podcast import Podcast
 
 logger = logging.getLogger(__name__)
 
 _scheduler: AsyncIOScheduler | None = None
 
 
-async def _poll_and_process() -> None:
-    """Fetch feed, discover new episodes, and run the pipeline if auto mode."""
+async def _poll_podcast(podcast: Podcast) -> None:
+    """Poll one podcast's feed and run the pipeline if auto mode is on."""
     from app.services.downloader import download_episode
     from app.services.publisher import publish_episode
     from app.services.renderer import render_episode
-    from app.services.rss import fetch_feed, diff_feed
+    from app.services.rss import diff_feed, fetch_feed
 
-    if not settings.rss_feed_url:
-        logger.warning("RSS_FEED_URL not set, skipping poll")
-        return
-
-    logger.info("Polling RSS feed: %s", settings.rss_feed_url)
+    logger.info("Polling feed for '%s': %s", podcast.name, podcast.feed_url)
     try:
-        parsed = fetch_feed(settings.rss_feed_url)
+        parsed = fetch_feed(podcast.feed_url)
     except Exception as exc:
-        logger.error("Feed fetch failed: %s", exc)
+        logger.error("Feed fetch failed for '%s': %s", podcast.name, exc)
         return
 
     async with AsyncSessionLocal() as session:
-        new_episodes = await diff_feed(session, parsed)
+        new_episodes = await diff_feed(
+            session, parsed, podcast_id=podcast.id, feed_url=podcast.feed_url
+        )
 
         if not new_episodes:
-            logger.info("No new episodes found")
+            logger.info("No new episodes for '%s'", podcast.name)
             return
 
-        logger.info("Found %d new episode(s)", len(new_episodes))
+        logger.info("Found %d new episode(s) for '%s'", len(new_episodes), podcast.name)
 
         if not settings.flowcast_auto_publish:
             logger.info("Auto-publish disabled. New episodes available in UI.")
             return
 
-        # Full automatic pipeline
         for ep_data in new_episodes:
             result = await session.execute(
                 select(Episode).where(Episode.guid == ep_data.guid)
@@ -58,11 +55,13 @@ async def _poll_and_process() -> None:
                 continue
 
             try:
-                logger.info("Auto-processing episode: %s", episode.title)
+                logger.info("Auto-processing: %s", episode.title)
                 await download_episode(session, episode)
                 await session.refresh(episode)
 
-                job = await render_episode(session, episode)
+                # Use podcast's default template if set
+                template_id = podcast.default_template_id
+                job = await render_episode(session, episode, template_id)
                 await session.refresh(episode)
 
                 if job.status == "done":
@@ -75,6 +74,22 @@ async def _poll_and_process() -> None:
                 episode.status = "failed"
                 episode.error_msg = str(exc)
                 await session.commit()
+
+
+async def _poll_all_podcasts() -> None:
+    """Poll all active podcasts."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Podcast).where(Podcast.is_active == True)  # noqa: E712
+        )
+        podcasts = result.scalars().all()
+
+    if not podcasts:
+        logger.info("No active podcasts configured yet")
+        return
+
+    for podcast in podcasts:
+        await _poll_podcast(podcast)
 
 
 async def _cleanup_old_renders() -> None:
@@ -98,7 +113,6 @@ async def _cleanup_old_renders() -> None:
     if deleted:
         logger.info("Cleaned up %d old render(s)", deleted)
 
-    # Update DB: clear render_path for deleted files
     async with AsyncSessionLocal() as session:
         result = await session.execute(
             select(Episode).where(Episode.render_path.isnot(None), Episode.status == "published")
@@ -114,12 +128,12 @@ def start_scheduler() -> AsyncIOScheduler:
     _scheduler = AsyncIOScheduler()
 
     _scheduler.add_job(
-        _poll_and_process,
+        _poll_all_podcasts,
         "interval",
         minutes=settings.poll_interval_minutes,
-        id="poll_rss",
+        id="poll_all_podcasts",
         replace_existing=True,
-        next_run_time=datetime.now(timezone.utc),  # Run once immediately on startup
+        next_run_time=datetime.now(timezone.utc),
     )
 
     _scheduler.add_job(

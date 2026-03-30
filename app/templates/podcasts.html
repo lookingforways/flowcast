@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}Podcasts — Flowcast{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-broadcast me-2"></i>Podcasts</h2>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newPodcastModal">
+    <i class="bi bi-plus-lg me-1"></i>Agregar podcast
+  </button>
+</div>
+
+{% if not podcasts %}
+<div class="alert alert-info">
+  <i class="bi bi-info-circle me-1"></i>
+  No hay podcasts configurados. Agrega tu primer podcast para empezar a importar episodios.
+</div>
+{% endif %}
+
+<div class="row g-3">
+  {% for p in podcasts %}
+  <div class="col-md-6">
+    <div class="card h-100 {% if not p.is_active %}opacity-50{% endif %}">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-broadcast me-1"></i>{{ p.name }}</span>
+        <div class="d-flex gap-2 align-items-center">
+          {% if p.youtube_playlist_id %}
+          <span class="badge bg-danger" title="Playlist: {{ p.youtube_playlist_id }}">
+            <i class="bi bi-collection-play me-1"></i>Playlist
+          </span>
+          {% endif %}
+          {% if not p.is_active %}
+          <span class="badge bg-secondary">Inactivo</span>
+          {% else %}
+          <span class="badge bg-success">Activo</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-1">
+          <i class="bi bi-rss me-1"></i>
+          <a href="{{ p.feed_url }}" target="_blank" class="text-truncate d-inline-block" style="max-width:300px">{{ p.feed_url }}</a>
+        </p>
+        {% if p.description %}
+        <p class="text-muted small mb-0">{{ p.description[:120] }}{% if p.description|length > 120 %}…{% endif %}</p>
+        {% endif %}
+        {% if p.youtube_playlist_id %}
+        <p class="text-muted small mb-0 mt-1">
+          <i class="bi bi-youtube me-1 text-danger"></i>Playlist ID: <code>{{ p.youtube_playlist_id }}</code>
+        </p>
+        {% endif %}
+        {% if p.default_template_id %}
+        <p class="text-muted small mb-0 mt-1">
+          <i class="bi bi-palette me-1"></i>Plantilla: #{{ p.default_template_id }}
+        </p>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary edit-podcast-btn"
+                data-id="{{ p.id }}"
+                data-name="{{ p.name }}"
+                data-feed="{{ p.feed_url }}"
+                data-description="{{ p.description or '' }}"
+                data-playlist="{{ p.youtube_playlist_id or '' }}"
+                data-template="{{ p.default_template_id or '' }}"
+                data-active="{{ p.is_active | lower }}"
+                data-bs-toggle="modal" data-bs-target="#editPodcastModal">
+          <i class="bi bi-pencil"></i> Editar
+        </button>
+        <button class="btn btn-sm btn-outline-success poll-btn" data-id="{{ p.id }}" data-name="{{ p.name }}">
+          <i class="bi bi-arrow-repeat"></i> Revisar feed
+        </button>
+        <a href="/episodes?podcast_id={{ p.id }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-mic"></i> Episodios
+        </a>
+        <button class="btn btn-sm btn-outline-danger delete-podcast-btn ms-auto"
+                data-id="{{ p.id }}" data-name="{{ p.name }}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- New Podcast Modal -->
+<div class="modal fade" id="newPodcastModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-broadcast me-2"></i>Agregar Podcast</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre del podcast <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="newName" placeholder="Mi Podcast">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">URL del feed RSS <span class="text-danger">*</span></label>
+          <input type="url" class="form-control" id="newFeed" placeholder="https://mipodcast.com/feed.xml">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" id="newDesc" rows="2"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">YouTube Playlist ID</label>
+          <input type="text" class="form-control" id="newPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
+          <div class="form-text">Opcional. Lo encontrás en la URL de tu playlist: youtube.com/playlist?list=<strong>PLXXX</strong></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Plantilla por defecto</label>
+          <select class="form-select" id="newTemplate">
+            <option value="">— Usar plantilla global predeterminada —</option>
+            {% for t in templates %}
+            <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="createPodcastBtn">
+          <i class="bi bi-plus-lg me-1"></i>Agregar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Podcast Modal -->
+<div class="modal fade" id="editPodcastModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Editar Podcast</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre</label>
+          <input type="text" class="form-control" id="editName">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">URL del feed RSS</label>
+          <input type="url" class="form-control" id="editFeed">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-control" id="editDesc" rows="2"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">YouTube Playlist ID</label>
+          <input type="text" class="form-control" id="editPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Plantilla por defecto</label>
+          <select class="form-select" id="editTemplate">
+            <option value="">— Usar plantilla global predeterminada —</option>
+            {% for t in templates %}
+            <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="editActive">
+          <label class="form-check-label" for="editActive">Activo</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="savePodcastBtn">
+          <i class="bi bi-floppy me-1"></i>Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Create podcast
+document.getElementById('createPodcastBtn').addEventListener('click', async () => {
+  const name = document.getElementById('newName').value.trim();
+  const feed_url = document.getElementById('newFeed').value.trim();
+  if (!name || !feed_url) return alert('Nombre y feed RSS son obligatorios');
+
+  const body = {
+    name, feed_url,
+    description: document.getElementById('newDesc').value.trim() || null,
+    youtube_playlist_id: document.getElementById('newPlaylist').value.trim() || null,
+    default_template_id: parseInt(document.getElementById('newTemplate').value) || null,
+  };
+
+  const resp = await fetch('/api/podcasts', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+  });
+  if (resp.ok) location.reload();
+  else alert('Error al crear podcast');
+});
+
+// Open edit modal
+document.querySelectorAll('.edit-podcast-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('editId').value = btn.dataset.id;
+    document.getElementById('editName').value = btn.dataset.name;
+    document.getElementById('editFeed').value = btn.dataset.feed;
+    document.getElementById('editDesc').value = btn.dataset.description;
+    document.getElementById('editPlaylist').value = btn.dataset.playlist;
+    document.getElementById('editActive').checked = btn.dataset.active === 'true';
+    const tmplSel = document.getElementById('editTemplate');
+    tmplSel.value = btn.dataset.template || '';
+  });
+});
+
+// Save edit
+document.getElementById('savePodcastBtn').addEventListener('click', async () => {
+  const id = document.getElementById('editId').value;
+  const body = {
+    name: document.getElementById('editName').value.trim(),
+    feed_url: document.getElementById('editFeed').value.trim(),
+    description: document.getElementById('editDesc').value.trim() || null,
+    youtube_playlist_id: document.getElementById('editPlaylist').value.trim() || null,
+    default_template_id: parseInt(document.getElementById('editTemplate').value) || null,
+    is_active: document.getElementById('editActive').checked,
+  };
+  const resp = await fetch(`/api/podcasts/${id}`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+  });
+  if (resp.ok) location.reload();
+  else alert('Error al guardar');
+});
+
+// Poll feed
+document.querySelectorAll('.poll-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
+    await fetch(`/api/podcasts/${btn.dataset.id}/poll`, {method: 'POST'});
+    showToast(`Revisando feed de "${btn.dataset.name}"...`);
+    setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Revisar feed'; }, 2000);
+  });
+});
+
+// Delete
+document.querySelectorAll('.delete-podcast-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (!confirm(`¿Eliminar "${btn.dataset.name}"?\nLos episodios existentes no se borrarán.`)) return;
+    await fetch(`/api/podcasts/${btn.dataset.id}`, {method: 'DELETE'});
+    location.reload();
+  });
+});
+</script>
+{% endblock %}

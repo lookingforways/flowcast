@@ -89,6 +89,29 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     video_id = response["id"]
     logger.info("Uploaded to YouTube: https://youtu.be/%s", video_id)
 
+    # Assign to playlist if the podcast has one configured
+    playlist_id = None
+    if episode.podcast_id:
+        from app.models.podcast import Podcast
+        podcast = await session.get(Podcast, episode.podcast_id)
+        if podcast and podcast.youtube_playlist_id:
+            playlist_id = podcast.youtube_playlist_id
+
+    if playlist_id:
+        try:
+            youtube.playlistItems().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "resourceId": {"kind": "youtube#video", "videoId": video_id},
+                    }
+                },
+            ).execute()
+            logger.info("Added video %s to playlist %s", video_id, playlist_id)
+        except Exception as exc:
+            logger.warning("Could not add video to playlist: %s", exc)
+
     episode.youtube_id = video_id
     episode.status = "published"
     episode.error_msg = None

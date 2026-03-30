@@ -3,8 +3,22 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="bi bi-mic me-2"></i>Episodios</h2>
+  <h2>
+    <i class="bi bi-mic me-2"></i>Episodios
+    {% if current_podcast %}
+    <span class="badge bg-primary fs-6 ms-2">{{ current_podcast.name }}</span>
+    {% endif %}
+  </h2>
   <div class="d-flex gap-2">
+    <select class="form-select form-select-sm" id="podcastFilter" style="width:auto"
+            onchange="location.href='/episodes' + (this.value ? '?podcast_id='+this.value : '')">
+      <option value="">Todos los podcasts</option>
+      {% for p in podcasts %}
+      <option value="{{ p.id }}" {% if current_podcast and current_podcast.id == p.id %}selected{% endif %}>
+        {{ p.name }}
+      </option>
+      {% endfor %}
+    </select>
     <select class="form-select form-select-sm" id="statusFilter" style="width:auto">
       <option value="">Todos los estados</option>
       <option value="discovered">Descubiertos</option>
@@ -22,6 +36,7 @@
       <thead class="table-dark">
         <tr>
           <th>Episodio</th>
+          <th>Podcast</th>
           <th>Duración</th>
           <th>Publicado</th>
           <th>Estado</th>
@@ -40,6 +55,13 @@
               <i class="bi bi-youtube"></i>
             </a>
             {% endif %}
+          </td>
+          <td class="text-muted small">
+            {% if ep.podcast %}
+            <a href="/episodes?podcast_id={{ ep.podcast.id }}" class="text-decoration-none">
+              <span class="badge bg-secondary">{{ ep.podcast.name[:20] }}</span>
+            </a>
+            {% else %}—{% endif %}
           </td>
           <td class="text-muted small">
             {% if ep.duration_secs %}{{ (ep.duration_secs // 60) }}:{{ '%02d' % (ep.duration_secs % 60) }}{% else %}—{% endif %}

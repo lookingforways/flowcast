@@ -25,7 +25,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db() -> None:
     """Create all tables. Called at startup."""
-    from app.models import episode, template, job  # noqa: F401 — register models
+    from app.models import podcast, episode, template, job  # noqa: F401 — register models
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

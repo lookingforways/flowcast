@@ -19,17 +19,23 @@
 
 <div class="row g-4">
   <div class="col-lg-6">
-    <!-- RSS -->
+    <!-- Podcasts -->
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-rss me-1"></i>Feed RSS</div>
+      <div class="card-header"><i class="bi bi-broadcast me-1"></i>Podcasts y feeds RSS</div>
+      <div class="card-body">
+        <p class="text-muted mb-3">Los feeds RSS se configuran por podcast. Cada podcast puede tener su propio feed y playlist de YouTube.</p>
+        <a href="/podcasts" class="btn btn-primary btn-sm">
+          <i class="bi bi-broadcast me-1"></i>Gestionar Podcasts
+        </a>
+      </div>
+    </div>
+
+    <!-- Polling -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-clock me-1"></i>Automatización</div>
       <div class="card-body">
         <div class="mb-3">
-          <label class="form-label fw-semibold">URL del feed</label>
-          <input type="url" class="form-control" value="{{ rss_feed_url }}" disabled>
-          <div class="form-text">Configura <code>RSS_FEED_URL</code> en el archivo <code>.env</code></div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Intervalo de revisión</label>
+          <label class="form-label fw-semibold">Intervalo de revisión de feeds</label>
           <div class="input-group">
             <input type="number" class="form-control" value="{{ poll_interval }}" disabled>
             <span class="input-group-text">minutos</span>
