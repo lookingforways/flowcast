@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     # Startup
     settings.ensure_dirs()
     await init_db()
-    _ensure_default_template()
+    await _ensure_default_template()
     start_scheduler()
     logger.info("Flowcast started. Visit %s", settings.app_base_url)
     yield
@@ -33,28 +33,20 @@ async def lifespan(app: FastAPI):
     logger.info("Flowcast stopped.")
 
 
-def _ensure_default_template() -> None:
-    """Create a default template synchronously if none exists."""
-    import asyncio
+async def _ensure_default_template() -> None:
+    """Create a default template if none exists."""
+    from sqlalchemy import select
 
-    async def _create():
-        from sqlalchemy import select
+    from app.database import AsyncSessionLocal
+    from app.models.template import Template
 
-        from app.database import AsyncSessionLocal
-        from app.models.template import Template
-
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(select(Template).limit(1))
-            if result.scalar_one_or_none() is None:
-                tmpl = Template(
-                    name="Default",
-                    is_default=True,
-                )
-                session.add(tmpl)
-                await session.commit()
-                logger.info("Created default template")
-
-    asyncio.get_event_loop().run_until_complete(_create())
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Template).limit(1))
+        if result.scalar_one_or_none() is None:
+            tmpl = Template(name="Default", is_default=True)
+            session.add(tmpl)
+            await session.commit()
+            logger.info("Created default template")
 
 
 app = FastAPI(
