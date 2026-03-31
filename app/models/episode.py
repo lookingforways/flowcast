@@ -42,7 +42,7 @@ class Episode(Base):
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    podcast: Mapped[Optional["Podcast"]] = relationship("Podcast", foreign_keys=[podcast_id])  # type: ignore[name-defined]
+    podcast: Mapped[Optional["Podcast"]] = relationship("Podcast", foreign_keys=[podcast_id], lazy="selectin")  # type: ignore[name-defined]
 
     def __repr__(self) -> str:
         return f"<Episode id={self.id} status={self.status!r} title={self.title!r}>"
