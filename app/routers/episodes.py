@@ -143,13 +143,21 @@ async def trigger_publish(
 
 
 async def _run_publish(episode_id: int) -> None:
+    import logging
     from app.database import AsyncSessionLocal
     from app.services.publisher import publish_episode
 
+    log = logging.getLogger(__name__)
     async with AsyncSessionLocal() as session:
         ep = await session.get(Episode, episode_id)
         if ep:
-            await publish_episode(session, ep)
+            try:
+                await publish_episode(session, ep)
+            except Exception as exc:
+                log.error("Publish failed for episode %d: %s", episode_id, exc, exc_info=True)
+                ep.status = "failed"
+                ep.error_msg = "Publish failed. Check server logs."
+                await session.commit()
 
 
 @router.delete("/{episode_id}", status_code=204)

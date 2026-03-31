@@ -1,6 +1,7 @@
 """YouTube publisher: uploads rendered MP4s via YouTube Data API v3."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from pathlib import Path
 
@@ -79,14 +80,16 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     logger.info("Uploading to YouTube: %s (privacy=%s)", title, settings.youtube_privacy)
     request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
 
-    response = None
-    while response is None:
-        status, response = request.next_chunk()
-        if status:
-            pct = int(status.progress() * 100)
-            logger.info("  Upload progress: %d%%", pct)
+    def _do_upload() -> str:
+        resp = None
+        while resp is None:
+            st, resp = request.next_chunk()
+            if st:
+                pct = int(st.progress() * 100)
+                logger.info("  Upload progress: %d%%", pct)
+        return resp["id"]
 
-    video_id = response["id"]
+    video_id = await asyncio.to_thread(_do_upload)
     logger.info("Uploaded to YouTube: https://youtu.be/%s", video_id)
 
     # Assign to playlist if the podcast has one configured
