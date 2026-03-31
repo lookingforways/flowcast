@@ -262,7 +262,6 @@ Reinicia el contenedor. A partir de ahora:
 
 | Variable | Default | Descripción |
 |----------|---------|-------------|
-| `RSS_FEED_URL` | — | URL del feed RSS del podcast (requerido) |
 | `GOOGLE_CLIENT_ID` | — | OAuth2 Client ID de Google Cloud |
 | `GOOGLE_CLIENT_SECRET` | — | OAuth2 Client Secret |
 | `FLOWCAST_AUTO_PUBLISH` | `false` | Publicación automática al detectar nuevos eps |
@@ -287,7 +286,7 @@ app/
 ├── main.py              # FastAPI app
 ├── config.py            # Configuración via variables de entorno
 ├── database.py          # SQLite + SQLAlchemy async
-├── models/              # ORM: Episode, Template, RenderJob
+├── models/              # ORM: Episode, Podcast, Template, RenderJob
 ├── schemas/             # Pydantic schemas
 ├── routers/             # API endpoints + páginas web
 ├── services/
@@ -298,22 +297,32 @@ app/
 │   └── scheduler.py     # APScheduler (polling automático)
 ├── ffmpeg/
 │   ├── pipeline.py      # Construcción y ejecución del comando FFmpeg
+│   ├── waveform.py      # Renderizador Python de forma de onda (FFT + Pillow)
 │   └── escape.py        # Escape seguro para drawtext
+├── utils/
+│   └── url_validator.py # Validación anti-SSRF para URLs externas
 └── auth/
     ├── session.py       # Cookie de sesión firmada (itsdangerous)
     ├── totp.py          # TOTP 2FA (pyotp + qrcode)
-    └── youtube_oauth.py # OAuth2 flow para YouTube
+    ├── limiter.py       # Rate limiter (slowapi)
+    └── youtube_oauth.py # OAuth2 flow para YouTube (token cifrado con Fernet)
 ```
 
 ---
 
-## Pipeline FFmpeg
+## Pipeline de render
 
-Cada audiograma usa un único comando FFmpeg con `-filter_complex`:
+El render tiene dos fases:
+
+### Fase 1 — Generación de forma de onda (Python)
+`app/ffmpeg/waveform.py` analiza el audio con FFT (numpy), calcula la amplitud por bandas de frecuencia para cada frame y renderiza barras simétricas con bordes redondeados y efecto glow usando Pillow. El resultado se guarda en un archivo MKV temporal con canal alpha.
+
+### Fase 2 — Composición FFmpeg
+FFmpeg compone las capas con `-filter_complex`:
 
 1. **Input 0**: imagen de fondo (loop infinito con `-loop 1`)
 2. **Input 1**: archivo MP3
-3. `showwaves` convierte el audio en video de forma de onda animada
+3. **Input 2**: overlay de forma de onda (MKV generado en Fase 1)
 4. `overlay` compone la onda sobre el fondo
 5. `drawtext` superpone el título del episodio
 6. `-shortest` detiene la codificación cuando termina el audio

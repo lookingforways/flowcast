@@ -6,6 +6,26 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.5.0] — 2026-03-31
+
+### Añadido
+- Renderizador de forma de onda en Python (`app/ffmpeg/waveform.py`): análisis FFT con numpy, barras simétricas con bordes redondeados y efecto glow renderizadas con Pillow — reemplaza `showwaves` de FFmpeg para resultados de calidad profesional
+
+### Corregido
+- Publicación en YouTube: errores en background tasks ya no se pierden silenciosamente — se loguean y el episodio pasa a estado `failed`
+- Descripción del episodio: se eliminan tags HTML y caracteres de control antes de enviar a YouTube API (evitaba error `invalidDescription`)
+- Upload de YouTube ejecutado en thread separado para no bloquear el event loop
+- Parámetros numéricos de plantilla (ej. `title_x`) ahora aceptan expresiones FFmpeg como `(w-text_w)/2` además de enteros
+- Scope OAuth de YouTube ampliado para incluir gestión de playlists (`youtube` scope completo)
+- Relación `episode.podcast` usa `lazy="selectin"` para compatibilidad con SQLAlchemy async (evitaba Internal Server Error en `/episodes`)
+- Al eliminar un podcast se eliminan en cascada todos sus episodios
+- Eliminado modo de onda `cbuffer` (no válido en FFmpeg) del editor de plantillas
+
+### Dependencias nuevas
+- `numpy>=1.26.0` — análisis FFT para el renderizador de forma de onda
+
+---
+
 ## [0.4.0] — 2026-03-30
 
 ### Seguridad — CRÍTICO
