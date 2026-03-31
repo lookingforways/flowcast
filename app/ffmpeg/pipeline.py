@@ -88,7 +88,8 @@ def build_filter_complex(
             f"s={ww}x{wh}:"
             f"mode={template.waveform_mode}:"
             f"colors=#{wcolor}:"
-            f"rate={FPS},"
+            f"rate={FPS}:"
+            f"scale=sqrt,"
             f"format=yuva420p[wave]"
         )
     parts.append(wave_filter)
