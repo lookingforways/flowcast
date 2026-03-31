@@ -36,24 +36,40 @@ async def _poll_podcast(podcast: Podcast) -> None:
             session, parsed, podcast_id=podcast.id, feed_url=podcast.feed_url
         )
 
-        if not new_episodes:
+        if not settings.flowcast_auto_publish:
+            if not new_episodes:
+                logger.info("No new episodes for '%s'", podcast.name)
+            else:
+                logger.info(
+                    "Auto-publish disabled. %d new episode(s) available in UI for '%s'.",
+                    len(new_episodes), podcast.name,
+                )
+            return
+
+        # Also pick up episodes already in DB that are stuck in 'discovered' state
+        pending_result = await session.execute(
+            select(Episode).where(
+                Episode.podcast_id == podcast.id,
+                Episode.status == "discovered",
+            )
+        )
+        pending = list(pending_result.scalars().all())
+
+        # Combine: new episodes detected this poll + any stuck discovered ones
+        all_episodes = list({ep.guid: ep for ep in pending}.values())
+        for ep_data in new_episodes:
+            result = await session.execute(select(Episode).where(Episode.guid == ep_data.guid))
+            ep = result.scalar_one_or_none()
+            if ep and ep.guid not in {e.guid for e in all_episodes}:
+                all_episodes.append(ep)
+
+        if not all_episodes:
             logger.info("No new episodes for '%s'", podcast.name)
             return
 
-        logger.info("Found %d new episode(s) for '%s'", len(new_episodes), podcast.name)
+        logger.info("Auto-processing %d episode(s) for '%s'", len(all_episodes), podcast.name)
 
-        if not settings.flowcast_auto_publish:
-            logger.info("Auto-publish disabled. New episodes available in UI.")
-            return
-
-        for ep_data in new_episodes:
-            result = await session.execute(
-                select(Episode).where(Episode.guid == ep_data.guid)
-            )
-            episode = result.scalar_one_or_none()
-            if episode is None:
-                continue
-
+        for episode in all_episodes:
             try:
                 logger.info("Auto-processing: %s", episode.title)
                 await download_episode(session, episode)
