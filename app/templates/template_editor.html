@@ -55,13 +55,8 @@
             </div>
             <div class="col-6">
               <label class="form-label small">Modo</label>
-              <select class="form-select form-select-sm" id="waveMode">
-                <option value="cline" {% if template.waveform_mode == 'cline' %}selected{% endif %}>Línea centrada</option>
-                <option value="p2p" {% if template.waveform_mode == 'p2p' %}selected{% endif %}>Punto a punto</option>
-                <option value="line" {% if template.waveform_mode == 'line' %}selected{% endif %}>Línea delgada</option>
-                <option value="point" {% if template.waveform_mode == 'point' %}selected{% endif %}>Puntos</option>
-                <option value="showfreqs" {% if template.waveform_mode == 'showfreqs' %}selected{% endif %}>Frecuencias (ecualizador)</option>
-              </select>
+              <input type="hidden" id="waveMode" value="bars">
+              <div class="form-control form-control-sm bg-light text-muted" style="cursor:default">Barras FFT</div>
             </div>
             <div class="col-6">
               <label class="form-label small">Posición Y</label>
