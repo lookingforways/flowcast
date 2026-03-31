@@ -1,11 +1,15 @@
 """YouTube OAuth2 flow using google-auth-oauthlib."""
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import logging
 import os
 from pathlib import Path
 from typing import Optional
+
+from cryptography.fernet import Fernet, InvalidToken
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -21,6 +25,12 @@ SCOPES = [
 ]
 
 REDIRECT_URI_PATH = "/auth/youtube/callback"
+
+
+def _get_fernet() -> Fernet:
+    """Derive a Fernet key from SECRET_KEY for token encryption."""
+    key_bytes = hashlib.sha256(settings.secret_key.encode()).digest()
+    return Fernet(base64.urlsafe_b64encode(key_bytes))
 
 
 def _client_config() -> dict:
@@ -74,9 +84,10 @@ def save_credentials(creds: Credentials) -> None:
         "client_secret": creds.client_secret,
         "scopes": list(creds.scopes) if creds.scopes else SCOPES,
     }
-    token_path.write_text(json.dumps(token_data, indent=2))
+    encrypted = _get_fernet().encrypt(json.dumps(token_data).encode())
+    token_path.write_bytes(encrypted)
     os.chmod(token_path, 0o600)
-    logger.info("YouTube credentials saved to %s", token_path)
+    logger.info("YouTube credentials saved (encrypted) to %s", token_path)
 
 
 def load_credentials() -> Optional[Credentials]:
@@ -84,7 +95,16 @@ def load_credentials() -> Optional[Credentials]:
     if not token_path.exists():
         return None
     try:
-        data = json.loads(token_path.read_text())
+        raw = token_path.read_bytes()
+        try:
+            data = json.loads(_get_fernet().decrypt(raw))
+        except (InvalidToken, Exception):
+            # Migration: file may be plain JSON from before encryption was added
+            data = json.loads(raw.decode())
+            # Re-save encrypted
+            token_path.write_bytes(_get_fernet().encrypt(json.dumps(data).encode()))
+            os.chmod(token_path, 0o600)
+            logger.info("Migrated YouTube token to encrypted format")
         creds = Credentials(
             token=data.get("token"),
             refresh_token=data.get("refresh_token"),

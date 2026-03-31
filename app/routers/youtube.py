@@ -1,5 +1,9 @@
+import logging
+
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
+
+logger = logging.getLogger(__name__)
 
 from app.auth.youtube_oauth import (
     exchange_code,
@@ -23,7 +27,8 @@ async def youtube_status():
         channel = await get_channel_info()
         return {"connected": True, "channel": channel}
     except Exception as exc:
-        return {"connected": False, "channel": None, "error": str(exc)}
+        logger.error("YouTube status check failed: %s", exc)
+        return {"connected": False, "channel": None, "error": "YouTube connection error. Check server logs."}
 
 
 @router.get("/auth/youtube")
@@ -42,7 +47,8 @@ async def youtube_callback(code: str, state: str = ""):
         exchange_code(code, state)
         return RedirectResponse("/settings?youtube=connected")
     except Exception as exc:
-        return RedirectResponse(f"/settings?youtube=error&msg={str(exc)[:200]}")
+        logger.error("YouTube OAuth callback failed: %s", exc)
+        return RedirectResponse("/settings?youtube=error")
 
 
 @router.post("/api/youtube/disconnect")

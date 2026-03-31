@@ -5,6 +5,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
+from app.auth.limiter import limiter
 from app.auth.session import (
     clear_session,
     get_session,
@@ -27,6 +28,7 @@ async def login_page(request: Request, error: str = ""):
 
 
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login_submit(
     request: Request,
     username: str = Form(...),

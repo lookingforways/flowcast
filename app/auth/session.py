@@ -37,6 +37,7 @@ def set_session(response: Response, data: dict) -> None:
         max_age=settings.session_max_age,
         httponly=True,
         samesite="lax",
+        secure=settings.app_base_url.startswith("https://"),
     )
 
 

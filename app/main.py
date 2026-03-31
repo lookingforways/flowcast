@@ -5,9 +5,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
+from app.auth.limiter import limiter
 from app.auth.session import is_fully_authenticated
 from app.config import settings
 from app.database import init_db
@@ -26,6 +30,7 @@ _PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    settings.validate_secrets()
     settings.ensure_dirs()
     await init_db()
     await _ensure_default_template()
@@ -56,8 +61,21 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.3.1",
+    version="0.4.0",
     lifespan=lifespan,
+)
+
+# Rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Explicit CORS — no cross-origin requests allowed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
 )
 
 
@@ -84,4 +102,4 @@ app.include_router(youtube.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.3.1"}
+    return {"status": "ok"}

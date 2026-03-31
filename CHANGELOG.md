@@ -6,6 +6,33 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.4.0] — 2026-03-30
+
+### Seguridad — CRÍTICO
+- Validación de credenciales al arrancar: la app falla explícitamente si `SECRET_KEY` o `ADMIN_PASSWORD` usan los valores default inseguros
+- Protección SSRF en fetch de RSS: `validate_external_url()` bloquea esquemas no-HTTP y rangos de IP privados/reservados antes de hacer cualquier request saliente
+- Protección SSRF en descarga de MP3: misma validación aplicada antes de descargar el audio del episodio
+- Los mensajes de error en respuestas de API ya no exponen detalles internos (paths, stacktraces, tokens)
+
+### Seguridad — ALTO
+- Rate limiting en `/login`: máximo 5 intentos por minuto por IP (slowapi)
+- Cookie de sesión con flag `Secure` activado automáticamente cuando `APP_BASE_URL` usa HTTPS
+- Token de YouTube cifrado en disco con Fernet (AES-128-CBC) derivando la clave del `SECRET_KEY`; migración automática de tokens en formato JSON plano al formato cifrado
+
+### Seguridad — MEDIO/BAJO
+- `_safe_unlink()` en templates y episodios: previene eliminación de archivos fuera de los directorios permitidos (path traversal)
+- Parámetros numéricos de plantilla clamped antes de pasarse al filtro FFmpeg (previene inyección en filter_complex)
+- `/health` ya no expone la versión de la app
+- Validación de longitud y esquema URL en schemas de podcast (Pydantic)
+- Timeout de 5 segundos en conexiones SQLite
+- CORS explícitamente configurado (sin origenes permitidos)
+
+### Dependencias nuevas
+- `slowapi==0.1.9` — rate limiting
+- `cryptography>=43.0.0` — cifrado Fernet para tokens
+
+---
+
 ## [0.3.1] — 2026-03-30
 
 ### Corregido

@@ -76,6 +76,19 @@ class Settings(BaseSettings):
     # System font path (installed by Dockerfile via fonts-liberation)
     default_font_path: str = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
 
+    def validate_secrets(self) -> None:
+        """Raise RuntimeError if insecure default credentials are detected."""
+        errors = []
+        if self.secret_key in ("change-me", ""):
+            errors.append("SECRET_KEY no puede ser 'change-me' — generá una clave aleatoria")
+        if self.admin_password in ("changeme", ""):
+            errors.append("ADMIN_PASSWORD no puede ser 'changeme' — cambiala en .env")
+        if errors:
+            raise RuntimeError(
+                "Configuración insegura — la app no puede arrancar:\n"
+                + "\n".join(f"  • {e}" for e in errors)
+            )
+
     def ensure_dirs(self) -> None:
         for d in [
             self.data_dir / "db",

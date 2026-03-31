@@ -20,6 +20,16 @@ router = APIRouter(prefix="/api/templates", tags=["templates"])
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 
+def _safe_unlink(path_str: str, allowed_parent: Path) -> None:
+    """Delete a file only if it resides within the allowed directory."""
+    try:
+        p = Path(path_str).resolve()
+        if str(p).startswith(str(allowed_parent.resolve())):
+            p.unlink(missing_ok=True)
+    except Exception:
+        pass
+
+
 @router.get("", response_model=list[TemplateOut])
 async def list_templates(session: AsyncSession = Depends(get_session)):
     result = await session.execute(select(Template).order_by(Template.is_default.desc(), Template.id))
@@ -114,9 +124,9 @@ async def upload_background(
     dest = bg_dir / filename
     dest.write_bytes(content)
 
-    # Delete old background if it exists
-    if tmpl.background_path and Path(tmpl.background_path).exists():
-        Path(tmpl.background_path).unlink()
+    # Delete old background if it exists (safe path check)
+    if tmpl.background_path:
+        _safe_unlink(tmpl.background_path, settings.backgrounds_dir)
 
     tmpl.background_path = str(dest)
     await session.commit()
@@ -167,8 +177,8 @@ async def upload_watermark(
     dest = bg_dir / filename
     dest.write_bytes(content)
 
-    if tmpl.watermark_path and Path(tmpl.watermark_path).exists():
-        Path(tmpl.watermark_path).unlink()
+    if tmpl.watermark_path:
+        _safe_unlink(tmpl.watermark_path, settings.backgrounds_dir)
 
     tmpl.watermark_path = str(dest)
     await session.commit()

@@ -6,12 +6,27 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pathlib import Path
+
+from app.config import settings
 from app.database import get_session
 from app.models.episode import Episode
 from app.schemas.episode import EpisodeList, EpisodeOut
 from app.schemas.job import JobOut
 
 router = APIRouter(prefix="/api/episodes", tags=["episodes"])
+
+
+def _safe_unlink(path_str: str, *allowed_parents: Path) -> None:
+    """Delete a file only if it resides within one of the allowed directories."""
+    try:
+        p = Path(path_str).resolve()
+        for parent in allowed_parents:
+            if str(p).startswith(str(parent.resolve())):
+                p.unlink(missing_ok=True)
+                return
+    except Exception:
+        pass
 
 
 @router.get("", response_model=EpisodeList)
@@ -143,12 +158,11 @@ async def delete_episode(episode_id: int, session: AsyncSession = Depends(get_se
     if ep is None:
         raise HTTPException(404, "Episode not found")
 
-    # Clean up files
-    import pathlib
-    for path_attr in ("mp3_path", "render_path"):
-        p = getattr(ep, path_attr)
-        if p and pathlib.Path(p).exists():
-            pathlib.Path(p).unlink()
+    # Clean up files (safe path check to prevent path traversal)
+    if ep.mp3_path:
+        _safe_unlink(ep.mp3_path, settings.downloads_dir)
+    if ep.render_path:
+        _safe_unlink(ep.render_path, settings.renders_dir)
 
     await session.delete(ep)
     await session.commit()

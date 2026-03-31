@@ -8,7 +8,7 @@ from app.config import settings
 engine = create_async_engine(
     settings.db_url,
     echo=False,
-    connect_args={"check_same_thread": False},
+    connect_args={"check_same_thread": False, "timeout": 5},
 )
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)

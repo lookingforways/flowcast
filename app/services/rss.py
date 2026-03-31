@@ -67,6 +67,8 @@ def _parse_pub_date(entry: feedparser.FeedParserDict) -> Optional[datetime]:
 
 def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
     """Parse the RSS feed and return a list of ParsedEpisode objects."""
+    from app.utils.url_validator import validate_external_url
+    validate_external_url(feed_url)
     feed = feedparser.parse(feed_url)
     if feed.bozo and not feed.entries:
         raise ValueError(f"Failed to parse feed: {feed_url} — {feed.bozo_exception}")

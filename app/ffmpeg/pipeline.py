@@ -27,6 +27,11 @@ VIDEO_H = 1080
 FPS = 25
 
 
+def _clamp(val: object, lo: int, hi: int) -> int:
+    """Clamp a template numeric value to a safe range, preventing FFmpeg filter injection."""
+    return max(lo, min(hi, int(val)))  # type: ignore[arg-type]
+
+
 def _resolve_font(template: Template) -> str:
     """Return the font path to use, falling back to system default."""
     if template.title_font_path and Path(template.title_font_path).exists():
@@ -56,8 +61,8 @@ def build_filter_complex(
     parts.append(f"[0:v]scale={VIDEO_W}:{VIDEO_H},setsar=1[bg]")
 
     # ── 2. Waveform from audio ───────────────────────────────────────────────
-    ww = template.waveform_w
-    wh = template.waveform_h
+    ww = _clamp(template.waveform_w, 1, 3840)
+    wh = _clamp(template.waveform_h, 1, 2160)
     wcolor = template.waveform_color.lstrip("#")
 
     if template.waveform_mode == "showfreqs":
@@ -81,8 +86,8 @@ def build_filter_complex(
     parts.append(wave_filter)
 
     # ── 3. Overlay waveform on background ───────────────────────────────────
-    wx = template.waveform_x
-    wy = template.waveform_y
+    wx = _clamp(template.waveform_x, 0, 3840)
+    wy = _clamp(template.waveform_y, 0, 2160)
     parts.append(f"[bg][wave]overlay=x={wx}:y={wy}[comp1]")
     current = "comp1"
 
@@ -92,9 +97,9 @@ def build_filter_complex(
         f"{font_clause}"
         f"text='{safe_title}':"
         f"fontcolor={template.title_color}:"
-        f"fontsize={template.title_font_size}:"
-        f"x={template.title_x}:"
-        f"y={template.title_y}:"
+        f"fontsize={_clamp(template.title_font_size, 8, 500)}:"
+        f"x={_clamp(template.title_x, 0, 3840)}:"
+        f"y={_clamp(template.title_y, 0, 2160)}:"
         f"line_spacing=4"
         f"[comp2]"
     )
@@ -120,13 +125,13 @@ def build_filter_complex(
 
     # ── 6. Watermark overlay ─────────────────────────────────────────────────
     if has_watermark and template.watermark_path:
-        wm_scale = template.watermark_scale
+        wm_scale = _clamp(template.watermark_scale, 10, 1920)
         parts.append(
             f"[{current}]null[pre_wm];"
             f"[2:v]scale={wm_scale}:-1[wm_scaled];"
             f"[pre_wm][wm_scaled]overlay="
-            f"x={template.watermark_x}:"
-            f"y={template.watermark_y}"
+            f"x={_clamp(template.watermark_x, 0, 3840)}:"
+            f"y={_clamp(template.watermark_y, 0, 2160)}"
             f"[out]"
         )
     else:

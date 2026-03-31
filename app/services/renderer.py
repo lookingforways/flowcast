@@ -97,10 +97,10 @@ async def render_episode(
         logger.error("Render failed for episode %d: %s", episode.id, exc)
         job.status = "failed"
         job.finished_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        job.error_msg = str(exc)
+        job.error_msg = "Render failed. Check server logs."
 
         episode.status = "failed"
-        episode.error_msg = str(exc)
+        episode.error_msg = "Render failed. Check server logs."
 
     await session.commit()
     await session.refresh(job)
