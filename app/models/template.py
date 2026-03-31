@@ -19,7 +19,7 @@ class Template(Base):
 
     # Waveform configuration
     waveform_color: Mapped[str] = mapped_column(String(16), default="#00FF88", nullable=False)
-    # Waveform mode: cline | p2p | cbuffer | showfreqs
+    # Waveform mode: cline | p2p | line | point | showfreqs
     waveform_mode: Mapped[str] = mapped_column(String(16), default="cline", nullable=False)
     waveform_x: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     waveform_y: Mapped[int] = mapped_column(Integer, default=810, nullable=False)

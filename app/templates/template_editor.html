@@ -58,8 +58,9 @@
               <select class="form-select form-select-sm" id="waveMode">
                 <option value="cline" {% if template.waveform_mode == 'cline' %}selected{% endif %}>Línea centrada</option>
                 <option value="p2p" {% if template.waveform_mode == 'p2p' %}selected{% endif %}>Punto a punto</option>
-                <option value="cbuffer" {% if template.waveform_mode == 'cbuffer' %}selected{% endif %}>Relleno</option>
-                <option value="showfreqs" {% if template.waveform_mode == 'showfreqs' %}selected{% endif %}>Frecuencias</option>
+                <option value="line" {% if template.waveform_mode == 'line' %}selected{% endif %}>Línea delgada</option>
+                <option value="point" {% if template.waveform_mode == 'point' %}selected{% endif %}>Puntos</option>
+                <option value="showfreqs" {% if template.waveform_mode == 'showfreqs' %}selected{% endif %}>Frecuencias (ecualizador)</option>
               </select>
             </div>
             <div class="col-6">

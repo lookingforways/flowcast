@@ -1,5 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
@@ -48,9 +48,12 @@ async def update_podcast(
 
 @router.delete("/{podcast_id}", status_code=204)
 async def delete_podcast(podcast_id: int, session: AsyncSession = Depends(get_session)):
+    from app.models.episode import Episode
+
     podcast = await session.get(Podcast, podcast_id)
     if podcast is None:
         raise HTTPException(404, "Podcast not found")
+    await session.execute(delete(Episode).where(Episode.podcast_id == podcast_id))
     await session.delete(podcast)
     await session.commit()
 
