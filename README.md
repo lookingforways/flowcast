@@ -41,7 +41,16 @@ git clone git@github.com:lookingforways/flowcast.git
 cd flowcast
 ```
 
-### 4. Configurar variables de entorno
+### 4. Apuntar el dominio al VPS
+
+En tu registrador de dominio, crea un registro DNS tipo `A`:
+```
+tu-dominio.com  →  IP-DE-TU-VPS
+```
+
+Esperá a que propague (generalmente 1-5 minutos con TTL bajo).
+
+### 5. Configurar variables de entorno
 
 ```bash
 cp .env.example .env
@@ -53,23 +62,27 @@ Completá como mínimo:
 ```env
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
-APP_BASE_URL=http://IP-DE-TU-VPS:8000
+APP_BASE_URL=https://tu-dominio.com
 SECRET_KEY=una-clave-aleatoria-larga
 ADMIN_USERNAME=tu-usuario
 ADMIN_PASSWORD=una-contraseña-segura
 ```
 
-### 5. Arrancar
+### 6. Arrancar
 
 ```bash
 docker compose up -d
 ```
 
-Accedé a `http://IP-DE-TU-VPS:8000`.
+Caddy obtiene el certificado TLS automáticamente en el primer arranque.
+Accedé a `https://tu-dominio.com` (HTTP redirige a HTTPS automáticamente).
+
+> **Nota**: los puertos 80 y 443 deben estar abiertos en el firewall del VPS.
 
 Para ver los logs:
 ```bash
 docker compose logs -f flowcast
+docker compose logs -f caddy     # logs de Caddy / TLS
 ```
 
 Para actualizar cuando haya cambios:
@@ -306,14 +319,18 @@ Genera un audio de 10 segundos con FFmpeg y renderiza un audiograma de prueba.
 
 ---
 
-## Producción con HTTPS
+## Producción con HTTPS (Caddy)
 
-1. Descomenta el servicio `nginx` en `docker-compose.yml`
-2. Configura `nginx.conf` con tu dominio
-3. Obtén certificado con Certbot:
-   ```bash
-   docker run --rm -v ./data/certbot:/etc/letsencrypt certbot/certbot certonly \
-     --standalone -d tu-dominio.com
+Caddy está incluido en `docker-compose.yml` y maneja TLS automáticamente.
+
+1. Asegurate de que el dominio apunta a la IP del VPS (registro DNS `A`)
+2. Los puertos 80 y 443 deben estar abiertos en el firewall
+3. Editá el `Caddyfile` con tu dominio:
    ```
-4. Actualiza `APP_BASE_URL=https://tu-dominio.com` en `.env`
-5. Actualiza el URI de callback en Google Cloud Console
+   tu-dominio.com {
+       reverse_proxy flowcast:8000
+   }
+   ```
+4. Actualizá `APP_BASE_URL=https://tu-dominio.com` en `.env`
+5. Actualizá el URI de callback en Google Cloud Console: `https://tu-dominio.com/auth/youtube/callback`
+6. `docker compose up -d` — Caddy obtiene el certificado automáticamente

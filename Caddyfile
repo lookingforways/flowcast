@@ -1,0 +1,3 @@
+avalos.xyz {
+    reverse_proxy flowcast:8000
+}
