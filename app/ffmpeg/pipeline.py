@@ -27,9 +27,17 @@ VIDEO_H = 1080
 FPS = 25
 
 
-def _clamp(val: object, lo: int, hi: int) -> int:
-    """Clamp a template numeric value to a safe range, preventing FFmpeg filter injection."""
-    return max(lo, min(hi, int(val)))  # type: ignore[arg-type]
+def _clamp(val: object, lo: int, hi: int) -> "int | str":
+    """Clamp a template numeric value to a safe range.
+
+    If *val* is a plain integer (or a string that represents one), clamp it.
+    If it looks like an FFmpeg expression (e.g. ``(w-text_w)/2``), pass it
+    through unchanged so FFmpeg can evaluate it at runtime.
+    """
+    try:
+        return max(lo, min(hi, int(val)))  # type: ignore[arg-type]
+    except (ValueError, TypeError):
+        return val  # type: ignore[return-value]
 
 
 def _resolve_font(template: Template) -> str:
