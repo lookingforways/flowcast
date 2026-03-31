@@ -71,6 +71,16 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     title = _truncate(episode.title, _MAX_TITLE_LEN)
     description = _safe_description(episode.description or "")
 
+    # Prepend original publish date to description
+    if episode.pub_date:
+        _MESES = [
+            "", "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+        ]
+        date_str = f"{episode.pub_date.day} de {_MESES[episode.pub_date.month]} de {episode.pub_date.year}"
+        date_line = f"Publicado originalmente el {date_str}\n\n"
+        description = _truncate(date_line + description, _MAX_DESC_LEN)
+
     body = {
         "snippet": {
             "title": title,
@@ -82,6 +92,12 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
         },
     }
 
+    # Set recordingDate metadata to the original episode publish date
+    if episode.pub_date:
+        body["recordingDetails"] = {
+            "recordingDate": episode.pub_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        }
+
     media = MediaFileUpload(
         episode.render_path,
         mimetype="video/mp4",
@@ -90,7 +106,8 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     )
 
     logger.info("Uploading to YouTube: %s (privacy=%s)", title, settings.youtube_privacy)
-    request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+    part = "snippet,status,recordingDetails" if episode.pub_date else "snippet,status"
+    request = youtube.videos().insert(part=part, body=body, media_body=media)
 
     def _do_upload() -> str:
         resp = None
