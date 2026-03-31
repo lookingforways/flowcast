@@ -6,6 +6,14 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.5.2] — 2026-03-31
+
+### Añadido
+- Los videos subidos a YouTube incluyen la fecha de publicación original del episodio en la descripción ("Publicado originalmente el 20 de diciembre de 2025")
+- Se envía `recordingDetails.recordingDate` con la fecha original del episodio como metadato de YouTube
+
+---
+
 ## [0.5.1] — 2026-03-31
 
 ### Corregido
