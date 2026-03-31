@@ -6,6 +6,13 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.5.1] — 2026-03-31
+
+### Corregido
+- Auto-pipeline ahora también procesa episodios que quedaron en estado `discovered` sin avanzar (ej. detectados cuando `FLOWCAST_AUTO_PUBLISH` estaba desactivado)
+
+---
+
 ## [0.5.0] — 2026-03-31
 
 ### Añadido
