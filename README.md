@@ -146,23 +146,37 @@ Flowcast protege toda la interfaz con usuario/contraseña + TOTP (autenticación
 3. En el menú izquierdo: **APIs y servicios → Biblioteca**
 4. Busca **YouTube Data API v3** y actívala
 
-### Paso 2: Crear credenciales OAuth2
+### Paso 2: Configurar pantalla de consentimiento OAuth
+
+1. Ve a **APIs y servicios → Pantalla de consentimiento de OAuth**
+2. Tipo de usuario: **Externo** → **Crear**
+3. Completá los campos obligatorios (nombre de la app, correo de asistencia, correo del desarrollador)
+4. En **Usuarios de prueba**, agregá tu cuenta de Google
+5. Guardá y continuá hasta el final
+
+> Este paso es obligatorio antes de crear las credenciales OAuth.
+
+### Paso 3: Crear credenciales OAuth2
 
 1. Ve a **APIs y servicios → Credenciales**
 2. Click en **Crear credenciales → ID de cliente OAuth 2.0**
 3. Tipo de aplicación: **Aplicación web**
-4. En "URI de redireccionamiento autorizados", agrega:
+4. En **"Orígenes autorizados de JavaScript"**, agrega:
+   ```
+   https://tu-dominio.com
+   ```
+5. En **"URIs de redireccionamiento autorizados"**, agrega:
    ```
    https://tu-dominio.com/auth/youtube/callback
    ```
-5. Descarga el JSON o copia el **Client ID** y **Client Secret**
+6. Descarga el JSON o copia el **Client ID** y **Client Secret**
 6. Agrégalos a tu `.env`:
    ```env
    GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
    GOOGLE_CLIENT_SECRET=GOCSPX-...
    ```
 
-### Paso 3: Conectar en la UI
+### Paso 4: Conectar en la UI
 
 1. Ve a `/settings` en Flowcast
 2. Click en **Conectar con YouTube**
