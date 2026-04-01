@@ -2,6 +2,37 @@
 
 Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:9 con forma de onda animada y los publica automáticamente en YouTube.
 
+## Stack tecnológico
+
+| Capa | Tecnología |
+|------|-----------|
+| Lenguaje | Python 3.12 |
+| Web framework | FastAPI |
+| Templates HTML | Jinja2 + Bootstrap 5 |
+| Base de datos | SQLite (SQLAlchemy async + aiosqlite) |
+| Tareas programadas | APScheduler |
+| Procesamiento de video | FFmpeg |
+| Análisis de audio / waveform | numpy + Pillow |
+| Autenticación | itsdangerous (sesión) + pyotp (2FA TOTP) |
+| YouTube API | google-api-python-client (OAuth2) |
+| Deploy | Docker + Docker Compose + Caddy (HTTPS) |
+
+### Arquitectura
+
+```
+Browser
+  │
+  ├── GET /episodes, /podcasts, /templates …
+  │     └── FastAPI → Jinja2 renderiza HTML completo → respuesta al browser
+  │
+  └── fetch() /api/episodes/24/render, /api/podcasts …
+        └── FastAPI → JSON response → JS actualiza la UI
+```
+
+Las páginas cargan con datos del servidor (server-rendered). Las interacciones dinámicas (crear, editar, borrar, renderizar) usan `fetch()` a la API REST `/api/*` sin recargar la página. No hay framework JS — todo es vanilla JS dentro de los templates Jinja2.
+
+---
+
 ## Características
 
 - **Multi-podcast**: gestiona varios podcasts, cada uno con su feed RSS y playlist de YouTube
