@@ -48,14 +48,53 @@ async def update_podcast(
 
 @router.delete("/{podcast_id}", status_code=204)
 async def delete_podcast(podcast_id: int, session: AsyncSession = Depends(get_session)):
+    import logging
+    from pathlib import Path
+
     from app.models.episode import Episode
+    from app.models.job import RenderJob
+
+    logger = logging.getLogger(__name__)
 
     podcast = await session.get(Podcast, podcast_id)
     if podcast is None:
         raise HTTPException(404, "Podcast not found")
+
+    # Collect all episodes to get their file paths before deleting
+    episodes_result = await session.execute(
+        select(Episode).where(Episode.podcast_id == podcast_id)
+    )
+    episodes = episodes_result.scalars().all()
+    episode_ids = [ep.id for ep in episodes]
+
+    # Collect files to delete from disk
+    files_to_delete: list[Path] = []
+    for ep in episodes:
+        if ep.mp3_path:
+            files_to_delete.append(Path(ep.mp3_path))
+        if ep.render_path:
+            files_to_delete.append(Path(ep.render_path))
+
+    # Delete render jobs first (FK constraint)
+    if episode_ids:
+        await session.execute(
+            delete(RenderJob).where(RenderJob.episode_id.in_(episode_ids))
+        )
+
+    # Delete episodes
     await session.execute(delete(Episode).where(Episode.podcast_id == podcast_id))
+
+    # Delete podcast
     await session.delete(podcast)
     await session.commit()
+
+    # Delete files from disk after DB commit
+    for path in files_to_delete:
+        try:
+            if path.exists():
+                path.unlink()
+        except OSError as exc:
+            logger.warning("Could not delete file %s: %s", path, exc)
 
 
 @router.post("/{podcast_id}/poll", status_code=202)
