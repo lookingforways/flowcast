@@ -177,6 +177,39 @@
     </div>
   </div>
 </div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deletePodcastModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar podcast</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Estás a punto de eliminar <strong id="deletePodcastName"></strong>.</p>
+        <p class="mb-1">Esto eliminará permanentemente:</p>
+        <ul class="mb-3">
+          <li>Todos los episodios y su historial</li>
+          <li>Todos los archivos MP3 descargados</li>
+          <li>Todos los renders MP4 generados</li>
+        </ul>
+        <p class="text-muted small"><i class="bi bi-youtube text-danger me-1"></i>Los videos ya publicados en YouTube permanecerán en tu canal.</p>
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="deleteConfirmCheck">
+          <label class="form-check-label" for="deleteConfirmCheck">
+            Entiendo que esta acción <strong>no se puede deshacer</strong>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+          <i class="bi bi-trash me-1"></i>Eliminar definitivamente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -244,13 +277,33 @@ document.querySelectorAll('.poll-btn').forEach(btn => {
   });
 });
 
-// Delete
+// Delete modal
+const deleteModal = new bootstrap.Modal(document.getElementById('deletePodcastModal'));
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+const deleteConfirmCheck = document.getElementById('deleteConfirmCheck');
+let pendingDeleteId = null;
+
+deleteConfirmCheck.addEventListener('change', () => {
+  confirmDeleteBtn.disabled = !deleteConfirmCheck.checked;
+});
+
 document.querySelectorAll('.delete-podcast-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    if (!confirm(`¿Eliminar "${btn.dataset.name}"?\nSe eliminarán todos sus episodios, renders y archivos descargados. Los videos ya publicados en YouTube permanecerán en tu canal. Esta acción no se puede deshacer.`)) return;
-    await fetch(`/api/podcasts/${btn.dataset.id}`, {method: 'DELETE'});
-    location.reload();
+  btn.addEventListener('click', () => {
+    pendingDeleteId = btn.dataset.id;
+    document.getElementById('deletePodcastName').textContent = `"${btn.dataset.name}"`;
+    deleteConfirmCheck.checked = false;
+    confirmDeleteBtn.disabled = true;
+    deleteModal.show();
   });
+});
+
+confirmDeleteBtn.addEventListener('click', async () => {
+  if (!pendingDeleteId) return;
+  confirmDeleteBtn.disabled = true;
+  confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando...';
+  await fetch(`/api/podcasts/${pendingDeleteId}`, {method: 'DELETE'});
+  deleteModal.hide();
+  location.reload();
 });
 </script>
 {% endblock %}
