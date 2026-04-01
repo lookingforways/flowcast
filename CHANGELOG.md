@@ -6,6 +6,18 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.5.3] — 2026-04-01
+
+### Añadido
+- Modal de confirmación con checkbox al eliminar un podcast, reemplaza el `confirm()` nativo del browser
+- Sección de stack tecnológico y arquitectura en el README
+
+### Corregido
+- Al eliminar un podcast se borran también los RenderJobs asociados y los archivos MP3/MP4 del disco
+- Mensaje de confirmación de borrado actualizado: indica que los videos de YouTube permanecen en el canal
+
+---
+
 ## [0.5.2] — 2026-03-31
 
 ### Añadido
