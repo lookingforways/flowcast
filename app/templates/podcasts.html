@@ -247,7 +247,7 @@ document.querySelectorAll('.poll-btn').forEach(btn => {
 // Delete
 document.querySelectorAll('.delete-podcast-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
-    if (!confirm(`¿Eliminar "${btn.dataset.name}"?\nLos episodios existentes no se borrarán.`)) return;
+    if (!confirm(`¿Eliminar "${btn.dataset.name}"?\nSe eliminarán todos sus episodios, renders y archivos descargados. Los videos ya publicados en YouTube permanecerán en tu canal. Esta acción no se puede deshacer.`)) return;
     await fetch(`/api/podcasts/${btn.dataset.id}`, {method: 'DELETE'});
     location.reload();
   });
