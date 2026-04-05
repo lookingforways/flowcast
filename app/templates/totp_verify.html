@@ -49,6 +49,7 @@
         {% endif %}
 
         <form method="post" action="/2fa">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="mb-4">
             <input type="text" name="token" class="form-control bg-dark border-secondary text-light token-input"
                    placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
