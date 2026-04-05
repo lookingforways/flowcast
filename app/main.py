@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -26,10 +26,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health", "/favicon.ico")
+# /health requires auth — removed from public prefixes intentionally
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/favicon.ico", "/robots.txt", "/.well-known/")
 
 # Max body size for login/2fa forms (2 KB — well above any legitimate use)
 _MAX_FORM_BODY = 2048
+
+_404_HTML = (
+    "<!doctype html><html lang='es'><head><meta charset='UTF-8'>"
+    "<title>404 — Flowcast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
+    "<h1>404</h1><p>Página no encontrada.</p><a href='/'>Volver al inicio</a></body></html>"
+)
 
 
 @asynccontextmanager
@@ -66,7 +73,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.3",
+    version="0.6.4",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -99,7 +106,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
     if request.url.path.startswith("/api/"):
         return JSONResponse({"detail": "Error"}, status_code=exc.status_code)
     if exc.status_code == 404:
-        return RedirectResponse("/", status_code=302)
+        return HTMLResponse(_404_HTML, status_code=404)
     return JSONResponse({"detail": "Error"}, status_code=exc.status_code)
 
 
@@ -177,6 +184,16 @@ app.include_router(episodes.router)
 app.include_router(templates.router)
 app.include_router(jobs.router)
 app.include_router(youtube.router)
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("app/static/favicon.ico")
+
+
+@app.get("/robots.txt", include_in_schema=False)
+async def robots_txt():
+    return PlainTextResponse("User-agent: *\nDisallow: /\n")
 
 
 @app.get("/health")

@@ -6,6 +6,25 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.4] — 2026-04-05
+
+### Seguridad / Hardening
+- **`/health` requiere autenticación**: removido de rutas públicas — solo accesible con sesión activa
+- **`robots.txt`**: endpoint público que devuelve `Disallow: /` — bloquea indexación a todos los bots
+- **HSTS max-age a 2 años**: aumentado de 31,536,000 a 63,072,000 segundos (recomendación OWASP/Mozilla Observatory)
+- **404 real**: rutas inexistentes para usuarios autenticados devuelven HTTP 404 en lugar de redirigir a `/`
+- **`/.well-known/` público**: preparado para security.txt
+
+### Accesibilidad
+- **ARIA en alertas de error**: añadidos `role="alert"` y `aria-live="assertive"` al div de error en login y 2FA — los lectores de pantalla anuncian el error automáticamente
+- **`<noscript>`** en login: mensaje informativo cuando JS está deshabilitado
+
+### UI
+- **Favicon real**: se sirve `/favicon.ico` correctamente desde `app/static/favicon.ico`
+- **`<link rel="icon">`** declarado explícitamente en base.html, login.html y totp_verify.html
+
+---
+
 ## [0.6.3] — 2026-04-05
 
 ### Seguridad — CSP style-src completamente endurecida
