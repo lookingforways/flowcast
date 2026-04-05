@@ -77,7 +77,7 @@
         {% if yt_status.connected %}
         <div class="d-flex align-items-center gap-3 mb-3">
           {% if yt_status.channel and yt_status.channel.thumbnail %}
-          <img src="{{ yt_status.channel.thumbnail }}" class="rounded-circle" width="48" height="48" alt="">
+          <img src="/api/img?url={{ yt_status.channel.thumbnail | urlencode }}" class="rounded-circle" width="48" height="48" alt="">
           {% endif %}
           <div>
             <div class="fw-semibold">{{ yt_status.channel.title if yt_status.channel else 'Canal conectado' }}</div>

@@ -17,7 +17,7 @@ from app.auth.limiter import limiter
 from app.auth.session import is_fully_authenticated
 from app.config import settings
 from app.database import init_db
-from app.routers import auth, episodes, jobs, podcasts, templates, ui, youtube
+from app.routers import auth, episodes, jobs, podcasts, proxy, templates, ui, youtube
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(
@@ -140,7 +140,7 @@ async def security_middleware(request: Request, call_next):
         f"script-src 'self' 'nonce-{nonce}' '{_BOOTSTRAP_JS_HASH}'; "
         f"style-src 'self' 'unsafe-inline' 'nonce-{nonce}' cdn.jsdelivr.net; "
         "font-src cdn.jsdelivr.net; "
-        "img-src 'self' data: https://yt3.ggpht.com; "
+        "img-src 'self' data:; "
         "connect-src 'self'; "
         "frame-ancestors 'none'; "
         "base-uri 'none'; "
@@ -171,6 +171,7 @@ async def auth_middleware(request: Request, call_next):
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth.router)
+app.include_router(proxy.router)
 app.include_router(ui.router)
 app.include_router(podcasts.router)
 app.include_router(episodes.router)
