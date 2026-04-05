@@ -73,7 +73,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.5",
+    version="0.6.6",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -170,6 +170,8 @@ async def auth_middleware(request: Request, call_next):
     if any(path.startswith(p) for p in _PUBLIC_PREFIXES):
         return await call_next(request)
     if not is_fully_authenticated(request):
+        if path.startswith("/api/"):
+            return JSONResponse({"detail": "No autenticado"}, status_code=401)
         return RedirectResponse("/login", status_code=302)
     return await call_next(request)
 

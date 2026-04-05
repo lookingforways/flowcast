@@ -6,6 +6,15 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.6] — 2026-04-05
+
+### Seguridad
+- **XSS en `showToast`**: reemplazado `innerHTML` con `textContent` para el mensaje, y el botón de cierre ahora se crea programáticamente con `addEventListener` — elimina vector de inyección HTML y cumple CSP sin `onclick` inline
+- **API devuelve 401**: el middleware de auth ahora devuelve `{"detail":"No autenticado"}` con status 401 para rutas `/api/*` en vez de redirigir a login HTML — evita que `fetch()` reciba HTML inesperado en sesiones expiradas
+- **`minlength="8"`** en campo de contraseña del login (validación client-side)
+
+---
+
 ## [0.6.5] — 2026-04-05
 
 ### Añadido
