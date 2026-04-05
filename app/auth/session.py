@@ -46,6 +46,26 @@ def clear_session(response: Response) -> None:
     response.delete_cookie(COOKIE_NAME)
 
 
+FLASH_COOKIE = "flowcast_flash"
+
+
+def set_flash(response: Response, message: str) -> None:
+    """Store a one-time error message in a short-lived cookie."""
+    response.set_cookie(
+        FLASH_COOKIE,
+        message,
+        max_age=60,
+        httponly=True,
+        samesite="lax",
+        secure=settings.app_base_url.startswith("https://"),
+    )
+
+
+def read_flash(request: Request) -> str:
+    """Read the flash message without clearing it."""
+    return request.cookies.get(FLASH_COOKIE, "")
+
+
 def is_fully_authenticated(request: Request) -> bool:
     """Return True if the user has completed both password and 2FA verification."""
     session = get_session(request)
