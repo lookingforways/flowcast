@@ -6,6 +6,15 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.9] — 2026-04-05
+
+### Seguridad
+- **Headers completos en todas las respuestas**: corregido el orden de los middlewares — `security_middleware` ahora es verdaderamente el más externo (se registra último en Starlette = corre primero). Todas las respuestas — incluyendo 401, 403, redirects — reciben el set completo de headers: CSP, COOP, CORP, X-Frame-Options, etc.
+- **API unauthenticated → 401 con JSON**: cambiado de 403 vacío a `{"detail":"No autenticado"}` con status 401 y `Content-Type: application/json` — semánticamente correcto (401 = sin autenticar) y permite que el frontend maneje sesiones expiradas correctamente
+- **`Canonical` en security.txt**: añadido campo `Canonical` requerido por RFC 9116
+
+---
+
 ## [0.6.8] — 2026-04-05
 
 ### Seguridad

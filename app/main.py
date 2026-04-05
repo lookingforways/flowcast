@@ -74,7 +74,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.8",
+    version="0.6.9",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -121,7 +121,22 @@ app.add_middleware(
 )
 
 
-# ── Security headers + nonce (outermost middleware) ───────────────────────────
+# ── Auth guard (registered first = innermost, called after security headers) ──
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+    if any(path.startswith(p) for p in _PUBLIC_PREFIXES):
+        return await call_next(request)
+    if not is_fully_authenticated(request):
+        if path.startswith("/api/"):
+            return JSONResponse({"detail": "No autenticado"}, status_code=401)
+        if path.startswith("/static/"):
+            return Response(status_code=403)
+        return RedirectResponse("/login", status_code=302)
+    return await call_next(request)
+
+
+# ── Security headers + nonce (registered last = outermost, wraps everything) ─
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
     # Generate a fresh nonce for every request
@@ -164,19 +179,6 @@ async def security_middleware(request: Request, call_next):
     return response
 
 
-# ── Auth guard ────────────────────────────────────────────────────────────────
-@app.middleware("http")
-async def auth_middleware(request: Request, call_next):
-    path = request.url.path
-    if any(path.startswith(p) for p in _PUBLIC_PREFIXES):
-        return await call_next(request)
-    if not is_fully_authenticated(request):
-        if path.startswith("/api/") or path.startswith("/static/"):
-            return Response(status_code=403)
-        return RedirectResponse("/login", status_code=302)
-    return await call_next(request)
-
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth.router)
@@ -207,6 +209,7 @@ async def security_txt():
         f"Contact: mailto:support@lookingforways.com\n"
         f"Expires: {expires}\n"
         f"Preferred-Languages: es, en\n"
+        f"Canonical: {settings.app_base_url}/.well-known/security.txt\n"
         f"Scope: {settings.app_base_url}\n"
     )
     return PlainTextResponse(content)
