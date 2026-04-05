@@ -6,6 +6,38 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.0] — 2026-04-05
+
+### Seguridad — hardening completo (auditoría externa)
+
+#### Crítico
+- **CSRF**: protección con patrón double-submit cookie usando itsdangerous — token firmado en cookie httponly + campo oculto en formulario, verificado en POST a `/login` y `/2fa`; token inválido devuelve 400 explícito
+- **CSP `script-src`**: eliminado `'unsafe-inline'` y `cdn.jsdelivr.net`; Bootstrap JS permitido solo por su hash SHA-384; scripts inline requieren nonce generado por request
+- **CSP bypass CDN**: ya no se permite cargar scripts arbitrarios desde jsdelivr.net
+
+#### Alto
+- **Nonces CSP**: nonce único por request (`secrets.token_hex(16)`) inyectado en todos los `<script>` y `<style>` inline en los 11 templates afectados
+- **Nuevas directivas CSP**: `base-uri 'none'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`
+- **Headers de seguridad en FastAPI**: middleware propio aplica todos los headers (HSTS via Caddy, X-Frame-Options, X-Content-Type-Options, CSP, Referrer-Policy, Permissions-Policy) — funciona independiente de Caddy
+
+#### Medio
+- **Cache-Control**: `no-store, no-cache, must-revalidate` en respuestas de `/login` y `/2fa`
+- **Body size limit**: máximo 2 KB en POST a `/login` y `/2fa`, rechazado en middleware antes de leer el body
+- **Rate limit en `/health`**: 30 req/minuto
+- **`Retry-After: 60`** en respuestas 429
+
+#### Bajo / Hardening general
+- **Headers `server` y `via`** eliminados de todas las respuestas
+- **Flash messages**: errores de login/2FA via cookie httponly en lugar de query string (`?error=...`)
+- **SRI**: atributos `integrity` y `crossorigin="anonymous"` en Bootstrap CSS, Bootstrap Icons CSS y Bootstrap JS
+- **Error handlers**: `RequestValidationError` → 400 genérico; `HTTPException` → mensaje genérico (no expone estructura de FastAPI ni nombres de campos)
+- **OpenAPI/Swagger deshabilitados**: `openapi_url=None`, `docs_url=None`, `redoc_url=None`
+- **Inputs de login**: `maxlength` en HTML (150/256) + validación en backend; placeholder `"admin"` → `"Usuario"`; labels vinculadas con `for`/`id`
+- **Meta robots**: `noindex, nofollow` en página de login
+- **Mensaje rate limit**: genérico, no expone la configuración exacta
+
+---
+
 ## [0.5.3] — 2026-04-01
 
 ### Añadido

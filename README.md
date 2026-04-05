@@ -46,6 +46,25 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 
 ---
 
+## Seguridad
+
+Flowcast implementa las siguientes medidas de seguridad:
+
+| Área | Implementación |
+|------|---------------|
+| Autenticación | Usuario + contraseña + TOTP 2FA obligatorio |
+| CSRF | Double-submit cookie con token firmado (itsdangerous) en cada formulario |
+| Sesión | Cookie httponly, SameSite=Lax, Secure (en HTTPS), firmada con itsdangerous |
+| Headers HTTP | HSTS, X-Frame-Options DENY, X-Content-Type-Options, CSP, Referrer-Policy, Permissions-Policy |
+| CSP | Nonce por request para scripts inline; Bootstrap JS permitido por hash SHA-384; sin `unsafe-inline` en script-src |
+| SRI | `integrity` + `crossorigin` en todos los recursos CDN (Bootstrap CSS/JS, Bootstrap Icons) |
+| Rate limiting | 5 req/minuto en login (por IP), 30 req/minuto en `/health` |
+| SSRF | Validación de URLs externas antes de fetch RSS y descarga de MP3 |
+| Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) |
+| Credenciales | La app no arranca si `SECRET_KEY` o `ADMIN_PASSWORD` usan valores por defecto |
+
+---
+
 ## Deploy en VPS (Ubuntu 24.04 x86)
 
 ### 1. Instalar Docker
