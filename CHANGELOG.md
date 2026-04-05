@@ -6,6 +6,18 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.1] — 2026-04-05
+
+### Corregido
+- **CSRF roto en producción**: el browser pedía `/favicon.ico` automáticamente, el middleware lo redirigía a `/login`, generando un nuevo token CSRF que sobreescribía la cookie — el form ya cargado tenía el token viejo y fallaba. Fix: reusar el token existente si es válido; agregar `/favicon.ico` a rutas públicas
+- **CSP ignorado**: el Caddyfile tenía un CSP estático que sobreescribía el CSP dinámico (con nonces) de FastAPI. Eliminado el CSP del Caddyfile — FastAPI lo maneja exclusivamente
+
+### Añadido
+- **Proxy de imágenes** (`/api/img`): endpoint que descarga imágenes externas server-side con protección SSRF, allowlist de content-types y límite de 5 MB. Las imágenes externas (ej. avatar de YouTube) pasan por el proxy y `img-src` queda en `'self' data:` únicamente
+- Avatar del canal de YouTube en configuración ahora se sirve vía proxy
+
+---
+
 ## [0.6.0] — 2026-04-05
 
 ### Seguridad — hardening completo (auditoría externa)
