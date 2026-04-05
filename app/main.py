@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health")
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health", "/favicon.ico")
 
 # SHA-384 hash of Bootstrap 5.3.3 bundle (allows it in script-src without CDN whitelist)
 _BOOTSTRAP_JS_HASH = "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.auth.csrf import CSRF_COOKIE, new_csrf_token, verify_csrf
+from app.auth.csrf import CSRF_COOKIE, is_valid_token, new_csrf_token, verify_csrf
 from app.auth.limiter import limiter
 from app.auth.session import (
     FLASH_COOKIE,
@@ -44,7 +44,8 @@ async def login_page(request: Request):
     if is_fully_authenticated(request):
         return RedirectResponse("/", status_code=302)
     flash = read_flash(request)
-    csrf = new_csrf_token()
+    existing = request.cookies.get(CSRF_COOKIE, "")
+    csrf = existing if is_valid_token(existing) else new_csrf_token()
     response = templates.TemplateResponse(
         "login.html", {"request": request, "error": flash, "csrf_token": csrf}
     )
@@ -91,7 +92,8 @@ async def totp_page(request: Request):
     first_time = not is_2fa_configured()
     qr_code = get_qr_code_base64()
     flash = read_flash(request)
-    csrf = new_csrf_token()
+    existing = request.cookies.get(CSRF_COOKIE, "")
+    csrf = existing if is_valid_token(existing) else new_csrf_token()
 
     response = templates.TemplateResponse(
         "totp_verify.html",
