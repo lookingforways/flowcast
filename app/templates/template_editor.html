@@ -115,7 +115,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.state.csp_nonce }}">
 const TMPL_ID = {{ template.id }};
 const canvas = document.getElementById('previewCanvas');
 const ctx = canvas.getContext('2d');

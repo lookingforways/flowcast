@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import secrets
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -27,21 +28,11 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health")
 
-_SECURITY_HEADERS = {
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-    "Content-Security-Policy": (
-        "default-src 'self'; "
-        "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net; "
-        "script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; "
-        "font-src cdn.jsdelivr.net; "
-        "img-src 'self' data:; "
-        "connect-src 'self'; "
-        "frame-ancestors 'none'"
-    ),
-}
+# SHA-384 hash of Bootstrap 5.3.3 bundle (allows it in script-src without CDN whitelist)
+_BOOTSTRAP_JS_HASH = "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+
+# Max body size for login/2fa forms (2 KB — well above any legitimate use)
+_MAX_FORM_BODY = 2048
 
 
 @asynccontextmanager
@@ -79,7 +70,6 @@ app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
     version="0.5.3",
-    # Disable automatic OpenAPI/docs endpoints
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -101,7 +91,7 @@ async def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONR
 app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
 
-# ── Exception handlers (hide framework details) ───────────────────────────────
+# ── Exception handlers ────────────────────────────────────────────────────────
 @app.exception_handler(RequestValidationError)
 async def validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
@@ -111,7 +101,6 @@ async def validation_handler(request: Request, exc: RequestValidationError) -> J
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> Response:
     if request.url.path.startswith("/api/"):
         return JSONResponse({"detail": "Error"}, status_code=exc.status_code)
-    # For UI routes redirect to home rather than expose error details
     if exc.status_code == 404:
         return RedirectResponse("/", status_code=302)
     return JSONResponse({"detail": "Error"}, status_code=exc.status_code)
@@ -127,13 +116,43 @@ app.add_middleware(
 )
 
 
-# ── Security headers + server header removal (runs on every response) ─────────
+# ── Security headers + nonce (outermost middleware) ───────────────────────────
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
+    # Generate a fresh nonce for every request
+    nonce = secrets.token_hex(16)
+    request.state.csp_nonce = nonce
+
+    # Block oversized bodies on auth form endpoints before FastAPI reads them
+    if request.method == "POST" and request.url.path in ("/login", "/2fa"):
+        content_length = int(request.headers.get("content-length", 0))
+        if content_length > _MAX_FORM_BODY:
+            return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
+
     response = await call_next(request)
-    for header, value in _SECURITY_HEADERS.items():
-        response.headers[header] = value
-    # Remove headers that reveal the stack
+
+    # Cache-Control: prevent caching of auth pages (may contain CSRF tokens)
+    if request.url.path in ("/login", "/2fa"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+
+    csp = (
+        "default-src 'self'; "
+        f"script-src 'self' 'nonce-{nonce}' '{_BOOTSTRAP_JS_HASH}'; "
+        f"style-src 'self' 'unsafe-inline' 'nonce-{nonce}' cdn.jsdelivr.net; "
+        "font-src cdn.jsdelivr.net; "
+        "img-src 'self' data:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'none'; "
+        "form-action 'self'; "
+        "object-src 'none'; "
+        "upgrade-insecure-requests"
+    )
+    response.headers["Content-Security-Policy"] = csp
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["server"] = ""
     return response
 

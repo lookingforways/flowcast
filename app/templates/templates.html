@@ -73,7 +73,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.state.csp_nonce }}">
 document.getElementById('createTmplBtn').addEventListener('click', async () => {
   const name = document.getElementById('newTmplName').value.trim();
   if (!name) return alert('Ingresa un nombre');

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth.csrf import CSRF_COOKIE, new_csrf_token, verify_csrf
@@ -63,14 +63,15 @@ async def login_submit(
     csrf_token: str = Form(...),
 ):
     cookie_csrf = request.cookies.get(CSRF_COOKIE, "")
-    valid = (
-        verify_csrf(csrf_token, cookie_csrf)
-        and len(username) <= _MAX_USERNAME
+    if not verify_csrf(csrf_token, cookie_csrf):
+        return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
+
+    if (
+        len(username) <= _MAX_USERNAME
         and len(password) <= _MAX_PASSWORD
         and username == settings.admin_username
         and password == settings.admin_password
-    )
-    if valid:
+    ):
         response = RedirectResponse("/2fa", status_code=302)
         set_session(response, {"authenticated": True, "totp_verified": False})
         return response
@@ -119,9 +120,7 @@ async def totp_submit(
 
     cookie_csrf = request.cookies.get(CSRF_COOKIE, "")
     if not verify_csrf(csrf_token, cookie_csrf):
-        response = RedirectResponse("/2fa", status_code=302)
-        set_flash(response, "Error de validación. Recargá la página.")
-        return response
+        return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
 
     if verify_token(token.strip()):
         response = RedirectResponse("/", status_code=302)

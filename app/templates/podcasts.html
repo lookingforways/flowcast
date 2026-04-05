@@ -213,7 +213,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.state.csp_nonce }}">
 // Create podcast
 document.getElementById('createPodcastBtn').addEventListener('click', async () => {
   const name = document.getElementById('newName').value.trim();

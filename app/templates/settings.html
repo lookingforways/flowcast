@@ -113,7 +113,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.state.csp_nonce }}">
 const disconnectBtn = document.getElementById('disconnectYtBtn');
 if (disconnectBtn) {
   disconnectBtn.addEventListener('click', async () => {

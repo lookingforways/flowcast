@@ -145,7 +145,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.state.csp_nonce }}">
 const episodeId = {{ episode.id }};
 document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('click', async () => {

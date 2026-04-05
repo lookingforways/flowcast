@@ -9,7 +9,7 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"
         integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
-  <style>
+  <style nonce="{{ request.state.csp_nonce }}">
     body { background: #0f0f1e; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
     .login-card { width: 100%; max-width: 380px; }
     .brand { font-size: 2rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
