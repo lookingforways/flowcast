@@ -26,8 +26,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# /health requires auth — removed from public prefixes intentionally
-_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/favicon.ico", "/robots.txt", "/.well-known/")
+# /static/js/ and /static/css/ require auth — only login/2fa pages are public,
+# and those pages only use CDN resources (Bootstrap), not our local static files.
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/favicon.ico", "/robots.txt", "/.well-known/")
 
 # Max body size for login/2fa forms (2 KB — well above any legitimate use)
 _MAX_FORM_BODY = 2048
@@ -73,7 +74,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.7",
+    version="0.6.8",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -170,8 +171,8 @@ async def auth_middleware(request: Request, call_next):
     if any(path.startswith(p) for p in _PUBLIC_PREFIXES):
         return await call_next(request)
     if not is_fully_authenticated(request):
-        if path.startswith("/api/"):
-            return JSONResponse({"detail": "No autenticado"}, status_code=401)
+        if path.startswith("/api/") or path.startswith("/static/"):
+            return Response(status_code=403)
         return RedirectResponse("/login", status_code=302)
     return await call_next(request)
 

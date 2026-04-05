@@ -6,6 +6,13 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.8] — 2026-04-05
+
+### Seguridad
+- **Archivos estáticos requieren autenticación**: `/static/js/` y `/static/css/` ya no son accesibles sin sesión activa — un atacante no autenticado recibe 403 y no puede leer el código fuente JS ni inferir la arquitectura interna de la app. Las páginas de login/2FA usan únicamente recursos CDN (Bootstrap) y no dependen de archivos locales, por lo que nada se rompe.
+
+---
+
 ## [0.6.7] — 2026-04-05
 
 ### Seguridad
