@@ -73,7 +73,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.4",
+    version="0.6.5",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -194,6 +194,19 @@ async def favicon():
 @app.get("/robots.txt", include_in_schema=False)
 async def robots_txt():
     return PlainTextResponse("User-agent: *\nDisallow: /\n")
+
+
+@app.get("/.well-known/security.txt", include_in_schema=False)
+async def security_txt():
+    from datetime import datetime, timezone
+    expires = datetime.now(timezone.utc).replace(year=datetime.now().year + 1).strftime("%Y-%m-%dT00:00:00.000Z")
+    content = (
+        f"Contact: mailto:support@lookingforways.com\n"
+        f"Expires: {expires}\n"
+        f"Preferred-Languages: es, en\n"
+        f"Scope: {settings.app_base_url}\n"
+    )
+    return PlainTextResponse(content)
 
 
 @app.get("/health")

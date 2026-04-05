@@ -6,6 +6,13 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.5] — 2026-04-05
+
+### Añadido
+- **`security.txt`** (`/.well-known/security.txt`): generado dinámicamente — `Contact` apunta a `support@lookingforways.com`, `Scope` usa `APP_BASE_URL` del entorno (se adapta a cualquier dominio de despliegue), `Expires` siempre 1 año desde el momento del request
+
+---
+
 ## [0.6.4] — 2026-04-05
 
 ### Seguridad / Hardening
