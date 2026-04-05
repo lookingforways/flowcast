@@ -6,6 +6,14 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.7] — 2026-04-05
+
+### Seguridad
+- **Eliminado `innerHTML` de `episodes.js`**: reemplazado con DOM methods (`createElement`, `appendChild`, `textContent`) — patrón seguro por diseño, imposible de convertirse en vector XSS aunque el código cambie en el futuro
+- **Eliminado `innerHTML` de `podcasts.html`**: mismo fix para el botón de spinner de "Revisar feed"
+
+---
+
 ## [0.6.6] — 2026-04-05
 
 ### Seguridad

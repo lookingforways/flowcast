@@ -258,11 +258,20 @@ document.getElementById('savePodcastBtn').addEventListener('click', async () => 
 // Poll feed
 document.querySelectorAll('.poll-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
+    const name = btn.dataset.name;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
+    const origNodes = Array.from(btn.childNodes).map(n => n.cloneNode(true));
+    btn.textContent = '';
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner-border spinner-border-sm';
+    btn.appendChild(spinner);
     await fetch(`/api/podcasts/${btn.dataset.id}/poll`, {method: 'POST'});
-    showToast(`Revisando feed de "${btn.dataset.name}"...`);
-    setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Revisar feed'; }, 2000);
+    showToast(`Revisando feed de "${name}"...`);
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '';
+      origNodes.forEach(n => btn.appendChild(n));
+    }, 2000);
   });
 });
 

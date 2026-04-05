@@ -3,6 +3,24 @@
 let currentEpisodeId = null;
 const renderModal = document.getElementById('renderModal');
 
+// Helper: set a button to loading state, returns a restore function
+function btnLoading(btn, text) {
+  const snapshot = btn.cloneNode(true);
+  btn.disabled = true;
+  btn.textContent = '';
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner-border spinner-border-sm';
+  btn.appendChild(spinner);
+  if (text) {
+    btn.appendChild(document.createTextNode('\u00a0' + text));
+  }
+  return () => {
+    btn.disabled = false;
+    btn.textContent = '';
+    snapshot.childNodes.forEach(n => btn.appendChild(n.cloneNode(true)));
+  };
+}
+
 // Filter by status
 document.getElementById('statusFilter').addEventListener('change', function () {
   const val = this.value;
@@ -16,17 +34,14 @@ document.querySelectorAll('.btn-action[data-action="download"], .btn-action[data
   btn.addEventListener('click', async () => {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
-    btn.disabled = true;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    const restore = btnLoading(btn);
     try {
       await apiRequest(`/api/episodes/${id}/${action}`, 'POST');
-      showToast(`${action === 'download' ? 'Descarga' : 'Publicación'} iniciada`);
+      showToast(action === 'download' ? 'Descarga iniciada' : 'Publicación iniciada');
       setTimeout(() => location.reload(), 2000);
     } catch (e) {
       showToast('Error: ' + e.message, 'danger');
-      btn.disabled = false;
-      btn.innerHTML = orig;
+      restore();
     }
   });
 });
@@ -45,8 +60,7 @@ document.getElementById('confirmRenderBtn').addEventListener('click', async () =
   if (!currentEpisodeId) return;
   const templateId = document.getElementById('renderTemplateSelect').value;
   const btn = document.getElementById('confirmRenderBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Iniciando...';
+  const restore = btnLoading(btn, 'Iniciando...');
   try {
     let url = `/api/episodes/${currentEpisodeId}/render`;
     if (templateId) url += `?template_id=${templateId}`;
@@ -56,9 +70,7 @@ document.getElementById('confirmRenderBtn').addEventListener('click', async () =
     setTimeout(() => location.reload(), 2500);
   } catch (e) {
     showToast('Error: ' + e.message, 'danger');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-film me-1"></i>Renderizar';
+    restore();
   }
 });
 
