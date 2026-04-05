@@ -6,6 +6,32 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.7.0] — 2026-04-05
+
+### Seguridad — auditoría externa completa (4 rondas, score 78 → 92/100)
+
+Resumen del hardening completo realizado en esta versión:
+
+- **Bootstrap JS eliminado**: reemplazado con APIs nativas del browser (`<dialog>`, `<details>/<summary>`). Elimina la dependencia de JS externo y el único motivo para `unsafe-inline` en `style-src`
+- **CSP sin `unsafe-inline` en ninguna directiva**: `script-src` y `style-src` usan nonces por request exclusivamente
+- **Archivos estáticos protegidos**: `/static/js/` y `/static/css/` requieren autenticación — un atacante sin sesión no puede leer el código fuente ni inferir la arquitectura
+- **Orden de middleware corregido**: `security_middleware` es verdaderamente el más externo — todas las respuestas (401, 403, 404, redirects) reciben el set completo de headers de seguridad
+- **API devuelve 401 JSON**: endpoints `/api/*` responden `{"detail":"No autenticado"}` para sesiones no iniciadas en lugar de redirigir a HTML
+- **`robots.txt`**: `Disallow: /` — ningún bot indexa nada
+- **`security.txt`** (RFC 9116): `/.well-known/security.txt` dinámico con `Contact`, `Expires`, `Canonical` y `Scope`
+- **HSTS a 2 años** (63,072,000 s) — recomendación OWASP/Mozilla Observatory
+- **Headers COOP/CORP**: `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Resource-Policy: same-origin`
+- **XSS en `showToast`**: reemplazado `innerHTML` con `textContent` + DOM methods
+- **`innerHTML` eliminado en todo el JS**: `episodes.js` y scripts inline usan `createElement`/`appendChild`
+- **CSRF expirado redirige con flash**: en lugar de devolver JSON 400 al usuario
+- **Favicon real** + `<link rel="icon">` explícito en todas las templates
+- **ARIA en alertas de error**: `role="alert"` + `aria-live="assertive"` en login y 2FA
+- **404 real** para usuarios autenticados (sin redirigir al dashboard)
+- **`/health` requiere autenticación**
+- **`minlength="8"`** en campo de contraseña
+
+---
+
 ## [0.6.9] — 2026-04-05
 
 ### Seguridad

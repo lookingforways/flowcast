@@ -8,7 +8,7 @@ Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:
 |------|-----------|
 | Lenguaje | Python 3.12 |
 | Web framework | FastAPI |
-| Templates HTML | Jinja2 + Bootstrap 5 |
+| Templates HTML | Jinja2 + Bootstrap 5 (CSS) + APIs nativas del browser |
 | Base de datos | SQLite (SQLAlchemy async + aiosqlite) |
 | Tareas programadas | APScheduler |
 | Procesamiento de video | FFmpeg |
@@ -48,20 +48,26 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 
 ## Seguridad
 
-Flowcast implementa las siguientes medidas de seguridad:
+Flowcast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/100**.
 
 | Área | Implementación |
 |------|---------------|
 | Autenticación | Usuario + contraseña + TOTP 2FA obligatorio |
-| CSRF | Double-submit cookie con token firmado (itsdangerous) en cada formulario |
+| CSRF | Double-submit cookie con token firmado (itsdangerous); token reutilizado si válido (evita invalidación por favicon) |
 | Sesión | Cookie httponly, SameSite=Lax, Secure (en HTTPS), firmada con itsdangerous |
-| Headers HTTP | HSTS, X-Frame-Options DENY, X-Content-Type-Options, CSP, Referrer-Policy, Permissions-Policy |
-| CSP | Nonce por request para scripts inline; Bootstrap JS permitido por hash SHA-384; sin `unsafe-inline` en script-src |
-| SRI | `integrity` + `crossorigin` en todos los recursos CDN (Bootstrap CSS/JS, Bootstrap Icons) |
-| Rate limiting | 5 req/minuto en login (por IP), 30 req/minuto en `/health` |
-| SSRF | Validación de URLs externas antes de fetch RSS y descarga de MP3 |
-| Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) |
+| Headers HTTP | HSTS 2 años, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP — aplicados a **todas** las respuestas |
+| CSP | Nonce único por request; sin `unsafe-inline` en ninguna directiva; Bootstrap JS eliminado |
+| SRI | `integrity` + `crossorigin` en todos los recursos CDN (Bootstrap CSS, Bootstrap Icons) |
+| JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
+| Archivos estáticos | `/static/js/` y `/static/css/` requieren autenticación — no accesibles sin sesión |
+| Rate limiting | 5 req/minuto en `/login` (por IP); `/health` requiere autenticación |
+| SSRF | Validación de URLs externas (IP privadas bloqueadas) antes de fetch RSS y descarga de MP3 |
+| Proxy de imágenes | `/api/img` descarga imágenes externas server-side con allowlist de content-types y límite 5 MB |
+| Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) derivando clave del `SECRET_KEY` |
 | Credenciales | La app no arranca si `SECRET_KEY` o `ADMIN_PASSWORD` usan valores por defecto |
+| Robots | `robots.txt` con `Disallow: /` — ningún bot indexa nada |
+| Divulgación responsable | `/.well-known/security.txt` (RFC 9116) con contacto, expiración y scope |
+| Sin JS externo | Bootstrap JS eliminado; modales con `<dialog>` nativo, acordeón con `<details>` — cero dependencias JS de CDN |
 
 ---
 
