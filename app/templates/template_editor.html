@@ -11,13 +11,13 @@
 <div class="row g-4">
   <!-- Preview -->
   <div class="col-lg-7">
-    <div class="card sticky-top" style="top: 1rem">
+    <div class="card sticky-top template-sticky-card">
       <div class="card-header d-flex justify-content-between">
         <span><i class="bi bi-eye me-1"></i>Vista previa (aproximada)</span>
         <span class="badge bg-secondary">1920×1080</span>
       </div>
       <div class="card-body p-0 bg-dark">
-        <canvas id="previewCanvas" style="width:100%;height:auto;display:block"></canvas>
+        <canvas id="previewCanvas"></canvas>
       </div>
       <div class="card-footer">
         <div class="row g-2">
@@ -56,7 +56,7 @@
             <div class="col-6">
               <label class="form-label small">Modo</label>
               <input type="hidden" id="waveMode" value="bars">
-              <div class="form-control form-control-sm bg-light text-muted" style="cursor:default">Barras FFT</div>
+              <div class="form-control form-control-sm bg-light text-muted wave-mode-label">Barras FFT</div>
             </div>
             <div class="col-6">
               <label class="form-label small">Posición Y</label>

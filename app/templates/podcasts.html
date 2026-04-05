@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="bi bi-broadcast me-2"></i>Podcasts</h2>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newPodcastModal">
+  <button class="btn btn-primary" onclick="document.getElementById('newPodcastModal').showModal()">
     <i class="bi bi-plus-lg me-1"></i>Agregar podcast
   </button>
 </div>
@@ -38,7 +38,7 @@
       <div class="card-body">
         <p class="text-muted small mb-1">
           <i class="bi bi-rss me-1"></i>
-          <a href="{{ p.feed_url }}" target="_blank" class="text-truncate d-inline-block" style="max-width:300px">{{ p.feed_url }}</a>
+          <a href="{{ p.feed_url }}" target="_blank" class="text-truncate d-inline-block feed-url-link">{{ p.feed_url }}</a>
         </p>
         {% if p.description %}
         <p class="text-muted small mb-0">{{ p.description[:120] }}{% if p.description|length > 120 %}…{% endif %}</p>
@@ -62,8 +62,7 @@
                 data-description="{{ p.description or '' }}"
                 data-playlist="{{ p.youtube_playlist_id or '' }}"
                 data-template="{{ p.default_template_id or '' }}"
-                data-active="{{ p.is_active | lower }}"
-                data-bs-toggle="modal" data-bs-target="#editPodcastModal">
+                data-active="{{ p.is_active | lower }}">
           <i class="bi bi-pencil"></i> Editar
         </button>
         <button class="btn btn-sm btn-outline-success poll-btn" data-id="{{ p.id }}" data-name="{{ p.name }}">
@@ -82,134 +81,123 @@
   {% endfor %}
 </div>
 
-<!-- New Podcast Modal -->
-<div class="modal fade" id="newPodcastModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-broadcast me-2"></i>Agregar Podcast</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Nombre del podcast <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" id="newName" placeholder="Mi Podcast">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">URL del feed RSS <span class="text-danger">*</span></label>
-          <input type="url" class="form-control" id="newFeed" placeholder="https://mipodcast.com/feed.xml">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Descripción</label>
-          <textarea class="form-control" id="newDesc" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">YouTube Playlist ID</label>
-          <input type="text" class="form-control" id="newPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
-          <div class="form-text">Opcional. Lo encontrás en la URL de tu playlist: youtube.com/playlist?list=<strong>PLXXX</strong></div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Plantilla por defecto</label>
-          <select class="form-select" id="newTemplate">
-            <option value="">— Usar plantilla global predeterminada —</option>
-            {% for t in templates %}
-            <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="createPodcastBtn">
-          <i class="bi bi-plus-lg me-1"></i>Agregar
-        </button>
-      </div>
+<!-- New Podcast Dialog -->
+<dialog id="newPodcastModal">
+  <div class="modal-header">
+    <h5 class="modal-title"><i class="bi bi-broadcast me-2"></i>Agregar Podcast</h5>
+    <button type="button" class="btn-close" onclick="this.closest('dialog').close()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Nombre del podcast <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" id="newName" placeholder="Mi Podcast">
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">URL del feed RSS <span class="text-danger">*</span></label>
+      <input type="url" class="form-control" id="newFeed" placeholder="https://mipodcast.com/feed.xml">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-control" id="newDesc" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">YouTube Playlist ID</label>
+      <input type="text" class="form-control" id="newPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
+      <div class="form-text">Opcional. Lo encontrás en la URL de tu playlist: youtube.com/playlist?list=<strong>PLXXX</strong></div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Plantilla por defecto</label>
+      <select class="form-select" id="newTemplate">
+        <option value="">— Usar plantilla global predeterminada —</option>
+        {% for t in templates %}
+        <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
+        {% endfor %}
+      </select>
     </div>
   </div>
-</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="btn btn-primary" id="createPodcastBtn">
+      <i class="bi bi-plus-lg me-1"></i>Agregar
+    </button>
+  </div>
+</dialog>
 
-<!-- Edit Podcast Modal -->
-<div class="modal fade" id="editPodcastModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Editar Podcast</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="editId">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Nombre</label>
-          <input type="text" class="form-control" id="editName">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">URL del feed RSS</label>
-          <input type="url" class="form-control" id="editFeed">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Descripción</label>
-          <textarea class="form-control" id="editDesc" rows="2"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">YouTube Playlist ID</label>
-          <input type="text" class="form-control" id="editPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Plantilla por defecto</label>
-          <select class="form-select" id="editTemplate">
-            <option value="">— Usar plantilla global predeterminada —</option>
-            {% for t in templates %}
-            <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="editActive">
-          <label class="form-check-label" for="editActive">Activo</label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="savePodcastBtn">
-          <i class="bi bi-floppy me-1"></i>Guardar
-        </button>
-      </div>
+<!-- Edit Podcast Dialog -->
+<dialog id="editPodcastModal">
+  <div class="modal-header">
+    <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Editar Podcast</h5>
+    <button type="button" class="btn-close" onclick="this.closest('dialog').close()"></button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="editId">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Nombre</label>
+      <input type="text" class="form-control" id="editName">
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">URL del feed RSS</label>
+      <input type="url" class="form-control" id="editFeed">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-control" id="editDesc" rows="2"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">YouTube Playlist ID</label>
+      <input type="text" class="form-control" id="editPlaylist" placeholder="PLxxxxxxxxxxxxxxxxxx">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Plantilla por defecto</label>
+      <select class="form-select" id="editTemplate">
+        <option value="">— Usar plantilla global predeterminada —</option>
+        {% for t in templates %}
+        <option value="{{ t.id }}">{{ t.name }}{% if t.is_default %} (predeterminada){% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" id="editActive">
+      <label class="form-check-label" for="editActive">Activo</label>
     </div>
   </div>
-</div>
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deletePodcastModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar podcast</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Estás a punto de eliminar <strong id="deletePodcastName"></strong>.</p>
-        <p class="mb-1">Esto eliminará permanentemente:</p>
-        <ul class="mb-3">
-          <li>Todos los episodios y su historial</li>
-          <li>Todos los archivos MP3 descargados</li>
-          <li>Todos los renders MP4 generados</li>
-        </ul>
-        <p class="text-muted small"><i class="bi bi-youtube text-danger me-1"></i>Los videos ya publicados en YouTube permanecerán en tu canal.</p>
-        <div class="form-check mt-3">
-          <input class="form-check-input" type="checkbox" id="deleteConfirmCheck">
-          <label class="form-check-label" for="deleteConfirmCheck">
-            Entiendo que esta acción <strong>no se puede deshacer</strong>
-          </label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
-          <i class="bi bi-trash me-1"></i>Eliminar definitivamente
-        </button>
-      </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="btn btn-primary" id="savePodcastBtn">
+      <i class="bi bi-floppy me-1"></i>Guardar
+    </button>
+  </div>
+</dialog>
+
+<!-- Delete Confirmation Dialog -->
+<dialog id="deletePodcastModal">
+  <div class="modal-header bg-danger text-white">
+    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar podcast</h5>
+    <button type="button" class="btn-close btn-close-white" onclick="this.closest('dialog').close()"></button>
+  </div>
+  <div class="modal-body">
+    <p>Estás a punto de eliminar <strong id="deletePodcastName"></strong>.</p>
+    <p class="mb-1">Esto eliminará permanentemente:</p>
+    <ul class="mb-3">
+      <li>Todos los episodios y su historial</li>
+      <li>Todos los archivos MP3 descargados</li>
+      <li>Todos los renders MP4 generados</li>
+    </ul>
+    <p class="text-muted small"><i class="bi bi-youtube text-danger me-1"></i>Los videos ya publicados en YouTube permanecerán en tu canal.</p>
+    <div class="form-check mt-3">
+      <input class="form-check-input" type="checkbox" id="deleteConfirmCheck">
+      <label class="form-check-label" for="deleteConfirmCheck">
+        Entiendo que esta acción <strong>no se puede deshacer</strong>
+      </label>
     </div>
   </div>
-</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+      <i class="bi bi-trash me-1"></i>Eliminar definitivamente
+    </button>
+  </div>
+</dialog>
 {% endblock %}
 
 {% block scripts %}
@@ -234,7 +222,7 @@ document.getElementById('createPodcastBtn').addEventListener('click', async () =
   else alert('Error al crear podcast');
 });
 
-// Open edit modal
+// Open edit dialog
 document.querySelectorAll('.edit-podcast-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.getElementById('editId').value = btn.dataset.id;
@@ -245,6 +233,7 @@ document.querySelectorAll('.edit-podcast-btn').forEach(btn => {
     document.getElementById('editActive').checked = btn.dataset.active === 'true';
     const tmplSel = document.getElementById('editTemplate');
     tmplSel.value = btn.dataset.template || '';
+    document.getElementById('editPodcastModal').showModal();
   });
 });
 
@@ -277,8 +266,8 @@ document.querySelectorAll('.poll-btn').forEach(btn => {
   });
 });
 
-// Delete modal
-const deleteModal = new bootstrap.Modal(document.getElementById('deletePodcastModal'));
+// Delete dialog
+const deletePodcastModal = document.getElementById('deletePodcastModal');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 const deleteConfirmCheck = document.getElementById('deleteConfirmCheck');
 let pendingDeleteId = null;
@@ -293,7 +282,7 @@ document.querySelectorAll('.delete-podcast-btn').forEach(btn => {
     document.getElementById('deletePodcastName').textContent = `"${btn.dataset.name}"`;
     deleteConfirmCheck.checked = false;
     confirmDeleteBtn.disabled = true;
-    deleteModal.show();
+    deletePodcastModal.showModal();
   });
 });
 
@@ -302,7 +291,7 @@ confirmDeleteBtn.addEventListener('click', async () => {
   confirmDeleteBtn.disabled = true;
   confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando...';
   await fetch(`/api/podcasts/${pendingDeleteId}`, {method: 'DELETE'});
-  deleteModal.hide();
+  deletePodcastModal.close();
   location.reload();
 });
 </script>

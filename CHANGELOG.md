@@ -6,6 +6,20 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.3] — 2026-04-05
+
+### Seguridad — CSP style-src completamente endurecida
+- **Eliminado `unsafe-inline` de `style-src`**: Bootstrap JS era el responsable de setear estilos inline dinámicamente en modales y acordeón, requiriendo `unsafe-inline`. Al eliminarlo desaparece el único motivo para permitirlo.
+- **Eliminado Bootstrap JS** (`bootstrap.bundle.min.js`): removido del bundle. Solo se mantiene Bootstrap CSS (estilos estáticos, sin riesgo).
+- **Modales → `<dialog>` nativo**: los 5 modales (podcasts ×3, episodios ×1, plantillas ×1) se reemplazaron con el elemento HTML nativo `<dialog>` que usa `showModal()`/`close()` — no toca `element.style` en absoluto.
+- **Acordeón → `<details>`/`<summary>` nativo**: el acordeón de trabajos de render reemplazado con elementos HTML nativos.
+- **Inline `style="..."` eliminados de todas las templates**: 10 atributos de estilo inline convertidos a clases CSS en `app.css`.
+- **`showToast` arreglado**: eliminado `el.style.cssText`, reemplazado con clase CSS `.fc-toast`.
+- **`episodes.js` arreglado**: `row.style.display` reemplazado con `classList.toggle('d-none', ...)`.
+- **CSP final**: `script-src 'self' 'nonce-{nonce}'` y `style-src 'self' 'nonce-{nonce}' cdn.jsdelivr.net` — sin `unsafe-inline` en ninguna directiva.
+
+---
+
 ## [0.6.2] — 2026-04-05
 
 ### Seguridad

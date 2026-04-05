@@ -28,9 +28,6 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/static", "/health", "/favicon.ico")
 
-# SHA-384 hash of Bootstrap 5.3.3 bundle (allows it in script-src without CDN whitelist)
-_BOOTSTRAP_JS_HASH = "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-
 # Max body size for login/2fa forms (2 KB — well above any legitimate use)
 _MAX_FORM_BODY = 2048
 
@@ -69,7 +66,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.2",
+    version="0.6.3",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -137,8 +134,8 @@ async def security_middleware(request: Request, call_next):
 
     csp = (
         "default-src 'self'; "
-        f"script-src 'self' 'nonce-{nonce}' '{_BOOTSTRAP_JS_HASH}'; "
-        f"style-src 'self' 'unsafe-inline' 'nonce-{nonce}' cdn.jsdelivr.net; "
+        f"script-src 'self' 'nonce-{nonce}'; "
+        f"style-src 'self' 'nonce-{nonce}' cdn.jsdelivr.net; "
         "font-src cdn.jsdelivr.net; "
         "img-src 'self' data:; "
         "connect-src 'self'; "

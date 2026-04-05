@@ -10,7 +10,7 @@
     {% endif %}
   </h2>
   <div class="d-flex gap-2">
-    <select class="form-select form-select-sm" id="podcastFilter" style="width:auto"
+    <select class="form-select form-select-sm select-auto" id="podcastFilter"
             onchange="location.href='/episodes' + (this.value ? '?podcast_id='+this.value : '')">
       <option value="">Todos los podcasts</option>
       {% for p in podcasts %}
@@ -19,7 +19,7 @@
       </option>
       {% endfor %}
     </select>
-    <select class="form-select form-select-sm" id="statusFilter" style="width:auto">
+    <select class="form-select form-select-sm select-auto" id="statusFilter">
       <option value="">Todos los estados</option>
       <option value="discovered">Descubiertos</option>
       <option value="downloaded">Descargados</option>
@@ -72,7 +72,7 @@
           <td>
             <span class="badge status-{{ ep.status }}">{{ ep.status }}</span>
             {% if ep.error_msg %}
-            <i class="bi bi-exclamation-triangle text-danger ms-1" title="{{ ep.error_msg }}" data-bs-toggle="tooltip"></i>
+            <i class="bi bi-exclamation-triangle text-danger ms-1" title="{{ ep.error_msg }}"></i>
             {% endif %}
           </td>
           <td>
@@ -85,7 +85,6 @@
               {% endif %}
               {% if ep.status == 'downloaded' or (ep.status == 'rendered' and not ep.youtube_id) or ep.status == 'failed' %}
               <button class="btn btn-outline-warning btn-action" data-action="render" data-id="{{ ep.id }}"
-                      data-bs-toggle="modal" data-bs-target="#renderModal"
                       data-episode-title="{{ ep.title[:60] }}"
                       title="Crear audiograma">
                 <i class="bi bi-film"></i>
@@ -106,34 +105,30 @@
   </div>
 </div>
 
-<!-- Render Modal -->
-<div class="modal fade" id="renderModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-film me-2"></i>Crear Audiograma</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p class="text-muted" id="renderEpisodeTitle"></p>
-        <label class="form-label fw-semibold">Plantilla</label>
-        <select class="form-select" id="renderTemplateSelect">
-          {% for t in templates %}
-          <option value="{{ t.id }}" {% if t.is_default %}selected{% endif %}>
-            {{ t.name }}{% if t.is_default %} (predeterminada){% endif %}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-warning" id="confirmRenderBtn">
-          <i class="bi bi-film me-1"></i>Renderizar
-        </button>
-      </div>
-    </div>
+<!-- Render Dialog -->
+<dialog id="renderModal">
+  <div class="modal-header">
+    <h5 class="modal-title"><i class="bi bi-film me-2"></i>Crear Audiograma</h5>
+    <button type="button" class="btn-close" onclick="this.closest('dialog').close()"></button>
   </div>
-</div>
+  <div class="modal-body">
+    <p class="text-muted" id="renderEpisodeTitle"></p>
+    <label class="form-label fw-semibold">Plantilla</label>
+    <select class="form-select" id="renderTemplateSelect">
+      {% for t in templates %}
+      <option value="{{ t.id }}" {% if t.is_default %}selected{% endif %}>
+        {{ t.name }}{% if t.is_default %} (predeterminada){% endif %}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="btn btn-warning" id="confirmRenderBtn">
+      <i class="bi bi-film me-1"></i>Renderizar
+    </button>
+  </div>
+</dialog>
 {% endblock %}
 
 {% block scripts %}

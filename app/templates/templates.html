@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="bi bi-palette me-2"></i>Plantillas</h2>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTemplateModal">
+  <button class="btn btn-primary" onclick="document.getElementById('newTemplateModal').showModal()">
     <i class="bi bi-plus-lg me-1"></i>Nueva plantilla
   </button>
 </div>
@@ -18,10 +18,10 @@
         {% if t.is_default %}<span class="badge bg-success">Predeterminada</span>{% endif %}
       </div>
       <div class="card-body p-0">
-        <img src="/api/templates/{{ t.id }}/background" class="w-100" style="height:180px;object-fit:cover" alt="Fondo">
+        <img src="/api/templates/{{ t.id }}/background" class="w-100 tmpl-bg-preview" alt="Fondo">
         <div class="p-3">
           <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="rounded-circle border" style="width:24px;height:24px;background:{{ t.waveform_color }}"></div>
+            <div class="wave-color-swatch rounded-circle border" data-color="{{ t.waveform_color }}"></div>
             <small class="text-muted">Onda: {{ t.waveform_mode }} — {{ t.waveform_w }}×{{ t.waveform_h }}px</small>
           </div>
           <small class="text-muted d-block">Título: {{ t.title_font_size }}px @ y={{ t.title_y }}</small>
@@ -51,25 +51,21 @@
   {% endfor %}
 </div>
 
-<!-- New Template Modal -->
-<div class="modal fade" id="newTemplateModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Nueva Plantilla</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="newTmplName" placeholder="Mi plantilla">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="createTmplBtn">Crear</button>
-      </div>
-    </div>
+<!-- New Template Dialog -->
+<dialog id="newTemplateModal">
+  <div class="modal-header">
+    <h5 class="modal-title">Nueva Plantilla</h5>
+    <button type="button" class="btn-close" onclick="this.closest('dialog').close()"></button>
   </div>
-</div>
+  <div class="modal-body">
+    <label class="form-label">Nombre</label>
+    <input type="text" class="form-control" id="newTmplName" placeholder="Mi plantilla">
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+    <button type="button" class="btn btn-primary" id="createTmplBtn">Crear</button>
+  </div>
+</dialog>
 {% endblock %}
 
 {% block scripts %}

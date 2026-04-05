@@ -1,12 +1,5 @@
 // Flowcast — shared utilities
 
-// Initialize Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-    new bootstrap.Tooltip(el);
-  });
-});
-
 // Generic API request helper
 async function apiRequest(url, method = 'GET', body = null) {
   const opts = { method, headers: {} };
@@ -26,9 +19,15 @@ async function apiRequest(url, method = 'GET', body = null) {
 // Show a temporary toast-like banner
 function showToast(msg, type = 'success') {
   const el = document.createElement('div');
-  el.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-  el.style.cssText = 'bottom:1.5rem;right:1.5rem;z-index:9999;min-width:250px';
-  el.innerHTML = `${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+  el.className = `alert alert-${type} fc-toast`;
+  el.innerHTML = `<span>${msg}</span><button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 4000);
 }
+
+// Set background color on waveform color swatches from data-color attribute
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.wave-color-swatch[data-color]').forEach(el => {
+    el.style.backgroundColor = el.dataset.color;
+  });
+});

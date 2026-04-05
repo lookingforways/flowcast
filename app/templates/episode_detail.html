@@ -32,7 +32,7 @@
 
         {% if episode.description %}
         <h6 class="fw-semibold mt-3">Notas del episodio</h6>
-        <div class="show-notes border rounded p-3 bg-light" style="max-height:300px;overflow-y:auto">
+        <div class="show-notes border rounded p-3 bg-light">
           {{ episode.description | safe }}
         </div>
         {% endif %}
@@ -50,32 +50,27 @@
       <div class="card-header"><i class="bi bi-terminal me-1"></i>Trabajos de render</div>
       <div class="card-body p-0">
         {% if jobs %}
-        <div class="accordion" id="jobsAccordion">
+        <div>
           {% for job in jobs %}
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#job{{ job.id }}">
-                <span class="badge status-job-{{ job.status }} me-2">
-                  {% if job.status == 'done' %}Listo
-                  {% elif job.status == 'running' %}Renderizando
-                  {% elif job.status == 'queued' %}En cola
-                  {% else %}Error{% endif %}
-                </span>
-                Job #{{ job.id }} — {{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else 'pendiente' }}
-              </button>
-            </h2>
-            <div id="job{{ job.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}">
-              <div class="accordion-body">
-                {% if job.error_msg %}
-                <div class="alert alert-danger py-2">{{ job.error_msg }}</div>
-                {% endif %}
-                {% if job.ffmpeg_log %}
-                <pre class="bg-dark text-light p-2 rounded small" style="max-height:200px;overflow-y:auto;font-size:0.75rem">{{ job.ffmpeg_log[-2000:] }}</pre>
-                {% endif %}
-              </div>
+          <details class="job-item" {% if loop.first %}open{% endif %}>
+            <summary>
+              <span class="badge status-job-{{ job.status }}">
+                {% if job.status == 'done' %}Listo
+                {% elif job.status == 'running' %}Renderizando
+                {% elif job.status == 'queued' %}En cola
+                {% else %}Error{% endif %}
+              </span>
+              Job #{{ job.id }} — {{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else 'pendiente' }}
+            </summary>
+            <div class="job-item-body">
+              {% if job.error_msg %}
+              <div class="alert alert-danger py-2">{{ job.error_msg }}</div>
+              {% endif %}
+              {% if job.ffmpeg_log %}
+              <pre class="bg-dark text-light p-2 rounded job-log">{{ job.ffmpeg_log[-2000:] }}</pre>
+              {% endif %}
             </div>
-          </div>
+          </details>
           {% endfor %}
         </div>
         {% else %}

@@ -7,13 +7,13 @@
 {% if request.query_params.get('youtube') == 'connected' %}
 <div class="alert alert-success alert-dismissible fade show">
   <i class="bi bi-check-circle me-1"></i><strong>YouTube conectado correctamente.</strong>
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
 </div>
 {% elif request.query_params.get('youtube') == 'error' %}
 <div class="alert alert-danger alert-dismissible fade show">
   <i class="bi bi-x-circle me-1"></i><strong>Error al conectar YouTube:</strong>
   {{ request.query_params.get('msg', '') }}
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
 </div>
 {% endif %}
 

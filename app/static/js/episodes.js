@@ -1,12 +1,13 @@
 // Episodes page logic
 
 let currentEpisodeId = null;
+const renderModal = document.getElementById('renderModal');
 
 // Filter by status
 document.getElementById('statusFilter').addEventListener('change', function () {
   const val = this.value;
   document.querySelectorAll('#episodesTable tbody tr').forEach(row => {
-    row.style.display = (!val || row.dataset.status === val) ? '' : 'none';
+    row.classList.toggle('d-none', !!(val && row.dataset.status !== val));
   });
 });
 
@@ -30,15 +31,16 @@ document.querySelectorAll('.btn-action[data-action="download"], .btn-action[data
   });
 });
 
-// Render button — opens modal
+// Render button — opens dialog
 document.querySelectorAll('.btn-action[data-action="render"]').forEach(btn => {
   btn.addEventListener('click', () => {
     currentEpisodeId = btn.dataset.id;
     document.getElementById('renderEpisodeTitle').textContent = btn.dataset.episodeTitle || '';
+    renderModal.showModal();
   });
 });
 
-// Confirm render in modal
+// Confirm render in dialog
 document.getElementById('confirmRenderBtn').addEventListener('click', async () => {
   if (!currentEpisodeId) return;
   const templateId = document.getElementById('renderTemplateSelect').value;
@@ -49,7 +51,7 @@ document.getElementById('confirmRenderBtn').addEventListener('click', async () =
     let url = `/api/episodes/${currentEpisodeId}/render`;
     if (templateId) url += `?template_id=${templateId}`;
     await apiRequest(url, 'POST');
-    bootstrap.Modal.getInstance(document.getElementById('renderModal')).hide();
+    renderModal.close();
     showToast('Render iniciado. Puede tardar varios minutos.');
     setTimeout(() => location.reload(), 2500);
   } catch (e) {
