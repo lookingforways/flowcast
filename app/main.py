@@ -69,7 +69,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.6.1",
+    version="0.6.2",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -153,6 +153,8 @@ async def security_middleware(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
     response.headers["server"] = ""
     return response
 
@@ -183,4 +185,4 @@ app.include_router(youtube.router)
 @app.get("/health")
 @limiter.limit("30/minute")
 async def health(request: Request):
-    return {"status": "ok"}
+    return JSONResponse({"status": "ok"}, headers={"Cache-Control": "no-store"})

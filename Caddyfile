@@ -1,4 +1,5 @@
 avalos.xyz {
+    encode gzip zstd
     reverse_proxy flowcast:8000
 
     header {

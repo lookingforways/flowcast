@@ -65,7 +65,9 @@ async def login_submit(
 ):
     cookie_csrf = request.cookies.get(CSRF_COOKIE, "")
     if not verify_csrf(csrf_token, cookie_csrf):
-        return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
+        response = RedirectResponse("/login", status_code=302)
+        set_flash(response, "Sesión expirada. Intentá de nuevo.")
+        return response
 
     if (
         len(username) <= _MAX_USERNAME
@@ -122,7 +124,9 @@ async def totp_submit(
 
     cookie_csrf = request.cookies.get(CSRF_COOKIE, "")
     if not verify_csrf(csrf_token, cookie_csrf):
-        return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
+        response = RedirectResponse("/2fa", status_code=302)
+        set_flash(response, "Sesión expirada. Intentá de nuevo.")
+        return response
 
     if verify_token(token.strip()):
         response = RedirectResponse("/", status_code=302)

@@ -6,6 +6,20 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.6.2] — 2026-04-05
+
+### Seguridad
+- **Headers Cross-Origin**: añadidos `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Resource-Policy: same-origin` — protegen contra ataques side-channel (Spectre) entre orígenes
+- **CSRF expirado**: en lugar de devolver JSON 400 al usuario, redirige a `/login` (o `/2fa`) con flash message "Sesión expirada. Intentá de nuevo." — mejor UX y sin exponer detalles técnicos
+
+### Corregido
+- **`Cache-Control: no-store`** en `/health` — evita que proxies intermedios cacheen la respuesta de disponibilidad
+
+### Performance
+- **Compresión HTTP**: habilitado `gzip` y `zstd` en Caddy para respuestas HTML/JSON
+
+---
+
 ## [0.6.1] — 2026-04-05
 
 ### Corregido
