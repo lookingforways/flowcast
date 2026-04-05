@@ -140,7 +140,7 @@ async def security_middleware(request: Request, call_next):
         f"script-src 'self' 'nonce-{nonce}' '{_BOOTSTRAP_JS_HASH}'; "
         f"style-src 'self' 'unsafe-inline' 'nonce-{nonce}' cdn.jsdelivr.net; "
         "font-src cdn.jsdelivr.net; "
-        "img-src 'self' data:; "
+        "img-src 'self' data: https://yt3.ggpht.com; "
         "connect-src 'self'; "
         "frame-ancestors 'none'; "
         "base-uri 'none'; "
