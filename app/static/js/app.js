@@ -38,3 +38,34 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.backgroundColor = el.dataset.color;
   });
 });
+
+// ── Theme toggle ─────────────────────────────────────────────────────────────
+(function () {
+  const toggle = document.getElementById('theme-toggle');
+  const icon   = document.getElementById('theme-icon');
+  const label  = document.getElementById('theme-label');
+
+  function applyThemeUI(theme) {
+    if (!icon || !label) return;
+    if (theme === 'dark') {
+      icon.className  = 'bi bi-sun';
+      label.textContent = 'Claro';
+    } else {
+      icon.className  = 'bi bi-moon';
+      label.textContent = 'Oscuro';
+    }
+  }
+
+  // Sync button label with current theme on load
+  applyThemeUI(document.documentElement.getAttribute('data-theme') || 'light');
+
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next    = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('fc-theme', next);
+      applyThemeUI(next);
+    });
+  }
+}());

@@ -26,9 +26,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# /static/js/ and /static/css/ require auth — only login/2fa pages are public,
-# and those pages only use CDN resources (Bootstrap), not our local static files.
-_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/favicon.ico", "/robots.txt", "/.well-known/")
+# /static/ requires auth except /static/fonts/ (fonts needed by the login page too).
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/favicon.ico", "/robots.txt", "/.well-known/", "/static/fonts/")
 
 # Max body size for login/2fa forms (2 KB — well above any legitimate use)
 _MAX_FORM_BODY = 2048
@@ -79,7 +78,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="Flowcast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.7.0",
+    version="0.8.0",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
@@ -176,8 +175,8 @@ async def security_middleware(request: Request, call_next):
     csp = (
         "default-src 'self'; "
         f"script-src 'self' 'nonce-{nonce}'; "
-        f"style-src 'self' 'nonce-{nonce}' cdn.jsdelivr.net; "
-        "font-src cdn.jsdelivr.net; "
+        f"style-src 'self' 'nonce-{nonce}'; "
+        "font-src 'self'; "
         "img-src 'self' data:; "
         "connect-src 'self'; "
         "frame-ancestors 'none'; "

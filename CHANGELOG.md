@@ -6,6 +6,35 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.8.0] — 2026-04-06
+
+### UI — Fase 1: Design System Adwaita + Sidebar GNOME
+
+Primera fase del rediseño visual completo inspirado en GNOME HIG / Adwaita.
+
+**Design system nuevo (`theme.css`)**
+- Sistema de tokens CSS completo: variables para colores, tipografía, radios, sombras y espaciado — tema claro y oscuro
+- Paleta Adwaita oficial: Blue 3 (`#3584e4`) como primario, Purple 3 (`#9141ac`) como acento, escala completa de semánticos (success/warning/error/info)
+- Tipografía Inter Variable cargada localmente (`/static/fonts/`) — sin dependencias externas
+
+**Layout GNOME (sidebar)**
+- Navegación lateral fija estilo GNOME: logo animado con CSS vars, secciones de nav, footer con estado YouTube, toggle de tema y logout
+- `base.html` completamente reescrito con grid `sidebar + main`
+- El ícono del logo (concepto "Stream") usa `var(--fc-primary)` — se adapta automáticamente al tema
+
+**Tema claro / oscuro**
+- Toggle manual en el sidebar (ícono sol/luna) persiste en `localStorage`
+- Detección automática de `prefers-color-scheme` como valor por defecto
+- Sin flash de tema incorrecto: script inline (con nonce) aplica el tema antes del primer paint
+
+**Seguridad — mejora adicional**
+- Eliminada dependencia de `cdn.jsdelivr.net`: Bootstrap Icons y fuente Inter ahora se sirven desde `/static/fonts/` y `/static/css/` localmente
+- CSP simplificada: `style-src 'self' 'nonce-{nonce}'` y `font-src 'self'` — sin whitelist de CDN externo
+- `/static/fonts/` agregado a rutas públicas para que la página de login cargue la fuente sin autenticación (los archivos de fuente no son sensibles)
+- Bootstrap CSS CDN eliminado del `<head>` — shims de compatibilidad incluidos en `theme.css` para la transición
+
+---
+
 ## [0.7.0] — 2026-04-05
 
 ### Seguridad — auditoría externa completa (4 rondas, score 78 → 92/100)
