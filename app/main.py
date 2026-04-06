@@ -38,6 +38,11 @@ _404_HTML = (
     "<title>404 — Flowcast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
     "<h1>404</h1><p>Página no encontrada.</p><a href='/'>Volver al inicio</a></body></html>"
 )
+_500_HTML = (
+    "<!doctype html><html lang='es'><head><meta charset='UTF-8'>"
+    "<title>Error — Flowcast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
+    "<h1>Error</h1><p>Algo salió mal. Intentá de nuevo.</p><a href='/'>Volver al inicio</a></body></html>"
+)
 
 
 @asynccontextmanager
@@ -111,6 +116,14 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
     return JSONResponse({"detail": "Error"}, status_code=exc.status_code)
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> Response:
+    logger.error("Unhandled exception for %s %s", request.method, request.url.path, exc_info=exc)
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"detail": "Error interno"}, status_code=500)
+    return HTMLResponse(_500_HTML, status_code=500)
+
+
 # ── CORS — no cross-origin requests allowed ───────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
@@ -151,9 +164,14 @@ async def security_middleware(request: Request, call_next):
 
     response = await call_next(request)
 
-    # Cache-Control: prevent caching of auth pages (may contain CSRF tokens)
-    if request.url.path in ("/login", "/2fa"):
+    # Cache-Control
+    path = request.url.path
+    if path in ("/login", "/2fa"):
+        # Auth pages contain CSRF tokens — never cache
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    elif path.startswith("/static/"):
+        # Static assets are content-addressed (versioned via filenames) — safe to cache 1 year
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
 
     csp = (
         "default-src 'self'; "
