@@ -71,4 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
       applyThemeUI(next);
     });
   }
+
+  // Seguir el sistema en tiempo real — solo cuando no hay preferencia manual guardada
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+    if (!localStorage.getItem('fc-theme')) {
+      const next = e.matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      applyThemeUI(next);
+    }
+  });
 }());

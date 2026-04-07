@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Iniciar sesión — Flowcast</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.8.0">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.8.0">
+  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.9.1">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.1">
   {# Apply saved/system theme before first paint — prevents flash of wrong theme #}
   <script nonce="{{ request.state.csp_nonce }}">
     (function () {
@@ -124,5 +124,12 @@
 
 </div>
 
+<script nonce="{{ request.state.csp_nonce }}">
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+  if (!localStorage.getItem('fc-theme')) {
+    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+  }
+});
+</script>
 </body>
 </html>
