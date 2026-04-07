@@ -241,24 +241,39 @@ async def run_pipeline(
             stderr=asyncio.subprocess.PIPE,
         )
 
+        # FFmpeg writes progress with \r (not \n) when stderr is a pipe.
+        # Read in chunks and split on both separators.
         stderr_lines: list[str] = []
         assert proc.stderr is not None
         _ffmpeg_frame = 0
-        async for line_bytes in proc.stderr:
-            line = line_bytes.decode("utf-8", errors="replace")
-            stderr_lines.append(line)
-            if episode_id:
-                m = _TIME_RE.search(line)
-                if m:
-                    if duration_secs:
-                        h, mn, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
-                        current = h * 3600 + mn * 60 + s
-                        pct = int(min(99, 50 + current / duration_secs * 50))
-                    else:
-                        # No duration — advance slowly so the bar doesn't freeze
-                        _ffmpeg_frame += 1
-                        pct = min(99, 50 + _ffmpeg_frame)
-                    set_progress("render", episode_id, pct)
+        _buf = b""
+        while True:
+            chunk = await proc.stderr.read(4096)
+            if not chunk:
+                break
+            _buf += chunk
+            # Split on \r and \n so we catch FFmpeg's carriage-return progress lines
+            parts = _buf.replace(b"\r", b"\n").split(b"\n")
+            _buf = parts[-1]  # keep incomplete last part for next iteration
+            for raw in parts[:-1]:
+                line = raw.decode("utf-8", errors="replace").strip()
+                if not line:
+                    continue
+                stderr_lines.append(line + "\n")
+                if episode_id:
+                    m = _TIME_RE.search(line)
+                    if m:
+                        if duration_secs:
+                            h, mn, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                            current = h * 3600 + mn * 60 + s
+                            pct = int(min(99, 50 + current / duration_secs * 50))
+                        else:
+                            _ffmpeg_frame += 1
+                            pct = min(99, 50 + _ffmpeg_frame)
+                        set_progress("render", episode_id, pct)
+        # Flush remaining buffer
+        if _buf:
+            stderr_lines.append(_buf.decode("utf-8", errors="replace"))
 
         await proc.wait()
         stderr_log = "".join(stderr_lines)

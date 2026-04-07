@@ -15,7 +15,8 @@
         <h5 class="mb-0">
           <i class="bi bi-mic me-2" aria-hidden="true"></i>{{ episode.title }}
         </h5>
-        <span class="badge status-{{ episode.status }}">{{ episode.status }}</span>
+        {% set _sl = {'discovered':'Descubierto','downloaded':'Descargado','rendered':'Renderizado','published':'Publicado','failed':'Error'} %}
+        <span class="badge status-{{ episode.status }}">{{ _sl.get(episode.status, episode.status) }}</span>
       </div>
       <div class="card-body">
         {% if episode.pub_date %}
