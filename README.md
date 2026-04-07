@@ -42,6 +42,7 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 - **Modo automático**: detecta nuevos episodios via RSS → descarga → renderiza → publica
 - **Publicación en YouTube** con OAuth2 — asigna automáticamente la playlist del podcast
 - **Autenticación**: login con usuario/contraseña + 2FA TOTP (Google Authenticator, Authy, 1Password)
+- **Progreso en tiempo real**: barras de progreso para descarga, render (waveform + FFmpeg) y publicación en YouTube — persisten al recargar la página
 - **Self-hosted**: corre en tu VPS con Docker
 
 ---

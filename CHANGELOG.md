@@ -6,6 +6,29 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.3] — 2026-04-07
+
+### Agregado
+
+**Barras de progreso en tiempo real**
+- Las operaciones de descarga, render y publicación en YouTube muestran una barra de progreso en `/episodes` y en el detalle de episodio
+- Render en dos fases: waveform Python 0→50%, encoding FFmpeg 50→100%
+- FFmpeg reporta progreso parseando `time=HH:MM:SS.ss` de stderr leído en chunks — compatible con `\r` (carriage return) que usa FFmpeg cuando stderr es un pipe
+- Progreso persiste si se recarga la página durante una operación activa
+- Protección anti-doble publicación: HTTP 409 si ya hay un upload en curso para ese episodio
+
+### Corregido
+
+**Badges de estado en español**
+- `/episodes` y `/episodes/{id}`: "discovered" → "Descubierto", "downloaded" → "Descargado", "rendered" → "Renderizado", "published" → "Publicado", "failed" → "Error"
+
+**Barra de progreso — bugs**
+- La barra desaparecía inmediatamente cuando el progreso era 0%: corregido con `_active: set[str]` en el store — `is_active()` distingue "activo al 0%" de "sin operación"
+- El render se quedaba trabado al 50%: corregido leyendo stderr en chunks de 4096 bytes y splitteando en `\r` y `\n`
+- Race condition entre primera encuesta y tarea en background: `set_progress()` se llama en el router ANTES de encolar la tarea
+
+---
+
 ## [0.9.2] — 2026-04-07
 
 ### Seguridad
