@@ -156,8 +156,43 @@ async def _run_publish(episode_id: int) -> None:
             except Exception as exc:
                 log.error("Publish failed for episode %d: %s", episode_id, exc, exc_info=True)
                 ep.status = "failed"
-                ep.error_msg = "Publish failed. Check server logs."
+                ep.error_msg = _publish_error_msg(exc)
                 await session.commit()
+
+
+def _publish_error_msg(exc: Exception) -> str:
+    """Traducir excepciones de YouTube a mensajes en español para el usuario."""
+    msg = str(exc).lower()
+
+    # Token expirado / revocado (modo Testing en Google Cloud expira cada 7 días)
+    if "invalid_grant" in msg or "token has been expired or revoked" in msg:
+        return (
+            "El token de YouTube expiró o fue revocado. "
+            "Andá a Configuración → Desconectar YouTube → Conectar con YouTube para renovarlo. "
+            "Si el problema se repite cada 7 días, tu app está en modo 'Testing' en Google Cloud Console "
+            "— publicala o agregá tu cuenta como usuario de prueba."
+        )
+
+    # Sin permisos / cuota
+    if "forbidden" in msg or "quotaexceeded" in msg or "403" in msg:
+        return (
+            "YouTube rechazó la publicación por falta de permisos o cuota agotada. "
+            "Verificá los permisos de la app en Google Cloud Console."
+        )
+
+    # No autenticado
+    if "unauthorized" in msg or "401" in msg or "not connected" in msg:
+        return (
+            "No hay sesión activa con YouTube. "
+            "Andá a Configuración y conectá tu cuenta de YouTube."
+        )
+
+    # Archivo no encontrado
+    if "no render" in msg or "no such file" in msg or "not found" in msg:
+        return "No se encontró el archivo de video para publicar. Intentá renderizar el episodio nuevamente."
+
+    # Error genérico — incluir el mensaje original para que sea útil
+    return f"Error al publicar en YouTube: {exc}"
 
 
 @router.delete("/{episode_id}", status_code=204)
