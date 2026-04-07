@@ -6,6 +6,27 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.1] — 2026-04-06
+
+### Corregido — polish UI post-rediseño
+
+**Tema / colores**
+- `prefers-color-scheme` ahora se sigue en tiempo real: listener `matchMedia('change')` en `app.js`, `login.html` y `totp_verify.html` — el tema cambia al instante cuando el sistema cambia, sin recargar la página. Solo actúa si no hay preferencia manual guardada en `localStorage`
+
+**Botones — estilo Adwaita**
+- Todos los botones son ahora **pill** (`border-radius: 9999px`) — diseño uniforme sin mezcla de estilos
+- `btn-outline-*` ya no son transparentes: fondo tintado permanente en cada variante (azul, rojo, verde, amarillo, neutro) — alineado con el paradigma de botones de GNOME (siempre con fondo)
+- `btn-group` preserva el aspecto de grupo — los botones dentro resetean el pill internamente
+- "Guardar cambios" en el editor de plantillas: ya no ocupa todo el ancho (`flex-grow-1` eliminado), alineado a la derecha junto a "Cancelar"
+
+**Diálogos**
+- El CSS reset (`* { margin: 0 }`) borraba el `margin: auto` del browser que centra el `<dialog>` nativo — restaurado explícitamente. Los diálogos ahora aparecen centrados en pantalla
+
+**Páginas de autenticación**
+- `login.html` y `totp_verify.html` cargaban sin diseño en producción porque `/static/css/` requería autenticación — agregado a rutas públicas
+
+---
+
 ## [0.9.0] — 2026-04-06
 
 ### UI — Rediseño completo Adwaita (Fases 2–5)
