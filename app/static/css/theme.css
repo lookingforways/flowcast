@@ -55,8 +55,9 @@
   --fc-sidebar-width: 220px;
 
   /* Radii */
-  --fc-radius:    6px;
-  --fc-radius-lg: 12px;
+  --fc-radius:     6px;
+  --fc-radius-btn: 9px;   /* Adwaita button radius — libadwaita usa 9px */
+  --fc-radius-lg:  12px;
 
   /* Typography */
   --fc-font:      'Inter', system-ui, -apple-system, sans-serif;
@@ -375,7 +376,7 @@ pre {
   justify-content: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: var(--fc-radius);
+  border-radius: var(--fc-radius-btn);
   font-family: var(--fc-font);
   font-size: 0.875rem;
   font-weight: 500;
@@ -438,46 +439,62 @@ pre {
 }
 .btn-warning:hover:not(:disabled) { background: var(--fc-warning-s); text-decoration: none; }
 
-/* Outline / Secondary */
+/* ── Adwaita-style tinted buttons (siempre con fondo, nunca outline vacío) ── */
+
+/* Neutral / secondary — GNOME "regular button" con fondo sutil */
 .btn-secondary, .btn-outline-secondary {
-  background: transparent;
-  color: var(--fc-text-secondary);
-  border-color: var(--fc-border-strong);
+  background: var(--fc-bg-hover);
+  color: var(--fc-text);
+  border-color: var(--fc-border);
 }
 .btn-secondary:hover:not(:disabled),
 .btn-outline-secondary:hover:not(:disabled) {
-  background: var(--fc-bg-hover);
+  background: var(--fc-bg-active);
   color: var(--fc-text);
   text-decoration: none;
 }
 
+/* Accented / primary outline — fondo azul tenue */
 .btn-outline-primary {
-  background: transparent;
+  background: rgba(53, 132, 228, 0.12);
   color: var(--fc-primary);
-  border-color: var(--fc-primary);
+  border-color: rgba(53, 132, 228, 0.35);
 }
 .btn-outline-primary:hover:not(:disabled) {
-  background: var(--fc-bg-active);
+  background: rgba(53, 132, 228, 0.22);
   text-decoration: none;
 }
 
+/* Destructive outline — fondo rojo tenue */
 .btn-outline-danger {
-  background: transparent;
+  background: var(--fc-error-bg);
   color: var(--fc-error);
-  border-color: var(--fc-error);
+  border-color: rgba(224, 27, 36, 0.3);
 }
 .btn-outline-danger:hover:not(:disabled) {
-  background: var(--fc-error-bg);
+  background: rgba(224, 27, 36, 0.18);
   text-decoration: none;
 }
 
+/* Success outline — fondo verde tenue */
 .btn-outline-success {
-  background: transparent;
+  background: var(--fc-success-bg);
   color: var(--fc-success-s);
-  border-color: var(--fc-success-s);
+  border-color: rgba(38, 162, 105, 0.35);
 }
 .btn-outline-success:hover:not(:disabled) {
-  background: var(--fc-success-bg);
+  background: rgba(38, 162, 105, 0.2);
+  text-decoration: none;
+}
+
+/* Warning outline — fondo amarillo tenue */
+.btn-outline-warning {
+  background: var(--fc-warning-bg);
+  color: var(--fc-warning-s);
+  border-color: rgba(230, 165, 10, 0.35);
+}
+.btn-outline-warning:hover:not(:disabled) {
+  background: rgba(246, 211, 45, 0.22);
   text-decoration: none;
 }
 
@@ -1150,8 +1167,8 @@ dialog::backdrop {
   border-right-width: 0;
 }
 
-.btn-group .btn:first-child { border-radius: var(--fc-radius) 0 0 var(--fc-radius); }
-.btn-group .btn:last-child  { border-radius: 0 var(--fc-radius) var(--fc-radius) 0; border-right-width: 1px; }
+.btn-group .btn:first-child { border-radius: var(--fc-radius-btn) 0 0 var(--fc-radius-btn); }
+.btn-group .btn:last-child  { border-radius: 0 var(--fc-radius-btn) var(--fc-radius-btn) 0; border-right-width: 1px; }
 .btn-group-sm .btn          { padding: 3px 8px; font-size: 0.8125rem; }
 
 /* ── Toggle switch ───────────────────────────────────────────────── */
