@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.youtube_oauth import load_credentials
 from app.config import settings
 from app.models.episode import Episode
+from app.utils.html_sanitizer import html_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +28,13 @@ def _truncate(text: str, max_len: int) -> str:
     return text[: max_len - 3] + "..."
 
 
-def _safe_description(text: str) -> str:
-    """Strip HTML tags and clean description for YouTube API."""
+def _yt_description(text: str) -> str:
+    """Convert HTML description to structured plain text for the YouTube API."""
     import re
-    # Remove HTML tags
-    clean = re.sub(r"<[^>]+>", "", text)
-    # Remove null bytes and other control characters YouTube rejects
-    clean = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", clean)
-    # Collapse excessive whitespace
-    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
-    return _truncate(clean, _MAX_DESC_LEN)
+    plain = html_to_text(text)
+    # Remove control characters YouTube rejects (keep \n and \t)
+    plain = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", plain)
+    return _truncate(plain, _MAX_DESC_LEN)
 
 
 async def get_channel_info() -> dict:
@@ -69,7 +67,7 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     youtube = build("youtube", "v3", credentials=creds)
 
     title = _truncate(episode.title, _MAX_TITLE_LEN)
-    description = _safe_description(episode.description or "")
+    description = _yt_description(episode.description or "")
 
     # Prepend original publish date to description
     if episode.pub_date:

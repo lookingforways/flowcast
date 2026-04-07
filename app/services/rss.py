@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.episode import Episode
+from app.utils.html_sanitizer import sanitize_html
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +33,11 @@ def _extract_mp3_url(entry: feedparser.FeedParserDict) -> Optional[str]:
         url = enc.get("href", "") or enc.get("url", "")
         mime = enc.get("type", "")
         if "audio" in mime or url.lower().endswith(".mp3"):
-            return url
+            # Only allow http/https — reject javascript: and other schemes
+            if url.startswith(("http://", "https://")):
+                return url
     link = getattr(entry, "link", "")
-    if link and link.lower().endswith(".mp3"):
+    if link and link.lower().endswith(".mp3") and link.startswith(("http://", "https://")):
         return link
     return None
 
@@ -93,7 +96,7 @@ def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
             ParsedEpisode(
                 guid=guid,
                 title=title,
-                description=content,
+                description=sanitize_html(content),
                 mp3_url=mp3_url,
                 duration_secs=_parse_duration(entry),
                 pub_date=_parse_pub_date(entry),

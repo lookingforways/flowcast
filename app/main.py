@@ -179,6 +179,7 @@ async def security_middleware(request: Request, call_next):
         "font-src 'self'; "
         "img-src 'self' data:; "
         "connect-src 'self'; "
+        "frame-src https://www.youtube.com; "
         "frame-ancestors 'none'; "
         "base-uri 'none'; "
         "form-action 'self'; "

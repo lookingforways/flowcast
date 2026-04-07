@@ -43,7 +43,7 @@
         {% if episode.description %}
         <h6 class="fw-semibold mt-3">Notas del episodio</h6>
         <div class="show-notes">
-          {{ episode.description | safe }}
+          {{ episode.description | sanitize_html | safe }}
         </div>
         {% endif %}
 

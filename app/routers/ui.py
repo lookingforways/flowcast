@@ -11,9 +11,11 @@ from app.models.episode import Episode
 from app.models.job import RenderJob
 from app.models.podcast import Podcast
 from app.models.template import Template
+from app.utils.html_sanitizer import sanitize_html
 
 router = APIRouter(tags=["ui"])
 templates = Jinja2Templates(directory="app/templates")
+templates.env.filters["sanitize_html"] = sanitize_html
 
 
 def _base_ctx(request: Request) -> dict:
