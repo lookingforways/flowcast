@@ -8,7 +8,7 @@ Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:
 |------|-----------|
 | Lenguaje | Python 3.12 |
 | Web framework | FastAPI |
-| Templates HTML | Jinja2 + Design System Adwaita (CSS custom) + APIs nativas del browser |
+| Templates HTML | Jinja2 + Design System Adwaita (theme.css — CSS custom properties) + APIs nativas del browser |
 | Base de datos | SQLite (SQLAlchemy async + aiosqlite) |
 | Tareas programadas | APScheduler |
 | Procesamiento de video | FFmpeg |
@@ -59,7 +59,7 @@ Flowcast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/
 | CSP | Nonce único por request; sin `unsafe-inline` en ninguna directiva; Bootstrap JS eliminado |
 | Sin CDN externo | Bootstrap Icons e Inter Variable servidos localmente — `style-src` y `font-src` solo desde `'self'` |
 | JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
-| Archivos estáticos | `/static/js/` y `/static/css/` requieren autenticación — no accesibles sin sesión |
+| Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
 | Rate limiting | 5 req/minuto en `/login` (por IP); `/health` requiere autenticación |
 | SSRF | Validación de URLs externas (IP privadas bloqueadas) antes de fetch RSS y descarga de MP3 |
 | Proxy de imágenes | `/api/img` descarga imágenes externas server-side con allowlist de content-types y límite 5 MB |

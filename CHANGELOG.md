@@ -6,6 +6,46 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.0] — 2026-04-06
+
+### UI — Rediseño completo Adwaita (Fases 2–5)
+
+Cierre del rediseño visual iniciado en v0.8.0. Todas las vistas migradas al design system Adwaita.
+
+**Fase 2 — Páginas de autenticación**
+- `login.html` y `totp_verify.html` reescritos como páginas standalone (no extienden `base.html`)
+- Tarjeta centrada estilo GNOME con logo SVG "Stream" incrustado
+- Todos los estilos en `<style nonce>` — sin `style=""` inline (cumple CSP)
+- Primera vez: QR con fondo blanco forzado para lectura correcta por apps de autenticación
+
+**Fase 3 — Dashboard, Podcasts y Episodios**
+- `index.html`: stat cards (`fc-stat-card`), content grid 2 columnas, `fc-empty-state`, `table-wrapper`
+- `podcasts.html`: `fc-page-header`, dialogs con `dialog-header/body/footer`, `dialog-header-destructive` en delete, `data-close-dialog` — sin `onclick` inline
+- `episodes.html`: filtros de podcast/estado sin `onchange` inline, `table-wrapper`, dialog de render con clases del sistema
+- `episodes.js`: handlers para `data-close-dialog` y podcast filter añadidos
+
+**Fase 4 — Detalle, Plantillas y Configuración**
+- `episode_detail.html`: embed YouTube con `ratio ratio-16x9`, `show-notes`, `job-log`, acciones sin `innerHTML`
+- `templates.html`: `fc-page-header`, dialog nativo, swatches de color via JS
+- `template_editor.html`: canvas sin `style=""` inline, JS sin `innerHTML`, `canvas-dark-bg`
+- `settings.html`: alertas dismissibles con `data-close-alert`, sin `onclick`
+
+**Fase 5 — Accesibilidad y transiciones**
+- `job_badge.html`: usa `status-job-*` del design system (adaptativo al tema)
+- `theme.css`: transición suave de tema (background/color/border, 0.15–0.18s en elementos estructurales), `color-scheme: light dark`, skip-to-content
+- Skip-to-content link visible al hacer Tab en `base.html`
+- `aria-modal="true"` en todos los `<dialog>`, `scope="col"` en todos los `<th>`, `aria-label` en selects de filtro
+- Toasts con `role="status"` + `aria-live="polite"` en `app.js`
+
+**Cache busting**
+- `?v=0.9.0` en todos los links CSS/JS — fuerza descarga en browsers con caché anterior
+
+**Fix: páginas de auth sin diseño**
+- `/static/css/` y `/static/js/` ahora son rutas públicas — necesario para que login y 2FA carguen el design system antes de autenticarse
+- El CSS/JS no contiene información sensible (es el design system visual, no lógica de negocio)
+
+---
+
 ## [0.8.0] — 2026-04-06
 
 ### UI — Fase 1: Design System Adwaita + Sidebar GNOME
