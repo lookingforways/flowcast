@@ -824,6 +824,7 @@ tbody tr:hover { background: var(--fc-bg-hover); }
 
 /* ── Dialog (native <dialog>) ────────────────────────────────────── */
 dialog {
+  margin: auto;           /* restaura el centrado que el reset CSS borró */
   background: var(--fc-bg-card);
   color: var(--fc-text);
   border: 1px solid var(--fc-border);
