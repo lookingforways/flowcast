@@ -375,8 +375,8 @@ pre {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--fc-radius-btn);
+  padding: 6px 18px;
+  border-radius: 9999px;
   font-family: var(--fc-font);
   font-size: 0.875rem;
   font-weight: 500;
@@ -406,26 +406,20 @@ pre {
 .btn-sm { padding: 3px 10px; font-size: 0.8125rem; }
 .btn-lg { padding: 9px 20px; font-size: 1rem; }
 
-/* Primary (suggested action) — pill shape per GNOME HIG */
+/* Primary (suggested action) */
 .btn-primary {
   background: var(--fc-primary);
   color: var(--fc-text-on-color);
   border-color: var(--fc-primary-active);
-  border-radius: 9999px;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 .btn-primary:hover:not(:disabled)  { background: var(--fc-primary-hover); text-decoration: none; }
 .btn-primary:active:not(:disabled) { background: var(--fc-primary-active); }
 
-/* Destructive — pill shape per GNOME HIG */
+/* Destructive */
 .btn-danger {
   background: var(--fc-error);
   color: var(--fc-text-on-color);
   border-color: #c01c28;
-  border-radius: 9999px;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 .btn-danger:hover:not(:disabled) { background: #c01c28; text-decoration: none; }
 
@@ -503,21 +497,6 @@ pre {
   background: rgba(246, 211, 45, 0.22);
   text-decoration: none;
 }
-
-/* Pill utility — apply to any button for pill shape */
-.btn-pill { border-radius: 9999px !important; padding-left: 20px !important; padding-right: 20px !important; }
-
-/* Inside btn-group, primary/danger reset to standard radius */
-.btn-group .btn-primary,
-.btn-group .btn-danger {
-  border-radius: 0;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-.btn-group .btn-primary:first-child,
-.btn-group .btn-danger:first-child { border-radius: var(--fc-radius-btn) 0 0 var(--fc-radius-btn); }
-.btn-group .btn-primary:last-child,
-.btn-group .btn-danger:last-child  { border-radius: 0 var(--fc-radius-btn) var(--fc-radius-btn) 0; }
 
 /* Link / flat */
 .btn-link {
