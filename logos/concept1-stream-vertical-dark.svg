@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 170" role="img" aria-label="Flowcast">
+  <title>Flowcast</title>
+  <rect width="140" height="170" rx="16" fill="#3C3C3B"/>
+  <path d="M 32,90 C 52,38 88,90 108,38"
+        stroke="#00FF88" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="108" cy="38" r="9" fill="#00FF88"/>
+  <text x="70" y="148" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="22" font-weight="600" letter-spacing="-0.3" text-anchor="middle">
+    <tspan fill="#00FF88">flow</tspan><tspan fill="#FFFFFF">cast</tspan>
+  </text>
+</svg>

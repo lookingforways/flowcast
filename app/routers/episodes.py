@@ -48,16 +48,10 @@ async def list_episodes(
 @router.get("/{episode_id}/progress")
 async def episode_progress(episode_id: int):
     """Return current progress (0-100) for any active operation on this episode."""
-    from app.utils.progress import get_progress
-    download = get_progress("download", episode_id)
-    render   = get_progress("render",   episode_id)
-    upload   = get_progress("upload",   episode_id)
-    if download:
-        return {"phase": "download", "pct": download}
-    if render:
-        return {"phase": "render", "pct": render}
-    if upload:
-        return {"phase": "upload", "pct": upload}
+    from app.utils.progress import get_progress, is_active
+    for kind in ("download", "render", "upload"):
+        if is_active(kind, episode_id):
+            return {"phase": kind, "pct": get_progress(kind, episode_id)}
     return {"phase": None, "pct": 0}
 
 
@@ -83,6 +77,8 @@ async def trigger_download(
     if ep.status not in ("discovered", "failed"):
         raise HTTPException(400, f"Episode is in status '{ep.status}', cannot download")
 
+    from app.utils.progress import set_progress
+    set_progress("download", episode_id, 0)
     background_tasks.add_task(_run_download, episode_id)
     return ep
 
@@ -112,6 +108,8 @@ async def trigger_render(
     if ep.status not in ("downloaded", "rendered", "failed"):
         raise HTTPException(400, f"Episode must be downloaded first (current: '{ep.status}')")
 
+    from app.utils.progress import set_progress
+    set_progress("render", episode_id, 0)
     background_tasks.add_task(_run_render, episode_id, template_id)
     # Return a placeholder response; actual job created async
     from app.models.job import RenderJob
@@ -154,6 +152,10 @@ async def trigger_publish(
     if ep.status != "rendered":
         raise HTTPException(400, f"Episode must be rendered first (current: '{ep.status}')")
 
+    from app.utils.progress import set_progress, is_active
+    if is_active("upload", episode_id):
+        raise HTTPException(409, "Ya hay una publicación en curso para este episodio")
+    set_progress("upload", episode_id, 0)
     background_tasks.add_task(_run_publish, episode_id)
     return ep
 
@@ -173,6 +175,8 @@ async def _run_publish(episode_id: int) -> None:
                 log.error("Publish failed for episode %d: %s", episode_id, exc, exc_info=True)
                 ep.status = "failed"
                 ep.error_msg = _publish_error_msg(exc)
+                from app.utils.progress import clear_progress
+                clear_progress("upload", episode_id)
                 await session.commit()
 
 

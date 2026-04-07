@@ -218,13 +218,19 @@
       try {
         var resp = await fetch(url, { method: 'POST' });
         if (!resp.ok) {
-          var err = await resp.json();
-          alert('Error: ' + (err.detail || JSON.stringify(err)));
-          location.reload();
+          var err = await resp.json().catch(function () { return {}; });
+          var msg = err.detail || 'Error al iniciar la operación';
+          document.getElementById('detailProgress').classList.add('d-none');
+          document.querySelectorAll('#detailActions [data-action]').forEach(function (b) { b.disabled = false; });
+          showToast(msg, 'danger');
         } else {
           startPolling();
         }
-      } catch (e) { alert(e); location.reload(); }
+      } catch (e) {
+        document.getElementById('detailProgress').classList.add('d-none');
+        document.querySelectorAll('#detailActions [data-action]').forEach(function (b) { b.disabled = false; });
+        showToast('Error de conexión', 'danger');
+      }
     });
   });
 

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Flowcast logo">
+  <title>Flowcast</title>
+  <path d="M 22,74 C 32,26 68,74 78,26"
+        stroke="#3C3C3B" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="78" cy="26" r="9" fill="#00FF88"/>
+</svg>

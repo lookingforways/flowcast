@@ -129,16 +129,3 @@ document.getElementById('confirmRenderBtn').addEventListener('click', async () =
   }
 });
 
-// ── Auto-refresh if any row is already processing (page reload mid-operation) ─
-
-document.querySelectorAll('.ep-progress').forEach(prog => {
-  const id = prog.dataset.id;
-  // Check if this episode already has an active operation
-  apiRequest(`/api/episodes/${id}/progress`).then(data => {
-    if (data.phase) {
-      showRowProgress(id);
-      updateRowProgress(id, data.pct, data.phase);
-      pollProgress(id);
-    }
-  }).catch(() => {});
-});

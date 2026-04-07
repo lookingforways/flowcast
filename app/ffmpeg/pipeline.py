@@ -243,15 +243,21 @@ async def run_pipeline(
 
         stderr_lines: list[str] = []
         assert proc.stderr is not None
+        _ffmpeg_frame = 0
         async for line_bytes in proc.stderr:
             line = line_bytes.decode("utf-8", errors="replace")
             stderr_lines.append(line)
-            if episode_id and duration_secs:
+            if episode_id:
                 m = _TIME_RE.search(line)
                 if m:
-                    h, mn, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
-                    current = h * 3600 + mn * 60 + s
-                    pct = int(min(99, 50 + current / duration_secs * 50))
+                    if duration_secs:
+                        h, mn, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                        current = h * 3600 + mn * 60 + s
+                        pct = int(min(99, 50 + current / duration_secs * 50))
+                    else:
+                        # No duration — advance slowly so the bar doesn't freeze
+                        _ffmpeg_frame += 1
+                        pct = min(99, 50 + _ffmpeg_frame)
                     set_progress("render", episode_id, pct)
 
         await proc.wait()
