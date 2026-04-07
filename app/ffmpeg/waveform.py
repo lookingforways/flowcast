@@ -145,6 +145,7 @@ def _generate_sync(
     height: int,
     fps: int,
     color_hex: str,
+    progress_cb=None,  # optional callable(pct: int) — called every ~5% of frames
 ) -> str:
     """Render waveform overlay to a lossless MKV. Returns the temp file path."""
     audio = _load_pcm(mp3_path)
@@ -173,6 +174,7 @@ def _generate_sync(
         stderr=subprocess.DEVNULL,
     )
 
+    report_every = max(1, n_frames // 20)  # report ~20 times total
     prev_amps = np.zeros(_N_BARS)
     for fi in range(n_frames):
         raw = _compute_bars(audio, fi, spf, fft_sz)
@@ -185,8 +187,13 @@ def _generate_sync(
 
         proc.stdin.write(_render_frame(amps, width, height, color))
 
+        if progress_cb and fi % report_every == 0:
+            progress_cb(int(fi / n_frames * 50))  # waveform = 0-50%
+
     proc.stdin.close()
     proc.wait()
+    if progress_cb:
+        progress_cb(50)  # waveform done
     return out_path
 
 
@@ -196,6 +203,9 @@ async def generate_waveform_overlay(
     height: int,
     fps: int,
     color_hex: str,
+    progress_cb=None,
 ) -> str:
     """Async entry point. Returns a temp MKV path to use as FFmpeg overlay input."""
-    return await asyncio.to_thread(_generate_sync, mp3_path, width, height, fps, color_hex)
+    return await asyncio.to_thread(
+        _generate_sync, mp3_path, width, height, fps, color_hex, progress_cb
+    )

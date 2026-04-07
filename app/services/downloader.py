@@ -40,7 +40,9 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
     logger.info("Downloading %s → %s", episode.mp3_url, dest_path)
     try:
         from app.utils.url_validator import validate_external_url
+        from app.utils.progress import set_progress, clear_progress
         validate_external_url(episode.mp3_url)
+        set_progress("download", episode.id, 0)
         async with httpx.AsyncClient(follow_redirects=True, timeout=300.0) as client:
             async with client.stream("GET", episode.mp3_url) as resp:
                 resp.raise_for_status()
@@ -51,12 +53,14 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
                         f.write(chunk)
                         downloaded += len(chunk)
                         if total:
-                            pct = downloaded / total * 100
+                            pct = int(downloaded / total * 100)
                             logger.debug("  %.1f%%", pct)
+                            set_progress("download", episode.id, pct)
 
         episode.mp3_path = str(dest_path)
         episode.status = "downloaded"
         episode.error_msg = None
+        clear_progress("download", episode.id)
         await session.commit()
         logger.info("Download complete: %s (%.1f MB)", dest_path, dest_path.stat().st_size / 1_048_576)
         return dest_path
@@ -65,6 +69,8 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
         logger.error("Download failed for episode %d: %s", episode.id, exc)
         episode.status = "failed"
         episode.error_msg = "Download failed. Check server logs."
+        from app.utils.progress import clear_progress
+        clear_progress("download", episode.id)
         await session.commit()
         if dest_path.exists():
             dest_path.unlink()

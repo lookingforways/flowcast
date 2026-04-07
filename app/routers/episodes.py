@@ -45,6 +45,22 @@ async def list_episodes(
     return EpisodeList(items=list(items), total=total, page=page, per_page=per_page)
 
 
+@router.get("/{episode_id}/progress")
+async def episode_progress(episode_id: int):
+    """Return current progress (0-100) for any active operation on this episode."""
+    from app.utils.progress import get_progress
+    download = get_progress("download", episode_id)
+    render   = get_progress("render",   episode_id)
+    upload   = get_progress("upload",   episode_id)
+    if download:
+        return {"phase": "download", "pct": download}
+    if render:
+        return {"phase": "render", "pct": render}
+    if upload:
+        return {"phase": "upload", "pct": upload}
+    return {"phase": None, "pct": 0}
+
+
 @router.get("/{episode_id}", response_model=EpisodeOut)
 async def get_episode(episode_id: int, session: AsyncSession = Depends(get_session)):
     ep = await session.get(Episode, episode_id)

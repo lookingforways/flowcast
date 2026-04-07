@@ -107,6 +107,10 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     part = "snippet,status,recordingDetails" if episode.pub_date else "snippet,status"
     request = youtube.videos().insert(part=part, body=body, media_body=media)
 
+    from app.utils.progress import set_progress, clear_progress
+    set_progress("upload", episode.id, 0)
+    _ep_id = episode.id
+
     def _do_upload() -> str:
         resp = None
         while resp is None:
@@ -114,9 +118,11 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
             if st:
                 pct = int(st.progress() * 100)
                 logger.info("  Upload progress: %d%%", pct)
+                set_progress("upload", _ep_id, pct)
         return resp["id"]
 
     video_id = await asyncio.to_thread(_do_upload)
+    clear_progress("upload", episode.id)
     logger.info("Uploaded to YouTube: https://youtu.be/%s", video_id)
 
     # Assign to playlist if the podcast has one configured

@@ -14,6 +14,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -182,24 +183,39 @@ def build_ffmpeg_cmd(
     return cmd
 
 
+_TIME_RE = re.compile(r"time=(\d+):(\d+):(\d+\.\d+)")
+
+
 async def run_pipeline(
     mp3_path: str,
     output_path: str,
     template: Template,
     title: str,
     duration_secs: int | None,
+    episode_id: int | None = None,
 ) -> tuple[list[str], str]:
     """Execute the FFmpeg pipeline. Returns (cmd, stderr_log).
 
     Raises RuntimeError on non-zero FFmpeg exit code.
+    If episode_id is provided, progress (0-100) is written to the progress store.
+    Waveform phase = 0-50%, FFmpeg encoding phase = 50-100%.
     """
     if not shutil.which("ffmpeg"):
         raise RuntimeError("ffmpeg not found in PATH. Install it with: apt-get install ffmpeg")
 
     from app.ffmpeg.waveform import generate_waveform_overlay
+    from app.utils.progress import set_progress
 
     ww = int(_clamp(template.waveform_w, 1, 3840))
     wh = int(_clamp(template.waveform_h, 1, 2160))
+
+    # ── Phase 1: waveform generation (0–50%) ────────────────────────────────
+    if episode_id:
+        set_progress("render", episode_id, 0)
+
+    def _wave_progress(pct: int) -> None:
+        if episode_id:
+            set_progress("render", episode_id, pct)
 
     logger.info("Generating waveform overlay (%dx%d)…", ww, wh)
     waveform_path = await generate_waveform_overlay(
@@ -208,23 +224,38 @@ async def run_pipeline(
         height=wh,
         fps=FPS,
         color_hex=template.waveform_color,
+        progress_cb=_wave_progress if episode_id else None,
     )
     logger.info("Waveform overlay ready: %s", waveform_path)
 
     bg = template.background_path if template.background_path else None
     cmd = build_ffmpeg_cmd(bg, mp3_path, waveform_path, output_path, template, title, duration_secs)
 
-    cmd_str = " ".join(cmd)
-    logger.info("FFmpeg command: %s", cmd_str)
+    logger.info("FFmpeg command: %s", " ".join(cmd))
 
+    # ── Phase 2: FFmpeg encoding (50–100%) ──────────────────────────────────
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd,
-            stdout=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.PIPE,
         )
-        _, stderr = await proc.communicate()
-        stderr_log = stderr.decode("utf-8", errors="replace")
+
+        stderr_lines: list[str] = []
+        assert proc.stderr is not None
+        async for line_bytes in proc.stderr:
+            line = line_bytes.decode("utf-8", errors="replace")
+            stderr_lines.append(line)
+            if episode_id and duration_secs:
+                m = _TIME_RE.search(line)
+                if m:
+                    h, mn, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                    current = h * 3600 + mn * 60 + s
+                    pct = int(min(99, 50 + current / duration_secs * 50))
+                    set_progress("render", episode_id, pct)
+
+        await proc.wait()
+        stderr_log = "".join(stderr_lines)
 
         if proc.returncode != 0:
             logger.error("FFmpeg failed (exit %d):\n%s", proc.returncode, stderr_log[-3000:])
@@ -237,7 +268,6 @@ async def run_pipeline(
         return cmd, stderr_log
 
     finally:
-        # Clean up the waveform temp file regardless of success or failure
         try:
             os.unlink(waveform_path)
         except OSError:

@@ -83,6 +83,7 @@ async def render_episode(
             template=tmpl,
             title=episode.title,
             duration_secs=episode.duration_secs,
+            episode_id=episode.id,
         )
         job.ffmpeg_cmd = " ".join(cmd)
         job.ffmpeg_log = ffmpeg_log[-4000:]  # Keep last 4KB of log
@@ -93,6 +94,9 @@ async def render_episode(
         episode.status = "rendered"
         episode.error_msg = None
 
+        from app.utils.progress import clear_progress
+        clear_progress("render", episode.id)
+
     except Exception as exc:
         logger.error("Render failed for episode %d: %s", episode.id, exc)
         job.status = "failed"
@@ -101,6 +105,9 @@ async def render_episode(
 
         episode.status = "failed"
         episode.error_msg = "Render failed. Check server logs."
+
+        from app.utils.progress import clear_progress
+        clear_progress("render", episode.id)
 
     await session.commit()
     await session.refresh(job)

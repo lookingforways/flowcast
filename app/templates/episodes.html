@@ -73,13 +73,18 @@
               {{ ep.pub_date.strftime('%d/%m/%Y') if ep.pub_date else '—' }}
             </td>
             <td>
-              <span class="badge status-{{ ep.status }}">{{ ep.status }}</span>
+              {% set _sl = {'discovered':'Descubierto','downloaded':'Descargado','rendered':'Renderizado','published':'Publicado','failed':'Error'} %}
+              <span class="badge status-{{ ep.status }}">{{ _sl.get(ep.status, ep.status) }}</span>
               {% if ep.error_msg %}
               <i class="bi bi-exclamation-triangle text-danger ms-1" title="{{ ep.error_msg }}" aria-hidden="true"></i>
               {% endif %}
             </td>
             <td>
-              <div class="btn-group btn-group-sm">
+              <div class="ep-progress d-none" data-id="{{ ep.id }}">
+                <div class="fc-progress"><div class="fc-progress-bar" style="width:0%"></div></div>
+                <div class="fc-progress-label">Iniciando…</div>
+              </div>
+              <div class="btn-group btn-group-sm ep-actions">
                 {% if ep.status == 'discovered' or ep.status == 'failed' %}
                 <button class="btn btn-outline-primary btn-action" data-action="download" data-id="{{ ep.id }}"
                         title="Descargar MP3" aria-label="Descargar MP3">
@@ -103,6 +108,7 @@
             </td>
           </tr>
           {% endfor %}
+
         </tbody>
       </table>
     </div>

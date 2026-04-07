@@ -100,7 +100,13 @@
       <div class="card-header">
         <i class="bi bi-play-circle me-1" aria-hidden="true"></i>Acciones
       </div>
-      <div class="card-body d-grid gap-2">
+      <div class="card-body d-grid gap-2" id="detailActions">
+        {# Progress bar — shown during active operations #}
+        <div id="detailProgress" class="d-none">
+          <div class="fc-progress mb-1"><div class="fc-progress-bar" id="detailProgressBar" style="width:0%"></div></div>
+          <div class="fc-progress-label text-center" id="detailProgressLabel">Procesando…</div>
+        </div>
+
         {% if episode.status in ('discovered', 'failed') %}
         <button class="btn btn-primary" data-action="download" data-id="{{ episode.id }}">
           <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar MP3
@@ -164,33 +170,72 @@
 
 {% block scripts %}
 <script nonce="{{ request.state.csp_nonce }}">
-document.querySelectorAll('[data-action]').forEach(function (btn) {
-  btn.addEventListener('click', async function () {
-    const action = btn.dataset.action;
-    const id     = btn.dataset.id;
-    btn.disabled = true;
-    var spinner = document.createElement('span');
-    spinner.className = 'spinner-border spinner-border-sm me-1';
-    spinner.setAttribute('aria-hidden', 'true');
-    btn.textContent = '';
-    btn.appendChild(spinner);
-    btn.appendChild(document.createTextNode('Procesando…'));
-    try {
-      var url = '/api/episodes/' + id + '/' + action;
+(function () {
+  var EPISODE_ID = {{ episode.id }};
+  var phaseLabel = { download: 'Descargando MP3…', render: 'Renderizando…', upload: 'Subiendo a YouTube…' };
+  var pollTimer = null;
+
+  function showProgress(label) {
+    document.querySelectorAll('#detailActions [data-action]').forEach(function (b) { b.disabled = true; });
+    document.getElementById('detailProgress').classList.remove('d-none');
+    document.getElementById('detailProgressLabel').textContent = label || 'Iniciando…';
+  }
+
+  function updateProgress(pct, phase) {
+    document.getElementById('detailProgressBar').style.width = pct + '%';
+    document.getElementById('detailProgressLabel').textContent =
+      (phaseLabel[phase] || 'Procesando…') + ' ' + pct + '%';
+  }
+
+  function startPolling() {
+    pollTimer = setInterval(async function () {
+      try {
+        var resp = await fetch('/api/episodes/' + EPISODE_ID + '/progress');
+        var data = await resp.json();
+        if (data.phase) {
+          updateProgress(data.pct, data.phase);
+        } else {
+          clearInterval(pollTimer);
+          location.reload();
+        }
+      } catch (_) {
+        clearInterval(pollTimer);
+        location.reload();
+      }
+    }, 1500);
+  }
+
+  document.querySelectorAll('[data-action]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var action = btn.dataset.action;
+      var id     = btn.dataset.id;
+      var url    = '/api/episodes/' + id + '/' + action;
       if (action === 'render') {
         var tmpl = document.getElementById('detailTemplateSelect');
         if (tmpl && tmpl.value) url += '?template_id=' + tmpl.value;
       }
-      var resp = await fetch(url, { method: 'POST' });
-      if (!resp.ok) {
-        var err = await resp.json();
-        alert('Error: ' + (err.detail || JSON.stringify(err)));
-        location.reload();
-      } else {
-        setTimeout(function () { location.reload(); }, 1500);
-      }
-    } catch(e) { alert(e); location.reload(); }
+      showProgress('Iniciando…');
+      try {
+        var resp = await fetch(url, { method: 'POST' });
+        if (!resp.ok) {
+          var err = await resp.json();
+          alert('Error: ' + (err.detail || JSON.stringify(err)));
+          location.reload();
+        } else {
+          startPolling();
+        }
+      } catch (e) { alert(e); location.reload(); }
+    });
   });
-});
+
+  // On load: resume polling if operation already in progress
+  fetch('/api/episodes/' + EPISODE_ID + '/progress').then(function (r) { return r.json(); }).then(function (data) {
+    if (data.phase) {
+      showProgress(phaseLabel[data.phase] || 'Procesando…');
+      updateProgress(data.pct, data.phase);
+      startPolling();
+    }
+  }).catch(function () {});
+}());
 </script>
 {% endblock %}

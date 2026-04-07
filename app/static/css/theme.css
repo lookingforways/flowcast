@@ -868,6 +868,27 @@ dialog::backdrop {
 
 [data-theme="dark"] .dialog-footer { background: rgba(255, 255, 255, 0.03); }
 
+/* ── Progress bar ────────────────────────────────────────────────── */
+.fc-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--fc-border);
+  overflow: hidden;
+}
+.fc-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--fc-primary);
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+.fc-progress-label {
+  font-size: 0.78rem;
+  color: var(--fc-text-secondary);
+  margin-top: 3px;
+}
+
 /* ── Toast ───────────────────────────────────────────────────────── */
 .fc-toast {
   position: fixed;

@@ -39,7 +39,51 @@ document.getElementById('statusFilter').addEventListener('change', function () {
   });
 });
 
-// Download / Publish buttons (direct actions)
+// ── Progress bar helpers ─────────────────────────────────────────────────────
+
+const _phaseLabel = {
+  download: 'Descargando MP3…',
+  render:   'Renderizando…',
+  upload:   'Subiendo a YouTube…',
+};
+
+function showRowProgress(episodeId) {
+  const row = document.querySelector(`tr[data-id="${episodeId}"]`);
+  if (!row) return;
+  row.querySelector('.ep-actions').classList.add('d-none');
+  row.querySelector('.ep-progress').classList.remove('d-none');
+}
+
+function updateRowProgress(episodeId, pct, phase) {
+  const prog = document.querySelector(`.ep-progress[data-id="${episodeId}"]`);
+  if (!prog) return;
+  prog.querySelector('.fc-progress-bar').style.width = pct + '%';
+  prog.querySelector('.fc-progress-label').textContent =
+    (_phaseLabel[phase] || 'Procesando…') + ' ' + pct + '%';
+}
+
+function pollProgress(episodeId, intervalMs) {
+  intervalMs = intervalMs || 1500;
+  const timer = setInterval(async () => {
+    try {
+      const data = await apiRequest(`/api/episodes/${episodeId}/progress`);
+      if (data.phase) {
+        updateRowProgress(episodeId, data.pct, data.phase);
+      } else {
+        // Operation finished — reload to reflect new status
+        clearInterval(timer);
+        location.reload();
+      }
+    } catch (_) {
+      clearInterval(timer);
+      location.reload();
+    }
+  }, intervalMs);
+  return timer;
+}
+
+// ── Download / Publish buttons ───────────────────────────────────────────────
+
 document.querySelectorAll('.btn-action[data-action="download"], .btn-action[data-action="publish"]').forEach(btn => {
   btn.addEventListener('click', async () => {
     const action = btn.dataset.action;
@@ -47,8 +91,8 @@ document.querySelectorAll('.btn-action[data-action="download"], .btn-action[data
     const restore = btnLoading(btn);
     try {
       await apiRequest(`/api/episodes/${id}/${action}`, 'POST');
-      showToast(action === 'download' ? 'Descarga iniciada' : 'Publicación iniciada');
-      setTimeout(() => location.reload(), 2000);
+      showRowProgress(id);
+      pollProgress(id);
     } catch (e) {
       showToast('Error: ' + e.message, 'danger');
       restore();
@@ -56,7 +100,8 @@ document.querySelectorAll('.btn-action[data-action="download"], .btn-action[data
   });
 });
 
-// Render button — opens dialog
+// ── Render button — opens dialog ─────────────────────────────────────────────
+
 document.querySelectorAll('.btn-action[data-action="render"]').forEach(btn => {
   btn.addEventListener('click', () => {
     currentEpisodeId = btn.dataset.id;
@@ -76,19 +121,24 @@ document.getElementById('confirmRenderBtn').addEventListener('click', async () =
     if (templateId) url += `?template_id=${templateId}`;
     await apiRequest(url, 'POST');
     renderModal.close();
-    showToast('Render iniciado. Puede tardar varios minutos.');
-    setTimeout(() => location.reload(), 2500);
+    showRowProgress(currentEpisodeId);
+    pollProgress(currentEpisodeId);
   } catch (e) {
     showToast('Error: ' + e.message, 'danger');
     restore();
   }
 });
 
-// Auto-refresh running jobs every 10s
-function refreshRunningRows() {
-  const hasRunning = document.querySelectorAll('[data-status="downloaded"]').length > 0;
-  if (hasRunning) {
-    setTimeout(() => location.reload(), 10000);
-  }
-}
-refreshRunningRows();
+// ── Auto-refresh if any row is already processing (page reload mid-operation) ─
+
+document.querySelectorAll('.ep-progress').forEach(prog => {
+  const id = prog.dataset.id;
+  // Check if this episode already has an active operation
+  apiRequest(`/api/episodes/${id}/progress`).then(data => {
+    if (data.phase) {
+      showRowProgress(id);
+      updateRowProgress(id, data.pct, data.phase);
+      pollProgress(id);
+    }
+  }).catch(() => {});
+});
