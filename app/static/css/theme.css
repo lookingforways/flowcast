@@ -62,7 +62,7 @@
   /* Typography */
   --fc-font:      'Inter', system-ui, -apple-system, sans-serif;
   --fc-font-mono: 'Iosevka', 'Cascadia Code', ui-monospace, monospace;
-  --fc-font-size: 16px;
+  --fc-font-size: 17px;
 
   /* Elevation */
   --fc-shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.08);
