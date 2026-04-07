@@ -3,78 +3,203 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>Verificación 2FA — Flowcast</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"
-        integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+  <link rel="stylesheet" href="/static/css/theme.css">
+  {# Apply saved/system theme before first paint — prevents flash of wrong theme #}
+  <script nonce="{{ request.state.csp_nonce }}">
+    (function () {
+      var saved = localStorage.getItem('fc-theme');
+      var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', saved || sys);
+    }());
+  </script>
   <style nonce="{{ request.state.csp_nonce }}">
-    body { background: #0f0f1e; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .card-2fa { width: 100%; max-width: 420px; }
-    .brand { font-size: 2rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
-    .brand span { color: #00FF88; }
-    .token-input { font-size: 1.8rem; letter-spacing: 0.5rem; text-align: center; font-variant-numeric: tabular-nums; }
-    .qr-container { background: #fff; padding: 1rem; border-radius: 0.5rem; display: inline-block; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .fc-auth-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .fc-auth-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .fc-auth-logo {
+      display: block;
+      margin: 0 auto 12px;
+    }
+
+    .fc-auth-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--fc-text);
+      margin-bottom: 4px;
+    }
+
+    .fc-auth-sub {
+      font-size: 0.875rem;
+      color: var(--fc-text-muted);
+    }
+
+    .fc-card-body { padding: 24px; }
+
+    .fc-error {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* Token input — big digits for readability */
+    .fc-token-input {
+      font-size: 1.8rem;
+      letter-spacing: 0.5rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 24px;
+    }
+
+    /* First-time QR setup */
+    .fc-setup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .fc-setup-title {
+      font-weight: 600;
+      color: var(--fc-warning-s, #e5a50a);
+      margin-bottom: 6px;
+    }
+
+    .fc-setup-hint {
+      font-size: 0.8125rem;
+      color: var(--fc-text-muted);
+      margin-bottom: 0;
+    }
+
+    .fc-qr-wrap {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      display: inline-block;
+      margin: 14px 0;
+    }
+
+    /* Normal (non-first-time) state */
+    .fc-shield-icon {
+      font-size: 2.5rem;
+      color: var(--fc-success);
+      display: block;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .fc-shield-hint {
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--fc-text-muted);
+      margin-bottom: 20px;
+    }
+
+    .fc-back-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.875rem;
+      color: var(--fc-text-muted);
+      text-decoration: none;
+    }
+
+    .fc-back-link:hover { color: var(--fc-text); }
   </style>
 </head>
 <body>
-  <div class="card-2fa">
-    <div class="text-center mb-4">
-      <div class="brand"><i class="bi bi-waveform"></i> Flow<span>cast</span></div>
-      <p class="text-secondary mt-1">Verificación en dos pasos</p>
-    </div>
 
-    {% if error %}
-    <div class="alert alert-danger py-2 text-center" role="alert" aria-live="assertive">{{ error }}</div>
-    {% endif %}
+<div class="fc-auth-box">
 
-    <div class="card bg-dark border-secondary">
-      <div class="card-body p-4">
+  <div class="fc-auth-brand">
+    <svg class="fc-auth-logo" viewBox="0 0 100 100" fill="none" width="48" height="48"
+         aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22,74 C32,26 68,74 78,26"
+            stroke="#3584e4" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="78" cy="26" r="9" fill="#3584e4"/>
+    </svg>
+    <p class="fc-auth-name">Flowcast</p>
+    <p class="fc-auth-sub">Verificación en dos pasos</p>
+  </div>
 
-        {% if first_time %}
-        <!-- First time setup: show QR -->
-        <div class="text-center mb-4">
-          <p class="text-warning fw-semibold"><i class="bi bi-shield-lock me-1"></i>Primera configuración</p>
-          <p class="text-secondary small">Escaneá este QR con tu app de autenticación<br>(Google Authenticator, Authy, 1Password, etc.)</p>
-          <div class="qr-container mt-3">
-            <img src="data:image/png;base64,{{ qr_code }}" width="200" height="200" alt="QR 2FA">
-          </div>
-          <p class="text-secondary small mt-3">Una vez escaneado, ingresá el código de 6 dígitos que aparece en la app.</p>
+  {% if error %}
+  <div class="alert alert-danger fc-error" role="alert" aria-live="assertive">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="fc-card-body">
+
+      {% if first_time %}
+      <div class="fc-setup-header">
+        <p class="fc-setup-title">
+          <i class="bi bi-shield-lock" aria-hidden="true"></i>
+          Primera configuración
+        </p>
+        <p class="fc-setup-hint">
+          Escaneá este QR con tu app de autenticación<br>
+          (Google Authenticator, Authy, 1Password, etc.)
+        </p>
+        <div class="fc-qr-wrap">
+          <img src="data:image/png;base64,{{ qr_code }}" width="200" height="200"
+               alt="Código QR para configurar 2FA">
         </div>
-        {% else %}
-        <div class="text-center mb-4">
-          <i class="bi bi-shield-check fs-1 text-success"></i>
-          <p class="text-secondary small mt-2">Ingresá el código de tu app de autenticación</p>
-        </div>
-        {% endif %}
-
-        <form method="post" action="/2fa">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <div class="mb-4">
-            <input type="text" name="token" class="form-control bg-dark border-secondary text-light token-input"
-                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
-                   required autofocus autocomplete="one-time-code">
-          </div>
-          <button type="submit" class="btn btn-success w-100 fw-semibold">
-            <i class="bi bi-shield-check me-1"></i>Verificar
-          </button>
-        </form>
-
-        <div class="text-center mt-3">
-          <a href="/logout" class="text-secondary small">
-            <i class="bi bi-arrow-left me-1"></i>Volver al login
-          </a>
-        </div>
+        <p class="fc-setup-hint">
+          Una vez escaneado, ingresá el código de 6 dígitos que aparece en la app.
+        </p>
       </div>
+      {% else %}
+      <i class="bi bi-shield-check fc-shield-icon" aria-hidden="true"></i>
+      <p class="fc-shield-hint">Ingresá el código de tu app de autenticación</p>
+      {% endif %}
+
+      <form method="post" action="/2fa">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="text" name="token" id="token"
+               class="form-control fc-token-input"
+               placeholder="000000" maxlength="6"
+               pattern="[0-9]{6}" inputmode="numeric"
+               required autofocus autocomplete="one-time-code"
+               aria-label="Código de verificación de 6 dígitos">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          Verificar
+        </button>
+      </form>
+
+      <a href="/logout" class="fc-back-link">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        Volver al login
+      </a>
+
     </div>
   </div>
 
-  <script nonce="{{ request.state.csp_nonce }}">
-    // Auto-submit when 6 digits entered
-    document.querySelector('[name=token]').addEventListener('input', function() {
-      if (this.value.length === 6) this.form.submit();
-    });
-  </script>
+</div>
+
+<script nonce="{{ request.state.csp_nonce }}">
+  // Auto-submit when all 6 digits are entered
+  document.getElementById('token').addEventListener('input', function () {
+    if (this.value.length === 6) { this.form.submit(); }
+  });
+</script>
+
 </body>
 </html>

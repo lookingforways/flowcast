@@ -6,63 +6,123 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Iniciar sesión — Flowcast</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"
-        integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+  <link rel="stylesheet" href="/static/css/theme.css">
+  {# Apply saved/system theme before first paint — prevents flash of wrong theme #}
+  <script nonce="{{ request.state.csp_nonce }}">
+    (function () {
+      var saved = localStorage.getItem('fc-theme');
+      var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', saved || sys);
+    }());
+  </script>
   <style nonce="{{ request.state.csp_nonce }}">
-    body { background: #0f0f1e; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .login-card { width: 100%; max-width: 380px; }
-    .brand { font-size: 2rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
-    .brand span { color: #00FF88; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .fc-auth-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .fc-auth-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .fc-auth-logo {
+      display: block;
+      margin: 0 auto 12px;
+    }
+
+    .fc-auth-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--fc-text);
+      margin-bottom: 4px;
+    }
+
+    .fc-auth-sub {
+      font-size: 0.875rem;
+      color: var(--fc-text-muted);
+    }
+
+    .fc-card-body { padding: 24px; }
+
+    .fc-field      { margin-bottom: 16px; }
+    .fc-field-last { margin-bottom: 24px; }
+
+    .fc-error {
+      text-align: center;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <div class="text-center mb-4">
-      <div class="brand"><i class="bi bi-waveform"></i> Flow<span>cast</span></div>
-      <p class="text-secondary mt-1">Ingresá para continuar</p>
+
+<div class="fc-auth-box">
+
+  <div class="fc-auth-brand">
+    <svg class="fc-auth-logo" viewBox="0 0 100 100" fill="none" width="48" height="48"
+         aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22,74 C32,26 68,74 78,26"
+            stroke="#3584e4" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="78" cy="26" r="9" fill="#3584e4"/>
+    </svg>
+    <p class="fc-auth-name">Flowcast</p>
+    <p class="fc-auth-sub">Ingresá para continuar</p>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger fc-error" role="alert" aria-live="assertive">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <noscript>
+    <div class="alert alert-info fc-error">
+      Esta página funciona correctamente sin JavaScript.
     </div>
+  </noscript>
 
-    {% if error %}
-    <div class="alert alert-danger py-2 text-center" role="alert" aria-live="assertive">{{ error }}</div>
-    {% endif %}
-    <noscript>
-      <div class="alert alert-info py-2 text-center">Esta página funciona correctamente sin JavaScript.</div>
-    </noscript>
+  <div class="card">
+    <div class="fc-card-body">
+      <form method="post" action="/login">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-    <div class="card bg-dark border-secondary">
-      <div class="card-body p-4">
-        <form method="post" action="/login">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <div class="mb-3">
-            <label for="username" class="form-label text-light">Usuario</label>
-            <div class="input-group">
-              <span class="input-group-text bg-dark border-secondary text-secondary">
-                <i class="bi bi-person"></i>
-              </span>
-              <input id="username" type="text" name="username"
-                     class="form-control bg-dark border-secondary text-light"
-                     placeholder="Usuario" maxlength="150" required autofocus autocomplete="username">
-            </div>
-          </div>
-          <div class="mb-4">
-            <label for="password" class="form-label text-light">Contraseña</label>
-            <div class="input-group">
-              <span class="input-group-text bg-dark border-secondary text-secondary">
-                <i class="bi bi-lock"></i>
-              </span>
-              <input id="password" type="password" name="password"
-                     class="form-control bg-dark border-secondary text-light"
-                     placeholder="••••••••" minlength="8" maxlength="256" required autocomplete="current-password">
-            </div>
-          </div>
-          <button type="submit" class="btn btn-success w-100 fw-semibold">
-            <i class="bi bi-arrow-right-circle me-1"></i>Continuar
-          </button>
-        </form>
-      </div>
+        <div class="fc-field">
+          <label for="username" class="form-label">
+            <i class="bi bi-person" aria-hidden="true"></i> Usuario
+          </label>
+          <input id="username" type="text" name="username" class="form-control"
+                 placeholder="Usuario" maxlength="150"
+                 required autofocus autocomplete="username">
+        </div>
+
+        <div class="fc-field-last">
+          <label for="password" class="form-label">
+            <i class="bi bi-lock" aria-hidden="true"></i> Contraseña
+          </label>
+          <input id="password" type="password" name="password" class="form-control"
+                 placeholder="••••••••" minlength="8" maxlength="256"
+                 required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+          Continuar
+        </button>
+      </form>
     </div>
   </div>
+
+</div>
+
 </body>
 </html>
