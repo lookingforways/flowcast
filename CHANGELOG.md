@@ -6,6 +6,45 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.2] — 2026-04-07
+
+### Seguridad
+
+**Sanitización HTML de descripciones RSS**
+- Las descripciones de episodios ahora se sanitizan con `nh3` (ammonia) al parsear el feed RSS, antes de guardar en DB — elimina XSS via contenido malicioso en feeds
+- Allowlist estricto: solo `p`, `br`, `strong`, `em`, `a[href=http/https/mailto]`, `ul`, `ol`, `li`, `blockquote`, headings. Todo lo demás se borra
+- El filtro Jinja2 `sanitize_html` se aplica también al mostrar — cubre episodios existentes en DB con HTML sin sanitizar
+- `mp3_url` validado a `http/https` al parsear el RSS — bloquea esquemas `javascript:` y similares antes de que lleguen a la DB
+- Nueva dependencia: `nh3>=0.2.17`
+
+**YouTube embed (CSP)**
+- Agregado `frame-src https://www.youtube.com` al CSP — los iframes de YouTube en el detalle de episodio ya no son bloqueados por el browser
+
+### Corregido
+
+**Descripciones en YouTube**
+- `html_to_text()` reemplaza el strip de tags con regex — convierte el HTML sanitizado a texto plano estructurado: párrafos separados por línea en blanco, listas como `• item`, links como `texto (url)`, emails sin prefijo `mailto:`
+- Las descripciones publicadas en YouTube ahora preservan la estructura legible del episodio original
+
+**Estado de conexión YouTube**
+- `is_connected()` ya no devuelve `True` cuando el token fue revocado pero no expiró localmente
+- Al publicar con `invalid_grant` → se borra el archivo de token → sidebar y dashboard muestran "Desconectado" en el próximo page load
+- Al refrescar el token con `invalid_grant` → mismo comportamiento
+- Mensajes de error de publicación en español con contexto y pasos de acción:
+  - `invalid_grant` → explica el vencimiento + pasos para reconectar + nota sobre modo Testing en Google Cloud
+  - 403/quota → permisos o cuota
+  - 401 → sin sesión activa
+  - Archivo faltante → sugiere re-renderizar
+  - Error genérico → incluye el mensaje original del sistema
+
+**Tipografía**
+- Font size base: `14px` → `17px` — el tamaño anterior (GTK nativo) era demasiado pequeño para web; 17px es cómodo sin necesitar zoom en el browser
+
+**Dashboard**
+- Eliminada la stat card de YouTube ("Conectado/Desconectado") — información redundante con el badge del sidebar
+
+---
+
 ## [0.9.1] — 2026-04-06
 
 ### Corregido — polish UI post-rediseño

@@ -59,6 +59,7 @@ Flowcast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/
 | CSP | Nonce único por request; sin `unsafe-inline` en ninguna directiva; Bootstrap JS eliminado |
 | Sin CDN externo | Bootstrap Icons e Inter Variable servidos localmente — `style-src` y `font-src` solo desde `'self'` |
 | JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
+| Sanitización HTML | Descripciones RSS sanitizadas con `nh3` (ammonia) antes de guardar en DB — allowlist estricto de tags seguros; `html_to_text()` convierte a texto estructurado para YouTube |
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
 | Rate limiting | 5 req/minuto en `/login` (por IP); `/health` requiere autenticación |
 | SSRF | Validación de URLs externas (IP privadas bloqueadas) antes de fetch RSS y descarga de MP3 |
@@ -356,7 +357,8 @@ app/
 │   ├── waveform.py      # Renderizador Python de forma de onda (FFT + Pillow)
 │   └── escape.py        # Escape seguro para drawtext
 ├── utils/
-│   └── url_validator.py # Validación anti-SSRF para URLs externas
+│   ├── url_validator.py # Validación anti-SSRF para URLs externas
+│   └── html_sanitizer.py # sanitize_html() + html_to_text() para descripciones RSS
 └── auth/
     ├── session.py       # Cookie de sesión firmada (itsdangerous)
     ├── totp.py          # TOTP 2FA (pyotp + qrcode)
