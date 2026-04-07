@@ -1004,7 +1004,128 @@ dialog::backdrop {
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
-/* Adwaita list compatibility (Bootstrap list-group shim) */
+/* ── Stat cards (Dashboard) ──────────────────────────────────────── */
+.fc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.fc-stat-card {
+  background: var(--fc-bg-card);
+  border: 1px solid var(--fc-border);
+  border-radius: var(--fc-radius-lg);
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--fc-shadow-sm);
+}
+
+.fc-stat-col   { display: flex; flex-direction: column; gap: 3px; }
+.fc-stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--fc-text); }
+.fc-stat-label { font-size: 0.8125rem; color: var(--fc-text-muted); }
+.fc-stat-icon  { font-size: 2rem; line-height: 1; opacity: 0.3; }
+
+.fc-stat-primary .fc-stat-value,
+.fc-stat-primary .fc-stat-icon  { color: var(--fc-primary); opacity: 1; }
+.fc-stat-primary .fc-stat-icon  { opacity: 0.3; }
+
+.fc-stat-success .fc-stat-value { color: var(--fc-success-s); }
+.fc-stat-success .fc-stat-icon  { color: var(--fc-success); opacity: 0.4; }
+
+.fc-stat-warning .fc-stat-value { color: var(--fc-warning-s); }
+.fc-stat-warning .fc-stat-icon  { color: var(--fc-warning); opacity: 0.5; }
+
+.fc-stat-danger  .fc-stat-value { color: var(--fc-error); }
+.fc-stat-danger  .fc-stat-icon  { color: var(--fc-error); opacity: 0.35; }
+
+.fc-stat-info    .fc-stat-value { color: var(--fc-info); }
+.fc-stat-info    .fc-stat-icon  { color: var(--fc-info); opacity: 0.35; }
+
+/* ── Content grid (dashboard 2-col layout) ───────────────────────── */
+.fc-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .fc-content-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Empty state ─────────────────────────────────────────────────── */
+.fc-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--fc-text-muted);
+}
+
+.fc-empty-state .bi {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+
+/* ── Destructive dialog header ───────────────────────────────────── */
+.dialog-header-destructive {
+  background: var(--fc-error-bg);
+  border-bottom-color: rgba(224, 27, 36, 0.25);
+}
+
+.dialog-header-destructive h3,
+.dialog-header-destructive h4 { color: var(--fc-error); }
+
+.dialog-header-destructive .btn-close { color: var(--fc-error); opacity: 0.8; }
+
+/* ── Button group ────────────────────────────────────────────────── */
+.btn-group {
+  display: inline-flex;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+  border-right-width: 0;
+}
+
+.btn-group .btn:first-child { border-radius: var(--fc-radius) 0 0 var(--fc-radius); }
+.btn-group .btn:last-child  { border-radius: 0 var(--fc-radius) var(--fc-radius) 0; border-right-width: 1px; }
+.btn-group-sm .btn          { padding: 3px 8px; font-size: 0.8125rem; }
+
+/* ── Toggle switch ───────────────────────────────────────────────── */
+.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-switch .form-check-input[type="checkbox"] {
+  width: 36px;
+  height: 20px;
+  border-radius: 20px;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ── Table compact ───────────────────────────────────────────────── */
+.table-sm td, .table-sm th { padding: 6px 12px; }
+
+/* ── Utility extras ──────────────────────────────────────────────── */
+.card-body-p0    { padding: 0 !important; }
+.card-body-center{ padding: 20px; text-align: center; }
+/* Nested table/list inside card — strip redundant border/radius/shadow */
+.fc-inset {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.fs-1 { font-size: 2rem; }
+.fs-2 { font-size: 1.5rem; }
+
+/* ── Adwaita list compatibility (Bootstrap list-group shim) */
 .list-group {
   background: var(--fc-bg-card);
   border-radius: var(--fc-radius-lg);

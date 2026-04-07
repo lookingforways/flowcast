@@ -3,6 +3,16 @@
 let currentEpisodeId = null;
 const renderModal = document.getElementById('renderModal');
 
+// Close dialogs via data-close-dialog
+document.querySelectorAll('[data-close-dialog]').forEach(function (btn) {
+  btn.addEventListener('click', function () { btn.closest('dialog').close(); });
+});
+
+// Podcast filter — navigate on change
+document.getElementById('podcastFilter').addEventListener('change', function () {
+  location.href = '/episodes' + (this.value ? '?podcast_id=' + this.value : '');
+});
+
 // Helper: set a button to loading state, returns a restore function
 function btnLoading(btn, text) {
   const snapshot = btn.cloneNode(true);

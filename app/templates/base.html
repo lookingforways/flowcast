@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
   <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/app.css">
+  {% block styles %}{% endblock %}
   {# Prevent flash of wrong theme: apply saved/system preference before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
     (function () {
