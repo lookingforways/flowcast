@@ -2,12 +2,21 @@
 {% block title %}Plantillas — Flowcast{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="bi bi-palette me-2"></i>Plantillas</h2>
-  <button class="btn btn-primary" onclick="document.getElementById('newTemplateModal').showModal()">
-    <i class="bi bi-plus-lg me-1"></i>Nueva plantilla
+<div class="fc-page-header">
+  <h1 class="fc-page-title">
+    <i class="bi bi-palette" aria-hidden="true"></i> Plantillas
+  </h1>
+  <button class="btn btn-primary" id="openNewTemplateBtn">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva plantilla
   </button>
 </div>
+
+{% if not templates %}
+<div class="alert alert-info">
+  <i class="bi bi-info-circle" aria-hidden="true"></i>
+  No hay plantillas aún. Crea una para empezar.
+</div>
+{% endif %}
 
 <div class="row g-3">
   {% for t in templates %}
@@ -15,10 +24,13 @@
     <div class="card h-100 {% if t.is_default %}border-success{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span class="fw-semibold">{{ t.name }}</span>
-        {% if t.is_default %}<span class="badge bg-success">Predeterminada</span>{% endif %}
+        {% if t.is_default %}
+        <span class="badge bg-success">Predeterminada</span>
+        {% endif %}
       </div>
-      <div class="card-body p-0">
-        <img src="/api/templates/{{ t.id }}/background" class="w-100 tmpl-bg-preview" alt="Fondo">
+      <div class="card-body-p0">
+        <img src="/api/templates/{{ t.id }}/background" class="w-100 tmpl-bg-preview"
+             alt="Imagen de fondo de la plantilla {{ t.name }}">
         <div class="p-3">
           <div class="d-flex align-items-center gap-2 mb-2">
             <div class="wave-color-swatch rounded-circle border" data-color="{{ t.waveform_color }}"></div>
@@ -29,76 +41,98 @@
       </div>
       <div class="card-footer d-flex gap-2">
         <a href="/templates/{{ t.id }}/edit" class="btn btn-sm btn-outline-primary">
-          <i class="bi bi-pencil"></i> Editar
+          <i class="bi bi-pencil" aria-hidden="true"></i> Editar
         </a>
         {% if not t.is_default %}
         <button class="btn btn-sm btn-outline-success set-default-btn" data-id="{{ t.id }}">
-          <i class="bi bi-check-circle"></i> Hacer predeterminada
+          <i class="bi bi-check-circle" aria-hidden="true"></i> Predeterminar
         </button>
-        <button class="btn btn-sm btn-outline-danger delete-tmpl-btn" data-id="{{ t.id }}" data-name="{{ t.name }}">
-          <i class="bi bi-trash"></i>
+        <button class="btn btn-sm btn-outline-danger delete-tmpl-btn ms-auto"
+                data-id="{{ t.id }}" data-name="{{ t.name }}"
+                aria-label="Eliminar plantilla {{ t.name }}">
+          <i class="bi bi-trash" aria-hidden="true"></i>
         </button>
         {% endif %}
       </div>
     </div>
   </div>
-  {% else %}
-  <div class="col">
-    <div class="alert alert-info">
-      <i class="bi bi-info-circle me-1"></i>No hay plantillas aún. Crea una para empezar.
-    </div>
-  </div>
   {% endfor %}
 </div>
 
-<!-- New Template Dialog -->
-<dialog id="newTemplateModal">
-  <div class="modal-header">
-    <h5 class="modal-title">Nueva Plantilla</h5>
-    <button type="button" class="btn-close" onclick="this.closest('dialog').close()"></button>
+{# ── New Template Dialog ────────────────────────────────────────────── #}
+<dialog id="newTemplateModal" aria-labelledby="newTemplateTitle">
+  <div class="dialog-header">
+    <h4 id="newTemplateTitle">
+      <i class="bi bi-palette" aria-hidden="true"></i> Nueva Plantilla
+    </h4>
+    <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
-  <div class="modal-body">
-    <label class="form-label">Nombre</label>
+  <div class="dialog-body">
+    <label class="form-label fw-semibold" for="newTmplName">Nombre</label>
     <input type="text" class="form-control" id="newTmplName" placeholder="Mi plantilla">
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
-    <button type="button" class="btn btn-primary" id="createTmplBtn">Crear</button>
+  <div class="dialog-footer">
+    <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
+    <button type="button" class="btn btn-primary" id="createTmplBtn">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i> Crear
+    </button>
   </div>
 </dialog>
 {% endblock %}
 
 {% block scripts %}
 <script nonce="{{ request.state.csp_nonce }}">
-document.getElementById('createTmplBtn').addEventListener('click', async () => {
-  const name = document.getElementById('newTmplName').value.trim();
-  if (!name) return alert('Ingresa un nombre');
-  const resp = await fetch('/api/templates', {
+// Close dialogs via data-close-dialog
+document.querySelectorAll('[data-close-dialog]').forEach(function (btn) {
+  btn.addEventListener('click', function () { btn.closest('dialog').close(); });
+});
+
+// Open new template dialog
+document.getElementById('openNewTemplateBtn').addEventListener('click', function () {
+  document.getElementById('newTemplateModal').showModal();
+});
+
+// Create template
+document.getElementById('createTmplBtn').addEventListener('click', async function () {
+  var name = document.getElementById('newTmplName').value.trim();
+  if (!name) { alert('Ingresa un nombre'); return; }
+  var resp = await fetch('/api/templates', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name})
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name }),
   });
   if (resp.ok) {
-    const t = await resp.json();
-    location.href = `/templates/${t.id}/edit`;
+    var t = await resp.json();
+    location.href = '/templates/' + t.id + '/edit';
   } else {
     alert('Error al crear plantilla');
   }
 });
 
-document.querySelectorAll('.set-default-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    await fetch(`/api/templates/${btn.dataset.id}/default`, {method: 'POST'});
+// Set default
+document.querySelectorAll('.set-default-btn').forEach(function (btn) {
+  btn.addEventListener('click', async function () {
+    await fetch('/api/templates/' + btn.dataset.id + '/default', { method: 'POST' });
     location.reload();
   });
 });
 
-document.querySelectorAll('.delete-tmpl-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    if (!confirm(`¿Eliminar plantilla "${btn.dataset.name}"?`)) return;
-    await fetch(`/api/templates/${btn.dataset.id}`, {method: 'DELETE'});
+// Delete
+document.querySelectorAll('.delete-tmpl-btn').forEach(function (btn) {
+  btn.addEventListener('click', async function () {
+    if (!confirm('¿Eliminar plantilla "' + btn.dataset.name + '"?')) return;
+    await fetch('/api/templates/' + btn.dataset.id, { method: 'DELETE' });
     location.reload();
   });
+});
+
+// Color swatches
+document.querySelectorAll('.wave-color-swatch').forEach(function (el) {
+  el.style.backgroundColor = el.dataset.color || '#888';
+  el.style.width = '16px';
+  el.style.height = '16px';
+  el.style.flexShrink = '0';
+  el.style.display = 'inline-block';
 });
 </script>
 {% endblock %}

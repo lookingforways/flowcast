@@ -568,6 +568,18 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .input-group .btn:last-child {
   border-radius: 0 var(--fc-radius) var(--fc-radius) 0;
 }
+.input-group-text {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--fc-bg-base);
+  border: 1px solid var(--fc-border);
+  border-left: none;
+  border-radius: 0 var(--fc-radius) var(--fc-radius) 0;
+  color: var(--fc-text-muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
 
 /* ── Boxed list (Adwaita pattern) ────────────────────────────────── */
 .fc-list {
@@ -905,8 +917,13 @@ dialog::backdrop {
 .col-md-6  { flex: 0 0 50%;      max-width: 50%; }
 .col-md-4  { flex: 0 0 33.333%;  max-width: 33.333%; }
 .col-md-3  { flex: 0 0 25%;      max-width: 25%; }
+.col-lg-8  { flex: 0 0 66.666%;  max-width: 66.666%; }
+.col-lg-7  { flex: 0 0 58.333%;  max-width: 58.333%; }
+.col-lg-6  { flex: 0 0 50%;      max-width: 50%; }
+.col-lg-5  { flex: 0 0 41.666%;  max-width: 41.666%; }
 .col-lg-4  { flex: 0 0 33.333%;  max-width: 33.333%; }
 .col-lg-3  { flex: 0 0 25%;      max-width: 25%; }
+.col       { flex: 1 1 0;        min-width: 0; }
 
 /* Flex utilities */
 .d-flex        { display: flex; }
@@ -1141,3 +1158,46 @@ dialog::backdrop {
 }
 .list-group-item:last-child { border-bottom: none; }
 .list-group-item-action:hover { background: var(--fc-bg-hover); }
+
+/* ── Responsive embed (ratio) ─────────────────────────────────────── */
+.ratio { position: relative; width: 100%; }
+.ratio::before { display: block; content: ""; }
+.ratio-16x9::before { padding-top: 56.25%; }
+.ratio > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+/* ── Background utilities ─────────────────────────────────────────── */
+.bg-light { background: var(--fc-bg-base) !important; }
+.bg-dark  { background: #1a1a2e !important; }
+
+/* ── Border utilities ─────────────────────────────────────────────── */
+.border-success { border-color: var(--fc-success) !important; }
+.border-primary { border-color: var(--fc-primary) !important; }
+
+/* ── Sticky ───────────────────────────────────────────────────────── */
+.sticky-top { position: sticky; top: 0; z-index: 100; }
+
+/* ── Dismissible alerts ───────────────────────────────────────────── */
+.alert { display: flex; align-items: flex-start; gap: 8px; }
+.alert .btn-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 1rem;
+  margin-left: auto;
+  padding: 0 4px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.alert .btn-close:hover { opacity: 1; }
+
+/* ── Show notes (episode description) ───────────────────────────────  */
+.show-notes {
+  background: var(--fc-bg-base);
+  border: 1px solid var(--fc-border);
+  border-radius: var(--fc-radius);
+  padding: 12px;
+}
+
+/* ── Template preview canvas wrapper ────────────────────────────────  */
+.canvas-dark-bg { background: #111827; }

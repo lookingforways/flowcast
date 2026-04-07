@@ -2,63 +2,80 @@
 {% block title %}Configuración — Flowcast{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-gear me-2"></i>Configuración</h2>
+<div class="fc-page-header">
+  <h1 class="fc-page-title">
+    <i class="bi bi-gear" aria-hidden="true"></i> Configuración
+  </h1>
+</div>
 
 {% if request.query_params.get('youtube') == 'connected' %}
-<div class="alert alert-success alert-dismissible fade show">
-  <i class="bi bi-check-circle me-1"></i><strong>YouTube conectado correctamente.</strong>
-  <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+<div class="alert alert-success mb-4" id="ytAlert">
+  <i class="bi bi-check-circle" aria-hidden="true"></i>
+  <strong>YouTube conectado correctamente.</strong>
+  <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
 {% elif request.query_params.get('youtube') == 'error' %}
-<div class="alert alert-danger alert-dismissible fade show">
-  <i class="bi bi-x-circle me-1"></i><strong>Error al conectar YouTube:</strong>
-  {{ request.query_params.get('msg', '') }}
-  <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+<div class="alert alert-danger mb-4" id="ytAlert">
+  <i class="bi bi-x-circle" aria-hidden="true"></i>
+  <strong>Error al conectar YouTube:</strong> {{ request.query_params.get('msg', '') }}
+  <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
 {% endif %}
 
 <div class="row g-4">
   <div class="col-lg-6">
-    <!-- Podcasts -->
+    {# Podcasts #}
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-broadcast me-1"></i>Podcasts y feeds RSS</div>
+      <div class="card-header">
+        <i class="bi bi-broadcast me-1" aria-hidden="true"></i>Podcasts y feeds RSS
+      </div>
       <div class="card-body">
-        <p class="text-muted mb-3">Los feeds RSS se configuran por podcast. Cada podcast puede tener su propio feed y playlist de YouTube.</p>
+        <p class="text-muted mb-3">
+          Los feeds RSS se configuran por podcast. Cada podcast puede tener su propio feed y playlist de YouTube.
+        </p>
         <a href="/podcasts" class="btn btn-primary btn-sm">
-          <i class="bi bi-broadcast me-1"></i>Gestionar Podcasts
+          <i class="bi bi-broadcast me-1" aria-hidden="true"></i>Gestionar Podcasts
         </a>
       </div>
     </div>
 
-    <!-- Polling -->
+    {# Automatización #}
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-clock me-1"></i>Automatización</div>
+      <div class="card-header">
+        <i class="bi bi-clock me-1" aria-hidden="true"></i>Automatización
+      </div>
       <div class="card-body">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Intervalo de revisión de feeds</label>
+          <label class="form-label fw-semibold" for="pollIntervalInput">Intervalo de revisión de feeds</label>
           <div class="input-group">
-            <input type="number" class="form-control" value="{{ poll_interval }}" disabled>
+            <input type="number" class="form-control" id="pollIntervalInput"
+                   value="{{ poll_interval }}" disabled>
             <span class="input-group-text">minutos</span>
           </div>
           <div class="form-text">Configura <code>POLL_INTERVAL_MINUTES</code> en <code>.env</code></div>
         </div>
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" {% if auto_publish %}checked{% endif %} disabled>
-          <label class="form-check-label">
+          <input class="form-check-input" type="checkbox"
+                 id="autoPublishToggle" {% if auto_publish %}checked{% endif %} disabled>
+          <label class="form-check-label" for="autoPublishToggle">
             <strong>Publicación automática</strong>
-            <span class="text-muted small d-block">Configura <code>FLOWCAST_AUTO_PUBLISH=true</code> en <code>.env</code></span>
+            <span class="text-muted small d-block">
+              Configura <code>FLOWCAST_AUTO_PUBLISH=true</code> en <code>.env</code>
+            </span>
           </label>
         </div>
       </div>
     </div>
 
-    <!-- YouTube Privacy -->
+    {# YouTube Privacy #}
     <div class="card">
-      <div class="card-header"><i class="bi bi-youtube me-1"></i>Configuración de YouTube</div>
+      <div class="card-header">
+        <i class="bi bi-youtube me-1" aria-hidden="true"></i>Configuración de YouTube
+      </div>
       <div class="card-body">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Privacidad de los videos</label>
-          <select class="form-select" disabled>
+          <label class="form-label fw-semibold" for="privacySelect">Privacidad de los videos</label>
+          <select class="form-select" id="privacySelect" disabled>
             <option {% if youtube_privacy == 'public' %}selected{% endif %}>public</option>
             <option {% if youtube_privacy == 'unlisted' %}selected{% endif %}>unlisted</option>
             <option {% if youtube_privacy == 'private' %}selected{% endif %}>private</option>
@@ -70,35 +87,41 @@
   </div>
 
   <div class="col-lg-6">
-    <!-- YouTube Auth -->
+    {# YouTube Auth #}
     <div class="card">
-      <div class="card-header"><i class="bi bi-youtube me-1"></i>Autenticación YouTube</div>
+      <div class="card-header">
+        <i class="bi bi-youtube me-1" aria-hidden="true"></i>Autenticación YouTube
+      </div>
       <div class="card-body">
         {% if yt_status.connected %}
         <div class="d-flex align-items-center gap-3 mb-3">
           {% if yt_status.channel and yt_status.channel.thumbnail %}
-          <img src="/api/img?url={{ yt_status.channel.thumbnail | urlencode }}" class="rounded-circle" width="48" height="48" alt="">
+          <img src="/api/img?url={{ yt_status.channel.thumbnail | urlencode }}"
+               class="rounded-circle" width="48" height="48" alt="">
           {% endif %}
           <div>
-            <div class="fw-semibold">{{ yt_status.channel.title if yt_status.channel else 'Canal conectado' }}</div>
+            <div class="fw-semibold">
+              {{ yt_status.channel.title if yt_status.channel else 'Canal conectado' }}
+            </div>
             <span class="badge bg-success">Conectado</span>
           </div>
         </div>
         <button class="btn btn-outline-danger btn-sm" id="disconnectYtBtn">
-          <i class="bi bi-x-circle me-1"></i>Desconectar YouTube
+          <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Desconectar YouTube
         </button>
         {% else %}
         <p class="text-muted mb-3">
           Conecta tu canal de YouTube para publicar audiogramas automáticamente.
-          Necesitas configurar <code>GOOGLE_CLIENT_ID</code> y <code>GOOGLE_CLIENT_SECRET</code> en tu <code>.env</code>.
+          Necesitas configurar <code>GOOGLE_CLIENT_ID</code> y <code>GOOGLE_CLIENT_SECRET</code>
+          en tu <code>.env</code>.
         </p>
         <a href="/auth/youtube" class="btn btn-danger">
-          <i class="bi bi-youtube me-1"></i>Conectar con YouTube
+          <i class="bi bi-youtube me-1" aria-hidden="true"></i>Conectar con YouTube
         </a>
         <hr>
         <h6 class="fw-semibold">¿Cómo obtener credenciales?</h6>
         <ol class="small text-muted mb-0">
-          <li>Ve a <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+          <li>Ve a <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></li>
           <li>Crea un proyecto o selecciona uno existente</li>
           <li>Activa la <strong>YouTube Data API v3</strong></li>
           <li>Crea credenciales OAuth 2.0 (tipo: Aplicación web)</li>
@@ -114,11 +137,20 @@
 
 {% block scripts %}
 <script nonce="{{ request.state.csp_nonce }}">
-const disconnectBtn = document.getElementById('disconnectYtBtn');
+// Dismiss alert banners
+document.querySelectorAll('[data-close-alert]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var alert = btn.closest('.alert');
+    if (alert) alert.remove();
+  });
+});
+
+// Disconnect YouTube
+var disconnectBtn = document.getElementById('disconnectYtBtn');
 if (disconnectBtn) {
-  disconnectBtn.addEventListener('click', async () => {
+  disconnectBtn.addEventListener('click', async function () {
     if (!confirm('¿Desconectar YouTube? Necesitarás volver a autenticarte para publicar.')) return;
-    await fetch('/api/youtube/disconnect', {method: 'POST'});
+    await fetch('/api/youtube/disconnect', { method: 'POST' });
     location.reload();
   });
 }
