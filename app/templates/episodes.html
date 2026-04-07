@@ -10,7 +10,8 @@
     {% endif %}
   </h1>
   <div class="d-flex gap-2">
-    <select class="form-select form-select-sm select-auto" id="podcastFilter">
+    <select class="form-select form-select-sm select-auto" id="podcastFilter"
+            aria-label="Filtrar por podcast">
       <option value="">Todos los podcasts</option>
       {% for p in podcasts %}
       <option value="{{ p.id }}" {% if current_podcast and current_podcast.id == p.id %}selected{% endif %}>
@@ -18,7 +19,8 @@
       </option>
       {% endfor %}
     </select>
-    <select class="form-select form-select-sm select-auto" id="statusFilter">
+    <select class="form-select form-select-sm select-auto" id="statusFilter"
+            aria-label="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="discovered">Descubiertos</option>
       <option value="downloaded">Descargados</option>
@@ -35,12 +37,12 @@
       <table class="table table-hover table-sm mb-0" id="episodesTable">
         <thead>
           <tr>
-            <th>Episodio</th>
-            <th>Podcast</th>
-            <th>Duración</th>
-            <th>Publicado</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th scope="col">Episodio</th>
+            <th scope="col">Podcast</th>
+            <th scope="col">Duración</th>
+            <th scope="col">Publicado</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -108,7 +110,7 @@
 </div>
 
 {# ── Render Dialog ─────────────────────────────────────────────────── #}
-<dialog id="renderModal" aria-labelledby="renderModalTitle">
+<dialog id="renderModal" aria-labelledby="renderModalTitle" aria-modal="true">
   <div class="dialog-header">
     <h4 id="renderModalTitle">
       <i class="bi bi-film" aria-hidden="true"></i> Crear Audiograma

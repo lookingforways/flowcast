@@ -20,11 +20,14 @@ async function apiRequest(url, method = 'GET', body = null) {
 function showToast(msg, type = 'success') {
   const el = document.createElement('div');
   el.className = `alert alert-${type} fc-toast`;
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
   const text = document.createElement('span');
   text.textContent = msg;
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'btn-close';
+  btn.setAttribute('aria-label', 'Cerrar notificación');
   btn.addEventListener('click', () => el.remove());
   el.appendChild(text);
   el.appendChild(btn);
