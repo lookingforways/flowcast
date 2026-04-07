@@ -116,8 +116,15 @@ def load_credentials() -> Optional[Credentials]:
         )
         # Refresh if expired
         if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            save_credentials(creds)
+            try:
+                creds.refresh(Request())
+                save_credentials(creds)
+            except Exception as refresh_exc:
+                logger.warning("YouTube token refresh failed: %s", refresh_exc)
+                if "invalid_grant" in str(refresh_exc).lower():
+                    # Token revocado — borrar para que is_connected() devuelva False
+                    revoke_credentials()
+                return None
         return creds
     except Exception as exc:
         logger.error("Failed to load YouTube credentials: %s", exc)

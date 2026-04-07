@@ -166,6 +166,12 @@ def _publish_error_msg(exc: Exception) -> str:
 
     # Token expirado / revocado (modo Testing en Google Cloud expira cada 7 días)
     if "invalid_grant" in msg or "token has been expired or revoked" in msg:
+        # Borrar el token guardado para que is_connected() refleje el estado real
+        try:
+            from app.auth.youtube_oauth import revoke_credentials
+            revoke_credentials()
+        except Exception:
+            pass
         return (
             "El token de YouTube expiró o fue revocado. "
             "Andá a Configuración → Desconectar YouTube → Conectar con YouTube para renovarlo. "
