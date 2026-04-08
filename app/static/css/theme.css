@@ -933,6 +933,7 @@ dialog::backdrop {
 .fc-grid-2col { display: grid; gap: 24px; align-items: start; grid-template-columns: 1fr 1fr; }
 .fc-grid-8-4  { display: grid; gap: 24px; align-items: start; grid-template-columns: 2fr 1fr; }
 .fc-grid-7-5  { display: grid; gap: 24px; align-items: start; grid-template-columns: 7fr 5fr; }
+.fc-grid-2col > *, .fc-grid-8-4 > *, .fc-grid-7-5 > * { min-width: 0; }
 
 @media (max-width: 992px) {
   .fc-grid-2col,
