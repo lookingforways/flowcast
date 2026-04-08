@@ -68,7 +68,9 @@
             <th scope="col">Episodio</th>
             <th scope="col">Podcast</th>
             <th scope="col">Estado</th>
-            <th scope="col">Publicado</th>
+            <th scope="col">YouTube</th>
+            <th scope="col">Dur. episodio</th>
+            <th scope="col">T. render</th>
             <th scope="col">Iniciado</th>
           </tr>
         </thead>
@@ -78,9 +80,13 @@
             <td class="text-muted">#{{ job.id }}</td>
             <td>
               {% if job.episode %}
-              <a href="/episodes/{{ job.episode_id }}" class="text-truncate d-block" style="max-width:320px">
+              <a href="/episodes/{{ job.episode_id }}" class="text-truncate d-block" style="max-width:280px">
                 {{ job.episode.title[:60] }}{% if job.episode.title|length > 60 %}…{% endif %}
               </a>
+              {% set rc = render_counts.get(job.episode_id, 1) %}
+              {% if rc > 1 %}
+              <span class="badge bg-warning" title="{{ rc }} renders para este episodio">×{{ rc }}</span>
+              {% endif %}
               {% else %}
               <span class="text-muted small">Ep. {{ job.episode_id }}</span>
               {% endif %}
@@ -92,13 +98,23 @@
             </td>
             <td>{% include "partials/job_badge.html" %}</td>
             <td>
-              {% if job.episode and job.episode.status == 'published' %}
-              <span class="badge status-published">
-                <i class="bi bi-youtube me-1" aria-hidden="true"></i>Publicado
-              </span>
+              {% if job.episode and job.episode.youtube_id %}
+              <a href="https://youtu.be/{{ job.episode.youtube_id }}" target="_blank" rel="noopener noreferrer"
+                 class="badge status-published">
+                <i class="bi bi-youtube me-1" aria-hidden="true"></i>Ver video
+              </a>
               {% else %}
               <span class="text-muted small">—</span>
               {% endif %}
+            </td>
+            <td class="text-muted small">
+              {{ job.episode.duration_secs | format_secs if job.episode else '—' }}
+            </td>
+            <td class="text-muted small">
+              {% if job.started_at and job.finished_at %}
+                {% set secs = (job.finished_at - job.started_at).total_seconds() | int %}
+                {{ secs | format_secs }}
+              {% else %}—{% endif %}
             </td>
             <td class="text-muted small">{{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else '—' }}</td>
           </tr>

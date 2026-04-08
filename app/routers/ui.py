@@ -19,6 +19,21 @@ templates = Jinja2Templates(directory="app/templates")
 templates.env.filters["sanitize_html"] = sanitize_html
 
 
+def _format_secs(secs) -> str:
+    """Convierte segundos a M:SS o H:MM:SS."""
+    if secs is None:
+        return "—"
+    secs = int(secs)
+    m, s = divmod(secs, 60)
+    if m >= 60:
+        h, m = divmod(m, 60)
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m}:{s:02d}"
+
+
+templates.env.filters["format_secs"] = _format_secs
+
+
 def _base_ctx(request: Request) -> dict:
     return {
         "request": request,
@@ -48,6 +63,17 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
         )
     ).scalars().all()
 
+    # Conteo de renders por episodio (para badge de re-renders)
+    ep_ids = [j.episode_id for j in recent_jobs]
+    render_counts: dict[int, int] = {}
+    if ep_ids:
+        rows = (await session.execute(
+            select(RenderJob.episode_id, func.count(RenderJob.id).label("cnt"))
+            .where(RenderJob.episode_id.in_(ep_ids))
+            .group_by(RenderJob.episode_id)
+        )).all()
+        render_counts = {row.episode_id: row.cnt for row in rows}
+
     return templates.TemplateResponse(
         "index.html",
         {
@@ -57,6 +83,7 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
             "pending": pending,
             "total_podcasts": total_podcasts,
             "recent_jobs": recent_jobs,
+            "render_counts": render_counts,
         },
     )
 
