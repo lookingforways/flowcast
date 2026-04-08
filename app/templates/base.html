@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Flowcast{% endblock %}</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.9.15">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.15">
-  <link rel="stylesheet" href="/static/css/app.css?v=0.9.15">
+  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.9.16">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.16">
+  <link rel="stylesheet" href="/static/css/app.css?v=0.9.16">
   {% block styles %}{% endblock %}
   {# Prevent flash of wrong theme: apply saved/system preference before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
@@ -109,7 +109,7 @@
 
 </div>{# /.fc-app #}
 
-<script src="/static/js/app.js?v=0.9.15" nonce="{{ request.state.csp_nonce }}"></script>
+<script src="/static/js/app.js?v=0.9.16" nonce="{{ request.state.csp_nonce }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -312,8 +312,9 @@ dialog,
 /* ── Page header ─────────────────────────────────────────────────── */
 .fc-page-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  min-height: 38px;
   margin-bottom: 20px;
   gap: 12px;
 }
