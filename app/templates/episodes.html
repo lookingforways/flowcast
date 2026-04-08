@@ -2,38 +2,37 @@
 {% block title %}Episodios — Flowcast{% endblock %}
 
 {% block content %}
-<div class="fc-page-header">
-  <h1 class="fc-page-title">
-    <i class="bi bi-mic" aria-hidden="true"></i> Episodios
-    {% if current_podcast %}
-    <span class="badge bg-primary ms-2">{{ current_podcast.name }}</span>
-    {% endif %}
-  </h1>
-  <div class="d-flex gap-2">
-    <select class="form-select form-select-sm select-auto" id="podcastFilter"
-            aria-label="Filtrar por podcast">
-      <option value="">Todos los podcasts</option>
-      {% for p in podcasts %}
-      <option value="{{ p.id }}" {% if current_podcast and current_podcast.id == p.id %}selected{% endif %}>
-        {{ p.name }}
-      </option>
-      {% endfor %}
-    </select>
-    <select class="form-select form-select-sm select-auto" id="statusFilter"
-            aria-label="Filtrar por estado">
-      <option value="">Todos los estados</option>
-      <option value="discovered">Descubiertos</option>
-      <option value="downloaded">Descargados</option>
-      <option value="rendered">Renderizados</option>
-      <option value="published">Publicados</option>
-      <option value="failed">Error</option>
-    </select>
-  </div>
-</div>
-
 <div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>
+      <i class="bi bi-mic" aria-hidden="true"></i> Episodios
+      {% if current_podcast %}
+      <span class="badge bg-primary ms-2">{{ current_podcast.name }}</span>
+      {% endif %}
+    </span>
+    <div class="d-flex gap-2">
+      <select class="form-select form-select-sm select-auto" id="podcastFilter"
+              aria-label="Filtrar por podcast">
+        <option value="">Todos los podcasts</option>
+        {% for p in podcasts %}
+        <option value="{{ p.id }}" {% if current_podcast and current_podcast.id == p.id %}selected{% endif %}>
+          {{ p.name }}
+        </option>
+        {% endfor %}
+      </select>
+      <select class="form-select form-select-sm select-auto" id="statusFilter"
+              aria-label="Filtrar por estado">
+        <option value="">Todos los estados</option>
+        <option value="discovered">Descubiertos</option>
+        <option value="downloaded">Descargados</option>
+        <option value="rendered">Renderizados</option>
+        <option value="published">Publicados</option>
+        <option value="failed">Error</option>
+      </select>
+    </div>
+  </div>
   <div class="card-body-p0">
-    <div class="table-wrapper">
+    <div class="table-wrapper fc-inset">
       <table class="table table-hover table-sm mb-0" id="episodesTable">
         <thead>
           <tr>
