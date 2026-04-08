@@ -6,6 +6,16 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.6] — 2026-04-07
+
+### Corregido
+
+**Alineación de títulos de página**
+- `fc-page-header` con `min-height: 38px` + `align-items: center` — el título `h1` queda centrado en la misma posición vertical en todas las páginas, independientemente de si hay selects o botones a la derecha
+- `align-items: baseline` (intento anterior) no funcionaba con `<select>` porque la spec CSS define su baseline como el borde inferior del elemento, no el texto
+
+---
+
 ## [0.9.5] — 2026-04-07
 
 ### Agregado
