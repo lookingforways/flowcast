@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.auth.youtube_oauth import is_connected
 from app.config import settings
@@ -39,10 +40,12 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
     ).scalar_one()
     total_podcasts = (await session.execute(select(func.count(Podcast.id)))).scalar_one()
     recent_jobs = (
-        await session.execute(select(RenderJob).order_by(RenderJob.created_at.desc()).limit(10))
-    ).scalars().all()
-    recent_episodes = (
-        await session.execute(select(Episode).order_by(Episode.created_at.desc()).limit(5))
+        await session.execute(
+            select(RenderJob)
+            .options(selectinload(RenderJob.episode))
+            .order_by(RenderJob.created_at.desc())
+            .limit(10)
+        )
     ).scalars().all()
 
     return templates.TemplateResponse(
@@ -54,7 +57,6 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
             "pending": pending,
             "total_podcasts": total_podcasts,
             "recent_jobs": recent_jobs,
-            "recent_episodes": recent_episodes,
         },
     )
 

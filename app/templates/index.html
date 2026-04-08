@@ -44,83 +44,74 @@
 
 </div>
 
-{# ── Content grid ────────────────────────────────────────────────── #}
-<div class="fc-content-grid">
+{# YouTube connect prompt #}
+{% if not youtube_connected %}
+<div class="alert alert-warning mb-3">
+  <i class="bi bi-youtube me-1" aria-hidden="true"></i>
+  YouTube no conectado — los renders no se publicarán automáticamente.
+  <a href="/auth/youtube" class="btn btn-danger btn-sm ms-2">Conectar</a>
+</div>
+{% endif %}
 
-  {# Recent render jobs #}
-  <div class="card">
-    <div class="card-header">
-      <i class="bi bi-list-task" aria-hidden="true"></i> Últimos trabajos de render
-    </div>
-    <div class="card-body-p0">
-      {% if recent_jobs %}
-      <div class="table-wrapper fc-inset">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">ID</th><th scope="col">Episodio</th><th scope="col">Estado</th><th scope="col">Iniciado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for job in recent_jobs %}
-            <tr>
-              <td class="text-muted">#{{ job.id }}</td>
-              <td><a href="/episodes/{{ job.episode_id }}">Ep. {{ job.episode_id }}</a></td>
-              <td>{% include "partials/job_badge.html" %}</td>
-              <td class="text-muted small">{{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else '—' }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="fc-empty-state">
-        <i class="bi bi-inbox" aria-hidden="true"></i>
-        Sin trabajos aún
-      </div>
-      {% endif %}
-    </div>
+{# ── Últimos trabajos de render ──────────────────────────────────── #}
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-list-task" aria-hidden="true"></i> Últimos trabajos de render
   </div>
-
-  {# Right column #}
-  <div class="d-flex flex-column gap-3">
-
-    {# Recent episodes #}
-    <div class="card">
-      <div class="card-header">
-        <i class="bi bi-clock-history" aria-hidden="true"></i> Episodios recientes
-      </div>
-      <div class="fc-list fc-inset">
-        {% for ep in recent_episodes %}
-        <div class="fc-list-row">
-          <div class="flex-grow-1 overflow-hidden">
-            <a href="/episodes/{{ ep.id }}" class="fc-list-row-title text-truncate d-block">
-              {{ ep.title[:55] }}{% if ep.title|length > 55 %}…{% endif %}
-            </a>
-          </div>
-          <span class="badge status-{{ ep.status }} flex-shrink-0">{{ ep.status }}</span>
-        </div>
-        {% else %}
-        <div class="fc-empty-state">
-          <i class="bi bi-inbox" aria-hidden="true"></i>
-          Sin episodios aún
-        </div>
-        {% endfor %}
-      </div>
+  <div class="card-body-p0">
+    {% if recent_jobs %}
+    <div class="table-wrapper fc-inset">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Episodio</th>
+            <th scope="col">Podcast</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Publicado</th>
+            <th scope="col">Iniciado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in recent_jobs %}
+          <tr>
+            <td class="text-muted">#{{ job.id }}</td>
+            <td>
+              {% if job.episode %}
+              <a href="/episodes/{{ job.episode_id }}" class="text-truncate d-block" style="max-width:320px">
+                {{ job.episode.title[:60] }}{% if job.episode.title|length > 60 %}…{% endif %}
+              </a>
+              {% else %}
+              <span class="text-muted small">Ep. {{ job.episode_id }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if job.episode and job.episode.podcast %}
+              <span class="badge bg-secondary">{{ job.episode.podcast.name }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>{% include "partials/job_badge.html" %}</td>
+            <td>
+              {% if job.episode and job.episode.status == 'published' %}
+              <span class="badge status-published">
+                <i class="bi bi-youtube me-1" aria-hidden="true"></i>Publicado
+              </span>
+              {% else %}
+              <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ job.started_at.strftime('%d/%m %H:%M') if job.started_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    {# YouTube connect prompt #}
-    {% if not youtube_connected %}
-    <div class="card">
-      <div class="card-body-center">
-        <i class="bi bi-youtube text-danger fs-1 d-block mb-2" aria-hidden="true"></i>
-        <p class="mb-3 small">Conecta tu canal de YouTube para publicar automáticamente.</p>
-        <a href="/auth/youtube" class="btn btn-danger btn-sm">Conectar YouTube</a>
-      </div>
+    {% else %}
+    <div class="fc-empty-state">
+      <i class="bi bi-inbox" aria-hidden="true"></i>
+      Sin trabajos aún
     </div>
     {% endif %}
-
   </div>
-
 </div>
 {% endblock %}

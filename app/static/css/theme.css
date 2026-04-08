@@ -640,55 +640,6 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   white-space: nowrap;
 }
 
-/* ── Boxed list (Adwaita pattern) ────────────────────────────────── */
-.fc-list {
-  background: var(--fc-bg-card);
-  border-radius: var(--fc-radius-lg);
-  border: 1px solid var(--fc-border);
-  box-shadow: var(--fc-shadow-sm);
-  overflow: hidden;
-}
-
-.fc-list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--fc-border);
-  font-weight: 600;
-  font-size: 0.8125rem;
-  color: var(--fc-text-secondary);
-  background: rgba(0, 0, 0, 0.025);
-}
-
-[data-theme="dark"] .fc-list-header {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.fc-list-row {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--fc-border);
-  gap: 12px;
-  transition: background 0.1s;
-}
-
-.fc-list-row:last-child { border-bottom: none; }
-
-.fc-list-row:hover { background: var(--fc-bg-hover); }
-
-.fc-list-row-title {
-  font-weight: 500;
-  color: var(--fc-text);
-  font-size: 0.9375rem;
-}
-
-.fc-list-row-subtitle {
-  font-size: 0.8125rem;
-  color: var(--fc-text-muted);
-  margin-top: 1px;
-}
 
 /* ── Card ────────────────────────────────────────────────────────── */
 .card {
@@ -1140,17 +1091,6 @@ dialog::backdrop {
 .fc-stat-info    .fc-stat-value { color: var(--fc-info); }
 .fc-stat-info    .fc-stat-icon  { color: var(--fc-info); opacity: 0.35; }
 
-/* ── Content grid (dashboard 2-col layout) ───────────────────────── */
-.fc-content-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 18px;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .fc-content-grid { grid-template-columns: 1fr; }
-}
 
 /* ── Empty state ─────────────────────────────────────────────────── */
 .fc-empty-state {
