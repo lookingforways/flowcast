@@ -8,8 +8,8 @@
   </a>
 </div>
 
-<div class="row g-4">
-  <div class="col-lg-8">
+<div class="fc-grid-8-4">
+  <div>
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>
@@ -68,7 +68,7 @@
           <details class="job-item" {% if loop.first %}open{% endif %}>
             <summary>
               <span class="badge status-job-{{ job.status }}">
-                {% if job.status == 'done' %}Listo
+                {% if job.status == 'done' %}Publicado
                 {% elif job.status == 'running' %}Renderizando
                 {% elif job.status == 'queued' %}En cola
                 {% else %}Error{% endif %}
@@ -96,7 +96,7 @@
     </div>
   </div>
 
-  <div class="col-lg-4">
+  <div>
     <div class="card mb-3">
       <div class="card-header">
         <i class="bi bi-play-circle me-1" aria-hidden="true"></i>Acciones
