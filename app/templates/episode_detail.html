@@ -12,9 +12,9 @@
   <div class="col-lg-8">
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
+        <span>
           <i class="bi bi-mic me-2" aria-hidden="true"></i>{{ episode.title }}
-        </h5>
+        </span>
         {% set _sl = {'discovered':'Descubierto','downloaded':'Descargado','rendered':'Renderizado','published':'Publicado','failed':'Error'} %}
         <span class="badge status-{{ episode.status }}">{{ _sl.get(episode.status, episode.status) }}</span>
       </div>
@@ -42,7 +42,7 @@
         {% endif %}
 
         {% if episode.description %}
-        <h6 class="fw-semibold mt-3">Notas del episodio</h6>
+        <p class="fw-semibold mb-2 mt-3">Notas del episodio</p>
         <div class="show-notes">
           {{ episode.description | sanitize_html | safe }}
         </div>

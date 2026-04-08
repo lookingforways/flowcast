@@ -6,6 +6,21 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.4] — 2026-04-07
+
+### Corregido
+
+**Consistencia visual (GNOME HIG)**
+- Stat cards del dashboard ahora ocupan todo el ancho disponible (`auto-fill` → `auto-fit` en CSS grid)
+- Padding interior de modales: 18px → 24px horizontal en header, body y footer — los textos ya no quedan pegados al borde
+- Encabezados de tabla (`<th>`) alineados con el estilo de `.card-header`: sin `text-transform: uppercase`, sin `letter-spacing`, color normal y `font-size: 0.875rem`
+- `<h5>` dentro de `.card-header` en detalle de episodio reemplazado por `<span>` — el card-header ya tiene su propio peso tipográfico
+- Sub-títulos `<h6>` sueltos dentro de card-body (`episode_detail.html`, `settings.html`) reemplazados por `<p class="fw-semibold">` — coherente con la jerarquía tipográfica
+- Campo "Plantilla por defecto" en diálogos de podcast sin wrapper `.fc-field` — corregido
+- IDs duplicados `ytAlert` en `settings.html` — separados en `ytAlertSuccess` / `ytAlertError`
+
+---
+
 ## [0.9.3] — 2026-04-07
 
 ### Agregado

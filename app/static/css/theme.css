@@ -780,11 +780,9 @@ table, .table {
 th {
   padding: 9px 14px;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--fc-text-muted);
+  color: var(--fc-text);
   border-bottom: 1px solid var(--fc-border);
   background: rgba(0, 0, 0, 0.025);
   white-space: nowrap;
@@ -845,7 +843,7 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px 12px;
+  padding: 16px 24px 12px;
   border-bottom: 1px solid var(--fc-border);
 }
 
@@ -855,13 +853,13 @@ dialog::backdrop {
   margin: 0;
 }
 
-.dialog-body { padding: 18px; }
+.dialog-body { padding: 20px 24px; }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 18px;
+  padding: 12px 24px;
   border-top: 1px solid var(--fc-border);
   background: rgba(0, 0, 0, 0.025);
 }
@@ -1105,7 +1103,7 @@ dialog::backdrop {
 /* ── Stat cards (Dashboard) ──────────────────────────────────────── */
 .fc-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }

@@ -9,13 +9,13 @@
 </div>
 
 {% if request.query_params.get('youtube') == 'connected' %}
-<div class="alert alert-success mb-4" id="ytAlert">
+<div class="alert alert-success mb-4" id="ytAlertSuccess">
   <i class="bi bi-check-circle" aria-hidden="true"></i>
   <strong>YouTube conectado correctamente.</strong>
   <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
 {% elif request.query_params.get('youtube') == 'error' %}
-<div class="alert alert-danger mb-4" id="ytAlert">
+<div class="alert alert-danger mb-4" id="ytAlertError">
   <i class="bi bi-x-circle" aria-hidden="true"></i>
   <strong>Error al conectar YouTube:</strong> {{ request.query_params.get('msg', '') }}
   <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
@@ -119,7 +119,7 @@
           <i class="bi bi-youtube me-1" aria-hidden="true"></i>Conectar con YouTube
         </a>
         <hr>
-        <h6 class="fw-semibold">¿Cómo obtener credenciales?</h6>
+        <p class="fw-semibold mb-2">¿Cómo obtener credenciales?</p>
         <ol class="small text-muted mb-0">
           <li>Ve a <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></li>
           <li>Crea un proyecto o selecciona uno existente</li>
