@@ -1,4 +1,4 @@
-{% if job.status == 'done' %}<span class="badge status-job-done">Listo</span>
+{% if job.status == 'done' %}<span class="badge status-job-done">Publicado</span>
 {% elif job.status == 'running' %}<span class="badge status-job-running"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Renderizando</span>
 {% elif job.status == 'queued' %}<span class="badge status-job-queued">En cola</span>
 {% elif job.status == 'failed' %}<span class="badge status-job-failed">Error</span>

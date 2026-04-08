@@ -80,13 +80,15 @@
             <td class="text-muted">#{{ job.id }}</td>
             <td>
               {% if job.episode %}
-              <a href="/episodes/{{ job.episode_id }}" class="text-truncate d-block" style="max-width:280px">
-                {{ job.episode.title[:60] }}{% if job.episode.title|length > 60 %}…{% endif %}
-              </a>
-              {% set rc = render_counts.get(job.episode_id, 1) %}
-              {% if rc > 1 %}
-              <span class="badge bg-warning" title="{{ rc }} renders para este episodio">×{{ rc }}</span>
-              {% endif %}
+              <div class="d-flex align-items-center gap-2" style="max-width:300px">
+                <a href="/episodes/{{ job.episode_id }}" class="text-truncate">
+                  {{ job.episode.title[:60] }}{% if job.episode.title|length > 60 %}…{% endif %}
+                </a>
+                {% set rc = render_counts.get(job.episode_id, 1) %}
+                {% if rc > 1 %}
+                <span class="badge bg-warning flex-shrink-0" title="{{ rc }} renders para este episodio">×{{ rc }}</span>
+                {% endif %}
+              </div>
               {% else %}
               <span class="text-muted small">Ep. {{ job.episode_id }}</span>
               {% endif %}
