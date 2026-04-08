@@ -6,6 +6,31 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.5] — 2026-04-07
+
+### Agregado
+
+**Dashboard — tabla enriquecida**
+- Últimos trabajos de render ahora muestra: título del episodio (link), podcast, estado del job, link a YouTube, duración del episodio, tiempo de render y fecha de inicio
+- Badge `×N` en episodios con más de un render, en la misma línea que el título
+- Filtro Jinja2 `format_secs` para convertir segundos a `M:SS` / `H:MM:SS`
+- Query adicional agrupada para contar renders por episodio (sin N+1)
+- Guard contra `job.episode = None` (FK huérfano)
+- Eliminada la card "Episodios recientes" — redundante con la tabla
+
+### Corregido
+
+**Consistencia visual (GNOME HIG) — segunda ronda**
+- Layouts de 2 columnas migrados de flex shim (`row g-4`) a CSS Grid real (`fc-grid-8-4`, `fc-grid-7-5`, `fc-grid-2col`) en `episode_detail`, `template_editor` y `settings` — garantiza `align-items: start` y elimina desalineado entre columnas
+- `min-width: 0` en ítems de grid — el iframe de YouTube ya no empuja la columna izquierda fuera del viewport
+- `fc-page-header` con `align-items: baseline` — títulos de todas las páginas al mismo nivel tipográfico
+- `/episodes`: título e ícono vuelven al `fc-page-header`; filtros quedan en el header; card-header con texto descriptivo (patrón dashboard)
+- Orden del menú lateral: Dashboard → Episodios → Podcasts → Plantillas
+- Estado `done` en job badges: "Listo" → "Publicado" (en `job_badge.html` y en el detalle de episodio)
+- Badge `×N` de re-renders en la misma línea que el título del episodio (flex + `flex-shrink-0`)
+
+---
+
 ## [0.9.4] — 2026-04-07
 
 ### Corregido
