@@ -14,3 +14,7 @@ venv/
 *.db
 *.db-shm
 *.db-wal
+
+# Claude Code — archivos internos, no van al repo público
+CLAUDE.md
+web-estilos/
