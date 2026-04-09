@@ -6,6 +6,26 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.7] — 2026-04-09
+
+### Corregido
+
+**Alineación de listas y diálogos**
+- `ul, ol` restauran `padding-left: 1.5rem` — el reset CSS universal los borraba, dejando los marcadores fuera del flujo de texto (afectaba `<ol>` en settings y `<ul>` en dialog de eliminar podcast)
+- `<hr>` entre botón "Conectar con YouTube" y sección "¿Cómo obtener credenciales?" ahora tiene `mt-4 mb-3` — separación visual adecuada entre las tres áreas
+
+**Seguridad — dialog de desconexión YouTube**
+- Reemplazado `confirm()` nativo del browser por `<dialog>` nativo con estilo propio
+- Eliminados `onclick=` inline — movidos a `addEventListener` en bloque `<script nonce>` para cumplir CSP
+
+### Agregado
+
+- `SECURITY.md`: documento completo con todos los controles de seguridad del proyecto (19 secciones, referencias a archivos y líneas)
+- `CLAUDE.md`: reglas de seguridad para Claude Code + checklist de verificación + protocolo de fin de sesión
+- Cache busting bumpeado a `?v=0.9.18`
+
+---
+
 ## [0.9.6] — 2026-04-07
 
 ### Corregido
