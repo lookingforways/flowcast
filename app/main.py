@@ -27,7 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # /static/ requires auth except CSS/JS/fonts (needed by login + 2FA before auth).
-_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/favicon.ico", "/robots.txt", "/.well-known/", "/static/css/", "/static/js/", "/static/fonts/")
+_PUBLIC_PREFIXES = ("/login", "/2fa", "/logout", "/favicon.ico", "/robots.txt", "/.well-known/", "/static/css/", "/static/js/", "/static/fonts/", "/static/img/flowcast-logo-")
 
 # Max body size for login/2fa forms (2 KB — well above any legitimate use)
 _MAX_FORM_BODY = 2048

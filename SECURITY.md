@@ -290,9 +290,10 @@ Solo las siguientes rutas son accesibles sin autenticación:
 _PUBLIC_PREFIXES = (
     "/login", "/2fa", "/logout",
     "/favicon.ico", "/robots.txt", "/.well-known/",
-    "/static/css/",    # necesario para login/2FA antes de auth
+    "/static/css/",              # necesario para login/2FA antes de auth
     "/static/js/",
     "/static/fonts/",
+    "/static/img/flowcast-logo-", # logos del sidebar/login/2FA
 )
 ```
 
