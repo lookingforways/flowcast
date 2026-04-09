@@ -6,6 +6,33 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.8] — 2026-04-09
+
+### Cambiado
+
+**Marca — FlowCast**
+- Nombre oficial corregido a `FlowCast` (era `Flowcast`) en todo el texto visible de la app: templates, README, SECURITY.md, logos SVG, docstrings del servidor, TOTP issuer y user-agent del proxy
+- Identificadores de código (`flowcast`) y variables de entorno (`FLOWCAST`) sin cambios
+
+**Nuevo logo en toda la app**
+- Reemplazado SVG inline (curva + círculo) por el nuevo logo de círculo con barras de audio en sidebar, login y pantalla de TOTP
+- Dos variantes: `flowcast-logo-claro.svg` (círculo `#3584e4`, barras `#241F31`) y `flowcast-logo-oscuro.svg` (invertido) — cambian automáticamente con el tema
+- CSS `img.logo-light` / `img.logo-dark` con especificidad tag+clase para evitar conflictos con inline styles
+- `/static/img/flowcast-logo-` agregado a `_PUBLIC_PREFIXES` para que login/2FA carguen el logo sin sesión activa
+
+### Corregido
+
+- Logo duplicado en sidebar, login y 2FA — especificidad CSS corregida (`img.logo-dark` gana sobre `.fc-auth-logo { display: block }`)
+- Tamaño del logo en login/2FA — `width: 64px; height: 64px` en lugar de `display: block` que no restringía las dimensiones del SVG
+- Cache busting actualizado a `?v=0.9.19` en `base.html`, `login.html` y `totp_verify.html` (login/2FA estaban desactualizados en `?v=0.9.10`)
+
+### Infraestructura
+
+- `.gitignore` actualizado: excluye `CLAUDE.md` y `web-estilos/` del repositorio público
+- Sitio web `flowcast-web` iniciado en Astro (repositorio privado separado, Cloudflare Pages)
+
+---
+
 ## [0.9.7] — 2026-04-09
 
 ### Corregido
