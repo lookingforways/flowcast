@@ -202,11 +202,11 @@ dialog,
   flex-shrink: 0;
 }
 
-/* Logo claro/oscuro */
-.logo-light { display: block; }
-.logo-dark  { display: none; }
-[data-theme="dark"] .logo-light { display: none; }
-[data-theme="dark"] .logo-dark  { display: block; }
+/* Logo claro/oscuro — img.logo-dark/light para ganar sobre inline styles */
+img.logo-light { display: block; }
+img.logo-dark  { display: none; }
+[data-theme="dark"] img.logo-light { display: none; }
+[data-theme="dark"] img.logo-dark  { display: block; }
 
 .fc-app-name {
   font-size: 0.9375rem;
