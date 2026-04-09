@@ -109,6 +109,19 @@
         <button class="btn btn-outline-danger btn-sm" id="disconnectYtBtn">
           <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Desconectar YouTube
         </button>
+
+        <dialog id="dlgDisconnectYt" aria-labelledby="dlgDisconnectYtTitle">
+          <div class="dialog-header">
+            <h4 id="dlgDisconnectYtTitle">Desconectar YouTube</h4>
+          </div>
+          <div class="dialog-body">
+            <p>¿Desconectar YouTube? Necesitarás volver a autenticarte para publicar.</p>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn btn-ghost" data-close-dialog>Cancelar</button>
+            <button class="btn btn-danger" id="disconnectYtConfirm">Desconectar</button>
+          </div>
+        </dialog>
         {% else %}
         <p class="text-muted mb-3">
           Conecta tu canal de YouTube para publicar audiogramas automáticamente.
@@ -145,11 +158,22 @@ document.querySelectorAll('[data-close-alert]').forEach(function (btn) {
   });
 });
 
+// Close dialogs via data-close-dialog
+document.querySelectorAll('[data-close-dialog]').forEach(function (btn) {
+  btn.addEventListener('click', function () { btn.closest('dialog').close(); });
+});
+
 // Disconnect YouTube
-var disconnectBtn = document.getElementById('disconnectYtBtn');
-if (disconnectBtn) {
-  disconnectBtn.addEventListener('click', async function () {
-    if (!confirm('¿Desconectar YouTube? Necesitarás volver a autenticarte para publicar.')) return;
+var disconnectYtBtn = document.getElementById('disconnectYtBtn');
+if (disconnectYtBtn) {
+  disconnectYtBtn.addEventListener('click', function () {
+    document.getElementById('dlgDisconnectYt').showModal();
+  });
+}
+var disconnectConfirm = document.getElementById('disconnectYtConfirm');
+if (disconnectConfirm) {
+  disconnectConfirm.addEventListener('click', async function () {
+    document.getElementById('dlgDisconnectYt').close();
     await fetch('/api/youtube/disconnect', { method: 'POST' });
     location.reload();
   });

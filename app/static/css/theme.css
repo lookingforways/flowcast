@@ -104,6 +104,7 @@
 
 img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; }
+ul, ol { padding-left: 1.5rem; }
 
 /* ── Base ────────────────────────────────────────────────────────── */
 html {
