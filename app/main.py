@@ -1,4 +1,4 @@
-"""Flowcast — self-hosted audiogram generator."""
+"""FlowCast — self-hosted audiogram generator."""
 from __future__ import annotations
 
 import logging
@@ -34,12 +34,12 @@ _MAX_FORM_BODY = 2048
 
 _404_HTML = (
     "<!doctype html><html lang='es'><head><meta charset='UTF-8'>"
-    "<title>404 — Flowcast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
+    "<title>404 — FlowCast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
     "<h1>404</h1><p>Página no encontrada.</p><a href='/'>Volver al inicio</a></body></html>"
 )
 _500_HTML = (
     "<!doctype html><html lang='es'><head><meta charset='UTF-8'>"
-    "<title>Error — Flowcast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
+    "<title>Error — FlowCast</title></head><body style='font-family:sans-serif;text-align:center;padding:4rem'>"
     "<h1>Error</h1><p>Algo salió mal. Intentá de nuevo.</p><a href='/'>Volver al inicio</a></body></html>"
 )
 
@@ -52,11 +52,11 @@ async def lifespan(app: FastAPI):
     await init_db()
     await _ensure_default_template()
     start_scheduler()
-    logger.info("Flowcast started. Visit %s", settings.app_base_url)
+    logger.info("FlowCast started. Visit %s", settings.app_base_url)
     yield
     # Shutdown
     stop_scheduler()
-    logger.info("Flowcast stopped.")
+    logger.info("FlowCast stopped.")
 
 
 async def _ensure_default_template() -> None:
@@ -76,7 +76,7 @@ async def _ensure_default_template() -> None:
 
 
 app = FastAPI(
-    title="Flowcast",
+    title="FlowCast",
     description="Self-hosted audiogram generator for podcasts",
     version="0.9.7",
     openapi_url=None,

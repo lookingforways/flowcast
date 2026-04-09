@@ -1,4 +1,4 @@
-// Flowcast — shared utilities
+// FlowCast — shared utilities
 
 // Generic API request helper
 async function apiRequest(url, method = 'GET', body = null) {

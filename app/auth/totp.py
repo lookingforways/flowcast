@@ -43,7 +43,7 @@ def get_provisioning_uri() -> str:
     """Return the otpauth:// URI for QR code generation."""
     secret = get_or_create_secret()
     totp = pyotp.TOTP(secret)
-    return totp.provisioning_uri(name=settings.admin_username, issuer_name="Flowcast")
+    return totp.provisioning_uri(name=settings.admin_username, issuer_name="FlowCast")
 
 
 def get_qr_code_base64() -> str:

@@ -27,7 +27,7 @@ async def proxy_image(url: str = Query(...)):
 
     try:
         async with httpx.AsyncClient(timeout=10, follow_redirects=True, max_redirects=3) as client:
-            resp = await client.get(url, headers={"User-Agent": "Flowcast/1.0"})
+            resp = await client.get(url, headers={"User-Agent": "FlowCast/1.0"})
 
         if resp.status_code != 200:
             return Response(status_code=502)

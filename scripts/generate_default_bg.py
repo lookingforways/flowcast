@@ -1,4 +1,4 @@
-"""Generate the default background image for Flowcast.
+"""Generate the default background image for FlowCast.
 
 Run once during build or setup:
     python scripts/generate_default_bg.py

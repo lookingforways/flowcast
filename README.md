@@ -1,4 +1,4 @@
-# Flowcast
+# FlowCast
 
 Self-hosted audiogram generator para podcasts. Convierte episodios en videos 16:9 con forma de onda animada y los publica automáticamente en YouTube.
 
@@ -49,7 +49,7 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 
 ## Seguridad
 
-Flowcast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/100**.
+FlowCast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/100**.
 
 | Área | Implementación |
 |------|---------------|
@@ -181,7 +181,7 @@ Accede a `http://localhost:8000` (o tu dominio).
 
 ## Autenticación y 2FA
 
-Flowcast protege toda la interfaz con usuario/contraseña + TOTP (autenticación de dos factores).
+FlowCast protege toda la interfaz con usuario/contraseña + TOTP (autenticación de dos factores).
 
 ### Primer acceso
 
@@ -200,7 +200,7 @@ Flowcast protege toda la interfaz con usuario/contraseña + TOTP (autenticación
 ### Paso 1: Crear proyecto en Google Cloud
 
 1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crea un proyecto nuevo (p.ej. "Flowcast")
+2. Crea un proyecto nuevo (p.ej. "FlowCast")
 3. En el menú izquierdo: **APIs y servicios → Biblioteca**
 4. Busca **YouTube Data API v3** y actívala
 
@@ -236,7 +236,7 @@ Flowcast protege toda la interfaz con usuario/contraseña + TOTP (autenticación
 
 ### Paso 4: Conectar en la UI
 
-1. Ve a `/settings` en Flowcast
+1. Ve a `/settings` en FlowCast
 2. Click en **Conectar con YouTube**
 3. Autoriza el acceso con tu cuenta de Google
 
@@ -265,7 +265,7 @@ El render usa todos los cores disponibles. Se recomienda procesar episodios en l
 
 ## Actualizar schema de base de datos
 
-Si actualizás Flowcast y hay cambios en el schema de la DB:
+Si actualizás FlowCast y hay cambios en el schema de la DB:
 
 ```bash
 rm ~/flowcast/data/db/flowcast.db
@@ -298,7 +298,7 @@ YOUTUBE_PRIVACY=public    # o unlisted / private
 ```
 
 Reinicia el contenedor. A partir de ahora:
-- Cada 60 minutos Flowcast revisa el feed
+- Cada 60 minutos FlowCast revisa el feed
 - Los nuevos episodios se descargan, renderizan y publican automáticamente
 
 ---

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 70" role="img" aria-label="Flowcast">
-  <title>Flowcast</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 70" role="img" aria-label="FlowCast">
+  <title>FlowCast</title>
   <rect width="270" height="70" rx="12" fill="#3C3C3B"/>
   <path d="M 14,56 C 24,14 44,56 54,14"
         stroke="#00FF88" stroke-width="5.5" fill="none" stroke-linecap="round"/>
