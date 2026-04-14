@@ -1,2 +1,22 @@
 /* app.css — app-specific overrides on top of theme.css */
 /* Design system lives in theme.css. Add component-specific tweaks here. */
+
+/* ── Settings page — copyright footer ───────────────────────────────── */
+.fc-settings-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fc-border);
+  font-size: 0.75rem;
+  color: var(--fc-text-muted);
+}
+.fc-settings-footer a {
+  color: var(--fc-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.fc-settings-footer a:hover { color: var(--fc-text); }
