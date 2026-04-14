@@ -51,10 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyThemeUI(theme) {
     if (!icon || !label) return;
     if (theme === 'dark') {
-      icon.className  = 'bi bi-sun';
+      icon.className  = 'ph ph-sun';
       label.textContent = 'Claro';
     } else {
-      icon.className  = 'bi bi-moon';
+      icon.className  = 'ph ph-moon';
       label.textContent = 'Oscuro';
     }
   }
