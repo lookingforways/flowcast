@@ -416,3 +416,24 @@ Caddy está incluido en `docker-compose.yml` y maneja TLS automáticamente.
 4. Actualizá `APP_BASE_URL=https://tu-dominio.com` en `.env`
 5. Actualizá el URI de callback en Google Cloud Console: `https://tu-dominio.com/auth/youtube/callback`
 6. `docker compose up -d` — Caddy obtiene el certificado automáticamente
+
+---
+
+## Licencia
+
+Copyright (c) 2026 **Looking for Ways LLC** — Todos los derechos reservados.
+
+FlowCast se distribuye bajo la [PolyForm Noncommercial License 1.0.0](LICENSE).
+
+| | |
+|---|---|
+| ✅ Uso personal y educativo | Permitido |
+| ✅ Modificar y redistribuir | Permitido con atribución |
+| ❌ Uso comercial | **Prohibido** |
+| ❌ Vender o monetizar | **Prohibido** |
+| ℹ️ Atribución | Obligatoria — debe indicar "Based on FlowCast by Looking for Ways LLC" |
+| ℹ️ Garantía | Sin garantía de ningún tipo |
+
+**"FlowCast"** es una marca registrada de Looking for Ways LLC. Los forks y derivados no pueden usar el nombre "FlowCast" como nombre de su producto sin permiso escrito.
+
+Para licencias comerciales o consultas: [hello@lookingforways.com](mailto:hello@lookingforways.com)

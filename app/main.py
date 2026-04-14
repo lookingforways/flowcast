@@ -1,3 +1,9 @@
+# Copyright (c) 2026 Looking for Ways LLC. All rights reserved.
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# https://polyformproject.org/licenses/noncommercial/1.0.0/
+# Commercial use prohibited. Attribution required. No warranty.
+# For licensing inquiries: hello@lookingforways.com
+
 """FlowCast — self-hosted audiogram generator."""
 from __future__ import annotations
 
