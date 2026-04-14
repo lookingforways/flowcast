@@ -2,13 +2,21 @@
 /* Design system lives in theme.css. Add component-specific tweaks here. */
 
 /* ── Settings page — copyright footer ───────────────────────────────── */
+
+/* When the settings footer is present, make fc-main a flex column so
+   margin-top: auto on the footer pushes it to the bottom of the viewport. */
+.fc-main:has(.fc-settings-footer) {
+  display: flex;
+  flex-direction: column;
+}
+
 .fc-settings-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 16px;
-  margin-top: 32px;
+  margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--fc-border);
   font-size: 0.75rem;
