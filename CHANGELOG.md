@@ -6,6 +6,33 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.9] — 2026-04-14
+
+### Cambiado
+
+**Diseño — GNOME Adwaita real**
+- Tipografía migrada de Inter Variable a **Cantarell** (fuente oficial de GNOME), servida localmente en woff2 (Regular + Bold, latin + latin-ext)
+- Iconografía migrada de Bootstrap Icons a **Phosphor Icons** 2.1.2 (pesos regular + fill), también servida localmente
+- Controles tipo interruptor migrados de checkboxes Bootstrap a **AdwSwitch** (estilo GtkSwitch/AdwSwitchRow de GNOME): pista pill 56×30px, thumb circular de 24px, transición suave
+- Color del AdwSwitch activo: verde GNOME → `--fc-primary` (#3584e4), consistente con botones de acción principal
+
+### Corregido
+
+- `ph-list-task` (icono inexistente) reemplazado por `ph-list-checks` en el dashboard
+- `¿` y `¡` renderizados correctamente: excluidos de unicode-range de Cantarell para que el browser use system-ui en esos glifos
+- Fallback de fuentes `.woff/.ttf/.svg` eliminados de `phosphor.css` (solo se sirven woff2 — evitaba 404s en logs)
+- Theme toggle: clases `bi bi-sun/moon` → `ph ph-sun/moon` en `app.js`
+
+### Eliminado
+
+- `bootstrap-icons.css`, `bootstrap-icons.woff2`, `InterVariable.woff2` — ya no se usan
+
+### Seguridad
+
+- Auditoría completa post-migración: sin event handlers inline, todos los scripts con nonce, ningún `| safe` sin sanitizar, SSRF protegido en todos los endpoints externos
+
+---
+
 ## [0.9.8] — 2026-04-09
 
 ### Cambiado

@@ -58,7 +58,7 @@ FlowCast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/
 | Sesión | Cookie httponly, SameSite=Lax, Secure (en HTTPS), firmada con itsdangerous |
 | Headers HTTP | HSTS 2 años, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP — aplicados a **todas** las respuestas |
 | CSP | Nonce único por request; sin `unsafe-inline` en ninguna directiva; Bootstrap JS eliminado |
-| Sin CDN externo | Bootstrap Icons e Inter Variable servidos localmente — `style-src` y `font-src` solo desde `'self'` |
+| Sin CDN externo | Phosphor Icons y Cantarell servidos localmente — `style-src` y `font-src` solo desde `'self'` |
 | JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
 | Sanitización HTML | Descripciones RSS sanitizadas con `nh3` (ammonia) antes de guardar en DB — allowlist estricto de tags seguros; `html_to_text()` convierte a texto estructurado para YouTube |
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
