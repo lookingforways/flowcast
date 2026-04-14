@@ -54,16 +54,14 @@
           </div>
           <div class="form-text">Configura <code>POLL_INTERVAL_MINUTES</code> en <code>.env</code></div>
         </div>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox"
+        <label class="adw-switch-row">
+          <span class="adw-switch-label">
+            <span class="adw-switch-title">Publicación automática</span>
+            <span class="adw-switch-subtitle">Configura <code>FLOWCAST_AUTO_PUBLISH=true</code> en <code>.env</code></span>
+          </span>
+          <input type="checkbox" class="adw-switch" role="switch"
                  id="autoPublishToggle" {% if auto_publish %}checked{% endif %} disabled>
-          <label class="form-check-label" for="autoPublishToggle">
-            <strong>Publicación automática</strong>
-            <span class="text-muted small d-block">
-              Configura <code>FLOWCAST_AUTO_PUBLISH=true</code> en <code>.env</code>
-            </span>
-          </label>
-        </div>
+        </label>
       </div>
     </div>
 
