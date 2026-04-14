@@ -1,4 +1,4 @@
-avalos.xyz {
+your-domain.com {
     encode gzip zstd
     reverse_proxy flowcast:8000
 
