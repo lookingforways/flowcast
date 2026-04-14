@@ -4,16 +4,16 @@
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
-    <i class="bi bi-broadcast" aria-hidden="true"></i> Podcasts
+    <i class="ph ph-broadcast" aria-hidden="true"></i> Podcasts
   </h1>
   <button class="btn btn-primary" id="openNewPodcastBtn">
-    <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar podcast
+    <i class="ph ph-plus" aria-hidden="true"></i> Agregar podcast
   </button>
 </div>
 
 {% if not podcasts %}
 <div class="alert alert-info">
-  <i class="bi bi-info-circle" aria-hidden="true"></i>
+  <i class="ph ph-info" aria-hidden="true"></i>
   No hay podcasts configurados. Agrega tu primer podcast para empezar a importar episodios.
 </div>
 {% endif %}
@@ -24,12 +24,12 @@
     <div class="card h-100 {% if not p.is_active %}opacity-50{% endif %}">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span class="fw-semibold">
-          <i class="bi bi-broadcast" aria-hidden="true"></i> {{ p.name }}
+          <i class="ph ph-broadcast" aria-hidden="true"></i> {{ p.name }}
         </span>
         <div class="d-flex gap-2 align-items-center">
           {% if p.youtube_playlist_id %}
           <span class="badge bg-danger" title="Playlist: {{ p.youtube_playlist_id }}">
-            <i class="bi bi-collection-play" aria-hidden="true"></i> Playlist
+            <i class="ph ph-playlist" aria-hidden="true"></i> Playlist
           </span>
           {% endif %}
           <span class="badge {% if p.is_active %}bg-success{% else %}bg-secondary{% endif %}">
@@ -40,7 +40,7 @@
 
       <div class="card-body">
         <p class="text-muted small mb-1">
-          <i class="bi bi-rss" aria-hidden="true"></i>
+          <i class="ph ph-rss" aria-hidden="true"></i>
           <a href="{{ p.feed_url }}" target="_blank" rel="noopener noreferrer"
              class="text-truncate d-inline-block feed-url-link">{{ p.feed_url }}</a>
         </p>
@@ -51,13 +51,13 @@
         {% endif %}
         {% if p.youtube_playlist_id %}
         <p class="text-muted small mb-0 mt-1">
-          <i class="bi bi-youtube text-danger" aria-hidden="true"></i>
+          <i class="ph ph-youtube-logo text-danger" aria-hidden="true"></i>
           Playlist ID: <code>{{ p.youtube_playlist_id }}</code>
         </p>
         {% endif %}
         {% if p.default_template_id %}
         <p class="text-muted small mb-0 mt-1">
-          <i class="bi bi-palette" aria-hidden="true"></i> Plantilla: #{{ p.default_template_id }}
+          <i class="ph ph-palette" aria-hidden="true"></i> Plantilla: #{{ p.default_template_id }}
         </p>
         {% endif %}
       </div>
@@ -71,19 +71,19 @@
                 data-playlist="{{ p.youtube_playlist_id or '' }}"
                 data-template="{{ p.default_template_id or '' }}"
                 data-active="{{ p.is_active | lower }}">
-          <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+          <i class="ph ph-pencil" aria-hidden="true"></i> Editar
         </button>
         <button class="btn btn-sm btn-outline-success poll-btn"
                 data-id="{{ p.id }}" data-name="{{ p.name }}">
-          <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Revisar feed
+          <i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Revisar feed
         </button>
         <a href="/episodes?podcast_id={{ p.id }}" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-mic" aria-hidden="true"></i> Episodios
+          <i class="ph ph-microphone" aria-hidden="true"></i> Episodios
         </a>
         <button class="btn btn-sm btn-outline-danger delete-podcast-btn ms-auto"
                 data-id="{{ p.id }}" data-name="{{ p.name }}"
                 aria-label="Eliminar podcast {{ p.name }}">
-          <i class="bi bi-trash" aria-hidden="true"></i>
+          <i class="ph ph-trash" aria-hidden="true"></i>
         </button>
       </div>
     </div>
@@ -95,7 +95,7 @@
 <dialog id="newPodcastModal" aria-labelledby="newPodcastTitle" aria-modal="true">
   <div class="dialog-header">
     <h4 id="newPodcastTitle">
-      <i class="bi bi-broadcast" aria-hidden="true"></i> Agregar Podcast
+      <i class="ph ph-broadcast" aria-hidden="true"></i> Agregar Podcast
     </h4>
     <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
@@ -134,7 +134,7 @@
   <div class="dialog-footer">
     <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
     <button type="button" class="btn btn-primary" id="createPodcastBtn">
-      <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar
+      <i class="ph ph-plus" aria-hidden="true"></i> Agregar
     </button>
   </div>
 </dialog>
@@ -143,7 +143,7 @@
 <dialog id="editPodcastModal" aria-labelledby="editPodcastTitle" aria-modal="true">
   <div class="dialog-header">
     <h4 id="editPodcastTitle">
-      <i class="bi bi-pencil" aria-hidden="true"></i> Editar Podcast
+      <i class="ph ph-pencil" aria-hidden="true"></i> Editar Podcast
     </h4>
     <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
@@ -184,7 +184,7 @@
   <div class="dialog-footer">
     <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
     <button type="button" class="btn btn-primary" id="savePodcastBtn">
-      <i class="bi bi-floppy" aria-hidden="true"></i> Guardar
+      <i class="ph ph-floppy-disk" aria-hidden="true"></i> Guardar
     </button>
   </div>
 </dialog>
@@ -193,7 +193,7 @@
 <dialog id="deletePodcastModal" aria-labelledby="deletePodcastTitle" aria-modal="true">
   <div class="dialog-header dialog-header-destructive">
     <h4 id="deletePodcastTitle">
-      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Eliminar podcast
+      <i class="ph ph-warning" aria-hidden="true"></i> Eliminar podcast
     </h4>
     <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
@@ -206,7 +206,7 @@
       <li>Todos los renders MP4 generados</li>
     </ul>
     <p class="text-muted small">
-      <i class="bi bi-youtube text-danger" aria-hidden="true"></i>
+      <i class="ph ph-youtube-logo text-danger" aria-hidden="true"></i>
       Los videos ya publicados en YouTube permanecerán en tu canal.
     </p>
     <div class="form-check mt-3">
@@ -219,7 +219,7 @@
   <div class="dialog-footer">
     <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
     <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
-      <i class="bi bi-trash" aria-hidden="true"></i> Eliminar definitivamente
+      <i class="ph ph-trash" aria-hidden="true"></i> Eliminar definitivamente
     </button>
   </div>
 </dialog>

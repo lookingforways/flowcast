@@ -4,12 +4,12 @@
 {% block content %}
 <div class="mb-3">
   <a href="/templates" class="text-muted">
-    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver a plantillas
+    <i class="ph ph-arrow-left me-1" aria-hidden="true"></i>Volver a plantillas
   </a>
 </div>
 
 <h1 class="fc-page-title mb-4">
-  <i class="bi bi-palette" aria-hidden="true"></i> Editar: {{ template.name }}
+  <i class="ph ph-palette" aria-hidden="true"></i> Editar: {{ template.name }}
 </h1>
 
 <div class="fc-grid-7-5">
@@ -17,7 +17,7 @@
   <div>
     <div class="card template-sticky-card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa (aproximada)</span>
+        <span><i class="ph ph-eye me-1" aria-hidden="true"></i>Vista previa (aproximada)</span>
         <span class="badge bg-secondary">1920×1080</span>
       </div>
       <div class="card-body-p0 canvas-dark-bg">
@@ -53,7 +53,7 @@
 
       <div class="card mb-3">
         <div class="card-header">
-          <i class="bi bi-waveform me-1" aria-hidden="true"></i>Forma de onda
+          <i class="ph ph-waveform me-1" aria-hidden="true"></i>Forma de onda
         </div>
         <div class="card-body">
           <div class="row g-2">
@@ -85,7 +85,7 @@
 
       <div class="card mb-3">
         <div class="card-header">
-          <i class="bi bi-type me-1" aria-hidden="true"></i>Título del episodio
+          <i class="ph ph-text-t me-1" aria-hidden="true"></i>Título del episodio
         </div>
         <div class="card-body">
           <div class="row g-2">
@@ -125,7 +125,7 @@
       <div class="d-flex gap-2 justify-content-end">
         <a href="/templates" class="btn btn-outline-secondary">Cancelar</a>
         <button type="button" class="btn btn-primary" id="saveBtn">
-          <i class="bi bi-floppy me-1" aria-hidden="true"></i>Guardar cambios
+          <i class="ph ph-floppy-disk me-1" aria-hidden="true"></i>Guardar cambios
         </button>
       </div>
     </form>
@@ -271,7 +271,7 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
   if (resp.ok) {
     btn.textContent = '';
     var icon = document.createElement('i');
-    icon.className = 'bi bi-check-lg me-1';
+    icon.className = 'ph ph-check me-1';
     icon.setAttribute('aria-hidden', 'true');
     btn.appendChild(icon);
     btn.appendChild(document.createTextNode('Guardado'));
@@ -279,7 +279,7 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
     setTimeout(function () {
       btn.textContent = '';
       var icon2 = document.createElement('i');
-      icon2.className = 'bi bi-floppy me-1';
+      icon2.className = 'ph ph-floppy-disk me-1';
       icon2.setAttribute('aria-hidden', 'true');
       btn.appendChild(icon2);
       btn.appendChild(document.createTextNode('Guardar cambios'));

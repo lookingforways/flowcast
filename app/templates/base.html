@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}FlowCast{% endblock %}</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.9.20">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.20">
-  <link rel="stylesheet" href="/static/css/app.css?v=0.9.20">
+  <link rel="stylesheet" href="/static/css/phosphor.css?v=0.9.21">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.21">
+  <link rel="stylesheet" href="/static/css/app.css?v=0.9.21">
   {% block styles %}{% endblock %}
   {# Prevent flash of wrong theme: apply saved/system preference before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
@@ -36,22 +36,22 @@
     <nav class="fc-sidebar-nav" aria-label="Navegación principal">
       <a href="/"
          class="fc-nav-item {% if request.url.path == '/' %}active{% endif %}">
-        <i class="bi bi-speedometer2" aria-hidden="true"></i>
+        <i class="ph ph-gauge" aria-hidden="true"></i>
         <span>Dashboard</span>
       </a>
       <a href="/episodes"
          class="fc-nav-item {% if request.url.path.startswith('/episodes') %}active{% endif %}">
-        <i class="bi bi-mic" aria-hidden="true"></i>
+        <i class="ph ph-microphone" aria-hidden="true"></i>
         <span>Episodios</span>
       </a>
       <a href="/podcasts"
          class="fc-nav-item {% if '/podcasts' in request.url.path %}active{% endif %}">
-        <i class="bi bi-broadcast" aria-hidden="true"></i>
+        <i class="ph ph-broadcast" aria-hidden="true"></i>
         <span>Podcasts</span>
       </a>
       <a href="/templates"
          class="fc-nav-item {% if '/templates' in request.url.path %}active{% endif %}">
-        <i class="bi bi-palette" aria-hidden="true"></i>
+        <i class="ph ph-palette" aria-hidden="true"></i>
         <span>Plantillas</span>
       </a>
     </nav>
@@ -61,30 +61,30 @@
       {# YouTube connection status #}
       {% if youtube_connected %}
         <span class="fc-yt-badge fc-yt-connected">
-          <i class="bi bi-youtube" aria-hidden="true"></i>
+          <i class="ph ph-youtube-logo" aria-hidden="true"></i>
           YouTube conectado
         </span>
       {% else %}
         <a href="/auth/youtube" class="fc-yt-badge fc-yt-disconnected">
-          <i class="bi bi-youtube" aria-hidden="true"></i>
+          <i class="ph ph-youtube-logo" aria-hidden="true"></i>
           Conectar YouTube
         </a>
       {% endif %}
 
       <a href="/settings"
          class="fc-nav-item {% if '/settings' in request.url.path %}active{% endif %}">
-        <i class="bi bi-gear" aria-hidden="true"></i>
+        <i class="ph ph-gear" aria-hidden="true"></i>
         <span>Configuración</span>
       </a>
 
       {# Theme toggle #}
       <button class="fc-nav-item" id="theme-toggle" type="button" aria-label="Cambiar tema">
-        <i class="bi bi-moon" aria-hidden="true" id="theme-icon"></i>
+        <i class="ph ph-moon" aria-hidden="true" id="theme-icon"></i>
         <span id="theme-label">Oscuro</span>
       </button>
 
       <a href="/logout" class="fc-nav-item" aria-label="Cerrar sesión">
-        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        <i class="ph ph-sign-out" aria-hidden="true"></i>
         <span>Cerrar sesión</span>
       </a>
 
@@ -96,7 +96,7 @@
 
     {% if auto_publish %}
     <div class="fc-banner fc-banner-success" role="status">
-      <i class="bi bi-robot" aria-hidden="true"></i>
+      <i class="ph ph-robot" aria-hidden="true"></i>
       <strong>Modo automático activo</strong> — Los nuevos episodios se renderizan y publican automáticamente.
     </div>
     {% endif %}
@@ -107,7 +107,7 @@
 
 </div>{# /.fc-app #}
 
-<script src="/static/js/app.js?v=0.9.20" nonce="{{ request.state.csp_nonce }}"></script>
+<script src="/static/js/app.js?v=0.9.21" nonce="{{ request.state.csp_nonce }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

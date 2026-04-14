@@ -4,7 +4,7 @@
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
-    <i class="bi bi-mic" aria-hidden="true"></i> Episodios
+    <i class="ph ph-microphone" aria-hidden="true"></i> Episodios
     {% if current_podcast %}
     <span class="badge bg-primary ms-2">{{ current_podcast.name }}</span>
     {% endif %}
@@ -33,7 +33,7 @@
 
 <div class="card">
   <div class="card-header">
-    <i class="bi bi-list" aria-hidden="true"></i> Lista de episodios de tus podcasts. Filtrá por podcast o estado.
+    <i class="ph ph-list" aria-hidden="true"></i> Lista de episodios de tus podcasts. Filtrá por podcast o estado.
   </div>
   <div class="card-body-p0">
     <div class="table-wrapper fc-inset">
@@ -58,7 +58,7 @@
               {% if ep.youtube_id %}
               <a href="https://youtu.be/{{ ep.youtube_id }}" target="_blank" rel="noopener noreferrer"
                  class="ms-1 text-danger" aria-label="Ver en YouTube">
-                <i class="bi bi-youtube" aria-hidden="true"></i>
+                <i class="ph ph-youtube-logo" aria-hidden="true"></i>
               </a>
               {% endif %}
             </td>
@@ -79,7 +79,7 @@
               {% set _sl = {'discovered':'Descubierto','downloaded':'Descargado','rendered':'Renderizado','published':'Publicado','failed':'Error'} %}
               <span class="badge status-{{ ep.status }}">{{ _sl.get(ep.status, ep.status) }}</span>
               {% if ep.error_msg %}
-              <i class="bi bi-exclamation-triangle text-danger ms-1" title="{{ ep.error_msg }}" aria-hidden="true"></i>
+              <i class="ph ph-warning text-danger ms-1" title="{{ ep.error_msg }}" aria-hidden="true"></i>
               {% endif %}
             </td>
             <td>
@@ -91,20 +91,20 @@
                 {% if ep.status == 'discovered' or ep.status == 'failed' %}
                 <button class="btn btn-outline-primary btn-action" data-action="download" data-id="{{ ep.id }}"
                         title="Descargar MP3" aria-label="Descargar MP3">
-                  <i class="bi bi-download" aria-hidden="true"></i>
+                  <i class="ph ph-download" aria-hidden="true"></i>
                 </button>
                 {% endif %}
                 {% if ep.status == 'downloaded' or (ep.status == 'rendered' and not ep.youtube_id) or ep.status == 'failed' %}
                 <button class="btn btn-outline-warning btn-action" data-action="render" data-id="{{ ep.id }}"
                         data-episode-title="{{ ep.title[:60] }}"
                         title="Crear audiograma" aria-label="Crear audiograma">
-                  <i class="bi bi-film" aria-hidden="true"></i>
+                  <i class="ph ph-film-slate" aria-hidden="true"></i>
                 </button>
                 {% endif %}
                 {% if ep.status == 'rendered' and youtube_connected %}
                 <button class="btn btn-outline-danger btn-action" data-action="publish" data-id="{{ ep.id }}"
                         title="Publicar en YouTube" aria-label="Publicar en YouTube">
-                  <i class="bi bi-youtube" aria-hidden="true"></i>
+                  <i class="ph ph-youtube-logo" aria-hidden="true"></i>
                 </button>
                 {% endif %}
               </div>
@@ -122,7 +122,7 @@
 <dialog id="renderModal" aria-labelledby="renderModalTitle" aria-modal="true">
   <div class="dialog-header">
     <h4 id="renderModalTitle">
-      <i class="bi bi-film" aria-hidden="true"></i> Crear Audiograma
+      <i class="ph ph-film-slate" aria-hidden="true"></i> Crear Audiograma
     </h4>
     <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
@@ -140,7 +140,7 @@
   <div class="dialog-footer">
     <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
     <button type="button" class="btn btn-warning" id="confirmRenderBtn">
-      <i class="bi bi-film" aria-hidden="true"></i> Renderizar
+      <i class="ph ph-film-slate" aria-hidden="true"></i> Renderizar
     </button>
   </div>
 </dialog>

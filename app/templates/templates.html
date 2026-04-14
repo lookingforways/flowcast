@@ -4,16 +4,16 @@
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
-    <i class="bi bi-palette" aria-hidden="true"></i> Plantillas
+    <i class="ph ph-palette" aria-hidden="true"></i> Plantillas
   </h1>
   <button class="btn btn-primary" id="openNewTemplateBtn">
-    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva plantilla
+    <i class="ph ph-plus" aria-hidden="true"></i> Nueva plantilla
   </button>
 </div>
 
 {% if not templates %}
 <div class="alert alert-info">
-  <i class="bi bi-info-circle" aria-hidden="true"></i>
+  <i class="ph ph-info" aria-hidden="true"></i>
   No hay plantillas aún. Crea una para empezar.
 </div>
 {% endif %}
@@ -41,16 +41,16 @@
       </div>
       <div class="card-footer d-flex gap-2">
         <a href="/templates/{{ t.id }}/edit" class="btn btn-sm btn-outline-primary">
-          <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+          <i class="ph ph-pencil" aria-hidden="true"></i> Editar
         </a>
         {% if not t.is_default %}
         <button class="btn btn-sm btn-outline-success set-default-btn" data-id="{{ t.id }}">
-          <i class="bi bi-check-circle" aria-hidden="true"></i> Predeterminar
+          <i class="ph ph-check-circle" aria-hidden="true"></i> Predeterminar
         </button>
         <button class="btn btn-sm btn-outline-danger delete-tmpl-btn ms-auto"
                 data-id="{{ t.id }}" data-name="{{ t.name }}"
                 aria-label="Eliminar plantilla {{ t.name }}">
-          <i class="bi bi-trash" aria-hidden="true"></i>
+          <i class="ph ph-trash" aria-hidden="true"></i>
         </button>
         {% endif %}
       </div>
@@ -63,7 +63,7 @@
 <dialog id="newTemplateModal" aria-labelledby="newTemplateTitle" aria-modal="true">
   <div class="dialog-header">
     <h4 id="newTemplateTitle">
-      <i class="bi bi-palette" aria-hidden="true"></i> Nueva Plantilla
+      <i class="ph ph-palette" aria-hidden="true"></i> Nueva Plantilla
     </h4>
     <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
   </div>
@@ -74,7 +74,7 @@
   <div class="dialog-footer">
     <button type="button" class="btn btn-secondary" data-close-dialog>Cancelar</button>
     <button type="button" class="btn btn-primary" id="createTmplBtn">
-      <i class="bi bi-plus-lg" aria-hidden="true"></i> Crear
+      <i class="ph ph-plus" aria-hidden="true"></i> Crear
     </button>
   </div>
 </dialog>

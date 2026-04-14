@@ -4,7 +4,7 @@
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
-    <i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard
+    <i class="ph ph-gauge" aria-hidden="true"></i> Dashboard
   </h1>
 </div>
 
@@ -15,7 +15,7 @@
       <span class="fc-stat-value">{{ total_podcasts }}</span>
       <span class="fc-stat-label">Podcasts</span>
     </div>
-    <i class="bi bi-broadcast fc-stat-icon" aria-hidden="true"></i>
+    <i class="ph ph-broadcast fc-stat-icon" aria-hidden="true"></i>
   </div>
 
   <div class="fc-stat-card fc-stat-info">
@@ -23,7 +23,7 @@
       <span class="fc-stat-value">{{ total_eps }}</span>
       <span class="fc-stat-label">Total episodios</span>
     </div>
-    <i class="bi bi-mic fc-stat-icon" aria-hidden="true"></i>
+    <i class="ph ph-microphone fc-stat-icon" aria-hidden="true"></i>
   </div>
 
   <div class="fc-stat-card fc-stat-success">
@@ -31,7 +31,7 @@
       <span class="fc-stat-value">{{ published }}</span>
       <span class="fc-stat-label">Publicados en YouTube</span>
     </div>
-    <i class="bi bi-youtube fc-stat-icon" aria-hidden="true"></i>
+    <i class="ph ph-youtube-logo fc-stat-icon" aria-hidden="true"></i>
   </div>
 
   <div class="fc-stat-card fc-stat-warning">
@@ -39,7 +39,7 @@
       <span class="fc-stat-value">{{ pending }}</span>
       <span class="fc-stat-label">Pendientes</span>
     </div>
-    <i class="bi bi-hourglass-split fc-stat-icon" aria-hidden="true"></i>
+    <i class="ph ph-hourglass fc-stat-icon" aria-hidden="true"></i>
   </div>
 
 </div>
@@ -47,7 +47,7 @@
 {# YouTube connect prompt #}
 {% if not youtube_connected %}
 <div class="alert alert-warning mb-3">
-  <i class="bi bi-youtube me-1" aria-hidden="true"></i>
+  <i class="ph ph-youtube-logo me-1" aria-hidden="true"></i>
   YouTube no conectado — los renders no se publicarán automáticamente.
   <a href="/auth/youtube" class="btn btn-danger btn-sm ms-2">Conectar</a>
 </div>
@@ -56,7 +56,7 @@
 {# ── Últimos trabajos de render ──────────────────────────────────── #}
 <div class="card">
   <div class="card-header">
-    <i class="bi bi-list-task" aria-hidden="true"></i> Últimos trabajos de render
+    <i class="ph ph-list-task" aria-hidden="true"></i> Últimos trabajos de render
   </div>
   <div class="card-body-p0">
     {% if recent_jobs %}
@@ -103,7 +103,7 @@
               {% if job.episode and job.episode.youtube_id %}
               <a href="https://youtu.be/{{ job.episode.youtube_id }}" target="_blank" rel="noopener noreferrer"
                  class="badge status-published">
-                <i class="bi bi-youtube me-1" aria-hidden="true"></i>Ver video
+                <i class="ph ph-youtube-logo me-1" aria-hidden="true"></i>Ver video
               </a>
               {% else %}
               <span class="text-muted small">—</span>
@@ -126,7 +126,7 @@
     </div>
     {% else %}
     <div class="fc-empty-state">
-      <i class="bi bi-inbox" aria-hidden="true"></i>
+      <i class="ph ph-tray" aria-hidden="true"></i>
       Sin trabajos aún
     </div>
     {% endif %}

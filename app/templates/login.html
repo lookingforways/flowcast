@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Iniciar sesión — FlowCast</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/css/bootstrap-icons.css?v=0.9.20">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.20">
+  <link rel="stylesheet" href="/static/css/phosphor.css?v=0.9.21">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.21">
   {# Apply saved/system theme before first paint — prevents flash of wrong theme #}
   <script nonce="{{ request.state.csp_nonce }}">
     (function () {
@@ -95,7 +95,7 @@
 
         <div class="fc-field">
           <label for="username" class="form-label">
-            <i class="bi bi-person" aria-hidden="true"></i> Usuario
+            <i class="ph ph-user" aria-hidden="true"></i> Usuario
           </label>
           <input id="username" type="text" name="username" class="form-control"
                  placeholder="Usuario" maxlength="150"
@@ -104,7 +104,7 @@
 
         <div class="fc-field-last">
           <label for="password" class="form-label">
-            <i class="bi bi-lock" aria-hidden="true"></i> Contraseña
+            <i class="ph ph-lock" aria-hidden="true"></i> Contraseña
           </label>
           <input id="password" type="password" name="password" class="form-control"
                  placeholder="••••••••" minlength="8" maxlength="256"
@@ -112,7 +112,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary w-100">
-          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+          <i class="ph ph-arrow-circle-right" aria-hidden="true"></i>
           Continuar
         </button>
       </form>

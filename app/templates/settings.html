@@ -4,19 +4,19 @@
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
-    <i class="bi bi-gear" aria-hidden="true"></i> Configuración
+    <i class="ph ph-gear" aria-hidden="true"></i> Configuración
   </h1>
 </div>
 
 {% if request.query_params.get('youtube') == 'connected' %}
 <div class="alert alert-success mb-4" id="ytAlertSuccess">
-  <i class="bi bi-check-circle" aria-hidden="true"></i>
+  <i class="ph ph-check-circle" aria-hidden="true"></i>
   <strong>YouTube conectado correctamente.</strong>
   <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
 {% elif request.query_params.get('youtube') == 'error' %}
 <div class="alert alert-danger mb-4" id="ytAlertError">
-  <i class="bi bi-x-circle" aria-hidden="true"></i>
+  <i class="ph ph-x-circle" aria-hidden="true"></i>
   <strong>Error al conectar YouTube:</strong> {{ request.query_params.get('msg', '') }}
   <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
@@ -27,14 +27,14 @@
     {# Podcasts #}
     <div class="card mb-4">
       <div class="card-header">
-        <i class="bi bi-broadcast me-1" aria-hidden="true"></i>Podcasts y feeds RSS
+        <i class="ph ph-broadcast me-1" aria-hidden="true"></i>Podcasts y feeds RSS
       </div>
       <div class="card-body">
         <p class="text-muted mb-3">
           Los feeds RSS se configuran por podcast. Cada podcast puede tener su propio feed y playlist de YouTube.
         </p>
         <a href="/podcasts" class="btn btn-primary btn-sm">
-          <i class="bi bi-broadcast me-1" aria-hidden="true"></i>Gestionar Podcasts
+          <i class="ph ph-broadcast me-1" aria-hidden="true"></i>Gestionar Podcasts
         </a>
       </div>
     </div>
@@ -42,7 +42,7 @@
     {# Automatización #}
     <div class="card mb-4">
       <div class="card-header">
-        <i class="bi bi-clock me-1" aria-hidden="true"></i>Automatización
+        <i class="ph ph-clock me-1" aria-hidden="true"></i>Automatización
       </div>
       <div class="card-body">
         <div class="mb-3">
@@ -68,7 +68,7 @@
     {# YouTube Privacy #}
     <div class="card">
       <div class="card-header">
-        <i class="bi bi-youtube me-1" aria-hidden="true"></i>Configuración de YouTube
+        <i class="ph ph-youtube-logo me-1" aria-hidden="true"></i>Configuración de YouTube
       </div>
       <div class="card-body">
         <div class="mb-3">
@@ -88,7 +88,7 @@
     {# YouTube Auth #}
     <div class="card">
       <div class="card-header">
-        <i class="bi bi-youtube me-1" aria-hidden="true"></i>Autenticación YouTube
+        <i class="ph ph-youtube-logo me-1" aria-hidden="true"></i>Autenticación YouTube
       </div>
       <div class="card-body">
         {% if yt_status.connected %}
@@ -105,7 +105,7 @@
           </div>
         </div>
         <button class="btn btn-outline-danger btn-sm" id="disconnectYtBtn">
-          <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Desconectar YouTube
+          <i class="ph ph-x-circle me-1" aria-hidden="true"></i>Desconectar YouTube
         </button>
 
         <dialog id="dlgDisconnectYt" aria-labelledby="dlgDisconnectYtTitle">
@@ -127,7 +127,7 @@
           en tu <code>.env</code>.
         </p>
         <a href="/auth/youtube" class="btn btn-danger">
-          <i class="bi bi-youtube me-1" aria-hidden="true"></i>Conectar con YouTube
+          <i class="ph ph-youtube-logo me-1" aria-hidden="true"></i>Conectar con YouTube
         </a>
         <hr class="mt-4 mb-3">
         <p class="fw-semibold mb-2">¿Cómo obtener credenciales?</p>
