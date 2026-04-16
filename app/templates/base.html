@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}FlowCast{% endblock %}</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/css/phosphor.css?v=0.9.25">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.25">
-  <link rel="stylesheet" href="/static/css/app.css?v=0.9.25">
+  <link rel="stylesheet" href="/static/css/phosphor.css?v=0.9.25" integrity="sha384-Jq+Tyuj4AB+MqGuIAkAyFym/GnJHQIyBxV/PIEeIXUz7NhFhT/qbTr4KtXZbSTNx" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.25" integrity="sha384-BY/9/KOFv5j3aW0t8ts3Doz4O5WwjhjKj7k3szlAjoq0vMSHRGSrnaJt8CTAZJfA" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/app.css?v=0.9.25" integrity="sha384-vSu+hKAiiuG9bDnaQHHL+2yaGvlrjod2uwB2CTDM/+FURhjpSJA+Rxvlo34fCLhY" crossorigin="anonymous">
   {% block styles %}{% endblock %}
   {# Prevent flash of wrong theme: apply saved/system preference before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
@@ -107,7 +107,7 @@
 
 </div>{# /.fc-app #}
 
-<script src="/static/js/app.js?v=0.9.25" nonce="{{ request.state.csp_nonce }}"></script>
+<script src="/static/js/app.js?v=0.9.25" nonce="{{ request.state.csp_nonce }}" integrity="sha384-gHQOHfPcQSEgVc2c2/JW61HkOHlO6SIoPM3vrPmBMQYtQLf42XNQi4CeKhIeYd/k" crossorigin="anonymous"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

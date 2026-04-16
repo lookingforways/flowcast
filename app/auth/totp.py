@@ -23,10 +23,14 @@ def get_or_create_secret() -> str:
         if secret:
             return secret
 
-    # Generate a new secret
-    secret = pyotp.random_base32()
-    path.write_text(secret)
+    # Generate a new secret — restrict permissions before writing (prevents race condition)
     import os
+    secret = pyotp.random_base32()
+    old_umask = os.umask(0o177)
+    try:
+        path.write_text(secret)
+    finally:
+        os.umask(old_umask)
     os.chmod(path, 0o600)
     logger.info("Generated new TOTP secret at %s", path)
     return secret

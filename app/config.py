@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     secret_key: str = "change-me"
     log_level: str = "INFO"
     app_base_url: str = "http://localhost:8000"
+    security_contact: str = "security@your-domain.com"
 
     # Authentication
     admin_username: str = "admin"

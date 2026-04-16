@@ -331,7 +331,7 @@ Ambos son creados/actualizados con `os.chmod(path, 0o600)` explícito después d
 
 ## 17. Infraestructura (producción)
 
-- **TLS:** Caddy con HTTPS automático (Let's Encrypt) en dominio `avalos.xyz`.
+- **TLS:** Caddy con HTTPS automático (Let's Encrypt) en tu dominio de producción.
 - **Reverse proxy:** Caddy → Docker container (solo el puerto HTTP interno expuesto a localhost).
 - **Contenedor Docker:** usuario no-root, sin privilegios adicionales.
 - **`robots.txt`:** `Disallow: /` — evita indexación por crawlers.

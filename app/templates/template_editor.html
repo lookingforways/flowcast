@@ -154,7 +154,7 @@ var wmImage = null;
 function loadCurrentBg() {
   var img = new Image();
   img.crossOrigin = 'anonymous';
-  img.onload = function () { bgImage = img; drawPreview(); };
+  img.addEventListener('load', function () { bgImage = img; drawPreview(); });
   img.src = '/api/templates/' + TMPL_ID + '/background?t=' + Date.now();
 }
 
@@ -229,7 +229,7 @@ document.getElementById('bgUpload').addEventListener('change', async function (e
   if (resp.ok) {
     var url = URL.createObjectURL(file);
     bgImage = new Image();
-    bgImage.onload = drawPreview;
+    bgImage.addEventListener('load', drawPreview);
     bgImage.src = url;
   } else {
     alert('Error al subir la imagen de fondo');
@@ -245,7 +245,7 @@ document.getElementById('wmUpload').addEventListener('change', async function (e
   if (resp.ok) {
     var url = URL.createObjectURL(file);
     wmImage = new Image();
-    wmImage.onload = drawPreview;
+    wmImage.addEventListener('load', drawPreview);
     wmImage.src = url;
   }
 });

@@ -32,7 +32,7 @@ def _set_csrf_cookie(response, token: str) -> None:
     response.set_cookie(
         CSRF_COOKIE,
         token,
-        max_age=3600,
+        max_age=1800,
         httponly=True,
         samesite="lax",
         secure=_SECURE,
@@ -114,6 +114,7 @@ async def totp_page(request: Request):
 
 
 @router.post("/2fa")
+@limiter.limit("5/minute")
 async def totp_submit(
     request: Request,
     token: str = Form(...),

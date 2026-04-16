@@ -230,7 +230,7 @@ async def security_txt():
     from datetime import datetime, timezone
     expires = datetime.now(timezone.utc).replace(year=datetime.now().year + 1).strftime("%Y-%m-%dT00:00:00.000Z")
     content = (
-        f"Contact: mailto:support@lookingforways.com\n"
+        f"Contact: mailto:{settings.security_contact}\n"
         f"Expires: {expires}\n"
         f"Preferred-Languages: es, en\n"
         f"Canonical: {settings.app_base_url}/.well-known/security.txt\n"
