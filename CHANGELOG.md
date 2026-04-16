@@ -6,6 +6,23 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.10] — 2026-04-16
+
+### Seguridad
+
+- **C1**: dominio de producción real removido de `SECURITY.md`
+- **C2**: historial git reescrito con `git filter-repo` — eliminados todos los trailers `Co-Authored-By: Claude Sonnet 4.6` de ~93 commits (protección de propiedad intelectual)
+- **C3**: race condition en permisos del secreto TOTP — `os.umask(0o177)` antes de `write_text()` garantiza que el archivo nunca sea world-readable durante su creación
+- **A1**: rate limiting `5/minute` agregado al endpoint `POST /2fa` (igual que `/login`)
+- **A2**: `img.onload =` reemplazado por `addEventListener('load', ...)` en `template_editor.html` (3 instancias) — consistente con el modelo de seguridad declarado en SECURITY.md
+- **M1**: TTL del CSRF cookie reducido de 3600 a 1800 segundos
+- **M2**: `.env.example` incluye instrucción de generación de `SECRET_KEY` con `secrets.token_urlsafe(32)`
+- **M3**: email de contacto de seguridad movido a variable de entorno `SECURITY_CONTACT` (configurable en `.env`)
+- **L1**: atributos `integrity=` (sha384) y `crossorigin=` agregados a todos los assets CSS/JS en `base.html` — Subresource Integrity activo
+- **L2**: logs de `youtube_oauth.py` usan `exc_info=` en lugar de interpolación de mensaje de excepción
+
+---
+
 ## [0.9.9] — 2026-04-14
 
 ### Cambiado

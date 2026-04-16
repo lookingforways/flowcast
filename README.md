@@ -62,7 +62,8 @@ FlowCast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/
 | JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
 | Sanitización HTML | Descripciones RSS sanitizadas con `nh3` (ammonia) antes de guardar en DB — allowlist estricto de tags seguros; `html_to_text()` convierte a texto estructurado para YouTube |
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
-| Rate limiting | 5 req/minuto en `/login` (por IP); `/health` requiere autenticación |
+| Rate limiting | 5 req/minuto en `/login` y `/2fa` (por IP, con slowapi) |
+| SRI | `integrity=` sha384 en todos los assets CSS/JS — verifica integridad en el browser |
 | SSRF | Validación de URLs externas (IP privadas bloqueadas) antes de fetch RSS y descarga de MP3 |
 | Proxy de imágenes | `/api/img` descarga imágenes externas server-side con allowlist de content-types y límite 5 MB |
 | Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) derivando clave del `SECRET_KEY` |
@@ -334,6 +335,7 @@ Reinicia el contenedor. A partir de ahora:
 | `ADMIN_PASSWORD` | `change-me` | Contraseña del panel (¡cámbiala!) |
 | `SESSION_MAX_AGE` | `604800` | Duración de la sesión en segundos (default: 7 días) |
 | `LOG_LEVEL` | `INFO` | Nivel de log: DEBUG, INFO, WARNING, ERROR |
+| `SECURITY_CONTACT` | `security@your-domain.com` | Email publicado en `/.well-known/security.txt` |
 
 ---
 
