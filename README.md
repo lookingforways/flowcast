@@ -147,6 +147,70 @@ git pull && docker compose up -d --build
 
 ---
 
+## Deploy en Easypanel
+
+[Easypanel](https://easypanel.io) gestiona su propio reverse proxy (Traefik) con SSL automático, por lo que el contenedor de Caddy no es necesario. FlowCast incluye `docker-compose.easypanel.yml` para este caso.
+
+### 1. Crear el servidor en Easypanel
+
+En el panel de Easypanel, creá un nuevo proyecto y dentro de él un servicio de tipo **App**.
+
+### 2. Conectar el repositorio
+
+En la configuración del servicio:
+- **Source**: GitHub → `lookingforways/flowcast`
+- **Branch**: `main`
+- **Build method**: Dockerfile
+
+### 3. Configurar el Compose file
+
+En la sección **Docker Compose** del servicio, especificá el archivo alternativo:
+
+```
+docker-compose.easypanel.yml
+```
+
+### 4. Configurar las variables de entorno
+
+En la sección **Environment** del servicio, agregá como mínimo:
+
+```env
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+APP_BASE_URL=https://tu-dominio.com
+SECRET_KEY=una-clave-aleatoria-larga
+ADMIN_USERNAME=tu-usuario
+ADMIN_PASSWORD=una-contraseña-segura
+```
+
+> `DOMAIN` no es necesario — Easypanel gestiona el SSL y el dominio desde su propio panel.
+
+Para generar `SECRET_KEY`:
+```bash
+openssl rand -base64 32
+```
+
+### 5. Configurar el dominio
+
+En la sección **Domains** del servicio:
+- Agregá tu dominio (ej. `flowcast.app`)
+- Easypanel obtiene el certificado SSL automáticamente vía Let's Encrypt
+- Asegurate de que el registro DNS tipo `A` apunte a la IP del servidor
+
+### 6. Desplegar
+
+Hacé clic en **Deploy**. En el primer arranque Easypanel construye la imagen y levanta el contenedor.
+
+Para ver los logs en tiempo real, usá la pestaña **Logs** del servicio en el panel.
+
+Para actualizar cuando haya nuevos cambios:
+```bash
+git pull
+```
+Y redesplegá desde el panel o configurá el webhook de GitHub para deploys automáticos.
+
+---
+
 ## Inicio rápido (desarrollo local)
 
 ### 1. Clonar y configurar
