@@ -119,6 +119,10 @@ ADMIN_USERNAME=tu-usuario
 ADMIN_PASSWORD=una-contraseña-segura
 ```
 
+> **`DOMAIN` y `APP_BASE_URL`** usan el mismo dominio pero en formatos distintos:
+> `DOMAIN=flowcast.app` (solo host, para Caddy y el certificado SSL) y
+> `APP_BASE_URL=https://flowcast.app` (URL completa, para el callback de OAuth2 con YouTube).
+
 ### 5. Arrancar
 
 ```bash
@@ -318,7 +322,7 @@ Reinicia el contenedor. A partir de ahora:
 | `FLOWCAST_AUTO_PUBLISH` | `false` | Publicación automática al detectar nuevos eps |
 | `POLL_INTERVAL_MINUTES` | `60` | Frecuencia de revisión del feed (minutos) |
 | `YOUTUBE_PRIVACY` | `unlisted` | Privacidad: `public`, `unlisted`, `private` |
-| `YOUTUBE_CATEGORY_ID` | `22` | Categoría YouTube (22 = Personas y blogs) |
+| `YOUTUBE_CATEGORY_ID` | `22` | Categoría YouTube. Valores comunes: `22` People & Blogs, `27` Education, `28` Science & Technology, `24` Entertainment, `25` News & Politics. [Ver lista completa](https://developers.google.com/youtube/v3/docs/videoCategories/list) |
 | `MAX_RENDER_AGE_DAYS` | `30` | Días antes de limpiar MP4s del disco (0 = nunca) |
 | `DATA_DIR` | `/app/data` | Directorio de datos (DB, descargas, renders) |
 | `APP_BASE_URL` | `http://localhost:8000` | URL pública de la app (para OAuth2 callback) |
