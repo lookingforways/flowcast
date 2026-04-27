@@ -21,6 +21,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    command: ["sh", "-c", "sed \"s|FLOWCAST_DOMAIN|$$DOMAIN|\" /etc/caddy/Caddyfile > /tmp/Caddyfile && caddy run --config /tmp/Caddyfile"]
     ports:
       - "80:80"
       - "443:443"
