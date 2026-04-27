@@ -6,6 +6,17 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.11] — 2026-04-27
+
+### Correcciones
+
+- **Deploy**: `Caddyfile` ahora lee el dominio desde la variable de entorno `DOMAIN` — Caddy obtiene el certificado SSL correctamente en instalaciones nuevas sin editar el archivo manualmente
+- **Deploy**: servicio `caddy` en `docker-compose.yml` recibe el `.env` vía `env_file` para que `{env.DOMAIN}` resuelva en tiempo de ejecución
+- **Instalación**: `.env.example` incluye campo `DOMAIN` como requerido; `RSS_FEED_URL` eliminada (nunca fue usada por la app); generación de `SECRET_KEY` usa `openssl rand -base64 32` en lugar de Python
+- **README**: sección "Deploy en VPS" actualizada — eliminado paso de agregar SSH key (repo ya es público), `git clone` usa HTTPS, pasos renumerados, `DOMAIN` incluido en el snippet de variables requeridas
+
+---
+
 ## [0.9.10] — 2026-04-16
 
 ### Seguridad

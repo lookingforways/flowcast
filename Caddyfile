@@ -1,4 +1,4 @@
-your-domain.com {
+{env.DOMAIN} {
     encode gzip zstd
     reverse_proxy flowcast:8000
 

@@ -84,23 +84,14 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### 2. Agregar SSH key del VPS a GitHub
+### 2. Clonar el repositorio
 
 ```bash
-ssh-keygen -t ed25519 -C "flowcast-vps"
-cat ~/.ssh/id_ed25519.pub
-```
-
-Copiá la clave pública y agrégala en GitHub: **Settings → SSH and GPG keys → New SSH key**.
-
-### 3. Clonar el repositorio
-
-```bash
-git clone git@github.com:lookingforways/flowcast.git
+git clone https://github.com/lookingforways/flowcast.git
 cd flowcast
 ```
 
-### 4. Apuntar el dominio al VPS
+### 3. Apuntar el dominio al VPS
 
 En tu registrador de dominio, crea un registro DNS tipo `A`:
 ```
@@ -109,7 +100,7 @@ tu-dominio.com  →  IP-DE-TU-VPS
 
 Esperá a que propague (generalmente 1-5 minutos con TTL bajo).
 
-### 5. Configurar variables de entorno
+### 4. Configurar variables de entorno
 
 ```bash
 cp .env.example .env
@@ -119,6 +110,7 @@ nano .env
 Completá como mínimo:
 
 ```env
+DOMAIN=tu-dominio.com
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 APP_BASE_URL=https://tu-dominio.com
@@ -127,7 +119,7 @@ ADMIN_USERNAME=tu-usuario
 ADMIN_PASSWORD=una-contraseña-segura
 ```
 
-### 6. Arrancar
+### 5. Arrancar
 
 ```bash
 docker compose up -d
