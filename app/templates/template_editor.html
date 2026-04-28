@@ -71,15 +71,19 @@
             </div>
             <div class="col-6">
               <label class="form-label small" for="waveY">Posición Y</label>
-              <input type="range" class="form-range" id="waveY"
-                     min="0" max="810" value="{{ template.waveform_y }}">
-              <span class="small text-muted" id="waveYVal">{{ template.waveform_y }}px</span>
+              <div class="d-flex align-items-center gap-2">
+                <input type="range" class="form-range" id="waveY"
+                       min="0" max="810" value="{{ template.waveform_y }}">
+                <span class="small text-muted flex-shrink-0" id="waveYVal">{{ template.waveform_y }}px</span>
+              </div>
             </div>
             <div class="col-6">
               <label class="form-label small" for="waveH">Altura</label>
-              <input type="range" class="form-range" id="waveH"
-                     min="50" max="540" value="{{ template.waveform_h }}">
-              <span class="small text-muted" id="waveHVal">{{ template.waveform_h }}px</span>
+              <div class="d-flex align-items-center gap-2">
+                <input type="range" class="form-range" id="waveH"
+                       min="50" max="540" value="{{ template.waveform_h }}">
+                <span class="small text-muted flex-shrink-0" id="waveHVal">{{ template.waveform_h }}px</span>
+              </div>
             </div>
           </div>
         </div>
@@ -122,13 +126,15 @@
             </div>
             <div class="col-6">
               <label class="form-label small" for="titleX">Posición X</label>
-              <input type="range" class="form-range" id="titleX"
-                     min="0" max="1920" value="{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}"
-                     {% if template.title_x == '(w-text_w)/2' %}data-centered="1"{% endif %}>
-              <div class="d-flex align-items-center gap-2 mt-1">
-                <span class="small text-muted" id="titleXVal">
+              <div class="d-flex align-items-center gap-2">
+                <input type="range" class="form-range" id="titleX"
+                       min="0" max="1920" value="{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}"
+                       {% if template.title_x == '(w-text_w)/2' %}data-centered="1"{% endif %}>
+                <span class="small text-muted flex-shrink-0" id="titleXVal">
                   {% if template.title_x == '(w-text_w)/2' %}centrado{% else %}{{ template.title_x }}px{% endif %}
                 </span>
+              </div>
+              <div class="mt-1">
                 <button type="button" class="btn btn-xs btn-outline-secondary" id="centerTitleBtn"
                         title="Centrar texto automáticamente">
                   <i class="ph ph-align-center-horizontal" aria-hidden="true"></i> Centrar
@@ -137,9 +143,11 @@
             </div>
             <div class="col-6">
               <label class="form-label small" for="titleY">Posición Y</label>
-              <input type="range" class="form-range" id="titleY"
-                     min="0" max="1000" value="{{ template.title_y }}">
-              <span class="small text-muted" id="titleYVal">{{ template.title_y }}px</span>
+              <div class="d-flex align-items-center gap-2">
+                <input type="range" class="form-range" id="titleY"
+                       min="0" max="1000" value="{{ template.title_y }}">
+                <span class="small text-muted flex-shrink-0" id="titleYVal">{{ template.title_y }}px</span>
+              </div>
             </div>
           </div>
         </div>
