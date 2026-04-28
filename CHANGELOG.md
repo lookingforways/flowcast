@@ -6,6 +6,32 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.12] — 2026-04-27
+
+### Nuevas funcionalidades
+
+- **Editor de plantillas — Selector de tipografía**: elige entre Liberation, Montserrat, Lato, Bebas Neue y Ubuntu para el título del episodio; las fuentes se incluyen en la imagen con FFmpeg y se previsualizan en el editor
+- **Editor de plantillas — Posición X del título**: slider 0–1920 px con botón "Centrar" que guarda la expresión FFmpeg `(w-text_w)/2` para centrado automático independientemente del ancho del texto
+
+### Correcciones
+
+- **Deploy**: `Caddyfile` inyecta `DOMAIN` via `sed` en el startup del contenedor — `{env.DOMAIN}` no funciona como dirección de sitio en Caddy v2
+- **Deploy**: validación de `DOMAIN` antes de arrancar Caddy — el contenedor falla rápido con mensaje claro si la variable está vacía
+- **Editor de plantillas**: font picker corregido para cumplir CSP — `font-family` movido a clases CSS en bloque `<style nonce>` (los atributos `style=""` inline no son cubiertos por `nonce`)
+- **Editor de plantillas**: font picker legible en modo oscuro — color de texto explícito en las tarjetas "Aa"
+- **Editor de plantillas**: color picker reemplazado por swatch circular — muestra el color seleccionado correctamente (`appearance: none` de Bootstrap ocultaba el selector nativo)
+- **Editor de plantillas**: botón "Centrar" guarda `(w-text_w)/2` en lugar de `960` — el texto se centra dinámicamente sin importar su longitud
+- **Editor de plantillas**: valor `px` de los sliders alineado verticalmente al centro del slider (era un bloque debajo)
+- **Iconos Phosphor**: alineación vertical corregida con `vertical-align: -0.125em` — los iconos ya no se desplazan respecto al texto en listas
+
+### Documentación
+
+- **README**: guía completa de deploy en **Easypanel** (6 pasos) + archivo `docker-compose.easypanel.yml` alternativo
+- **README**: aclaración de `DOMAIN` (hostname, usado por Caddy/SSL) vs `APP_BASE_URL` (URL completa, usada por OAuth2)
+- **README**: tabla de categorías YouTube más comunes (`YOUTUBE_CATEGORY_ID`) con enlace a la lista completa
+
+---
+
 ## [0.9.11] — 2026-04-27
 
 ### Correcciones

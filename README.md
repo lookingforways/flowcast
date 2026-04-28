@@ -370,8 +370,9 @@ Reinicia el contenedor. A partir de ahora:
 2. En el editor:
    - Sube una **imagen de fondo** (PNG/JPG 1920×1080 recomendado)
    - Sube tu **logo/watermark** (opcional)
-   - Ajusta colores, posición y tamaño de la onda de audio
-   - Ajusta posición y tamaño del título
+   - Elige la **tipografía** del título: Liberation, Montserrat, Lato, Bebas Neue o Ubuntu
+   - Ajusta **color, tamaño y posición** (X/Y) del título — botón "Centrar" para centrado automático
+   - Ajusta **color, posición y altura** de la onda de audio
    - Vista previa en tiempo real
 3. Guarda y establece como plantilla predeterminada
 
