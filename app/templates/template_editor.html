@@ -58,9 +58,11 @@
         <div class="card-body">
           <div class="row g-2">
             <div class="col-6">
-              <label class="form-label small" for="waveColor">Color</label>
-              <input type="color" class="form-control form-control-color" id="waveColor"
-                     value="{{ template.waveform_color }}">
+              <label class="form-label small">Color</label>
+              <div class="color-pick-wrap">
+                <label class="color-pick-swatch" for="waveColor" aria-label="Seleccionar color de onda"></label>
+                <input type="color" class="color-pick-input" id="waveColor" value="{{ template.waveform_color }}">
+              </div>
             </div>
             <div class="col-6">
               <label class="form-label small">Modo</label>
@@ -107,9 +109,11 @@
             </div>
 
             <div class="col-6">
-              <label class="form-label small" for="titleColor">Color del texto</label>
-              <input type="color" class="form-control form-control-color" id="titleColor"
-                     value="{{ template.title_color }}">
+              <label class="form-label small">Color del texto</label>
+              <div class="color-pick-wrap">
+                <label class="color-pick-swatch" for="titleColor" aria-label="Seleccionar color de texto"></label>
+                <input type="color" class="color-pick-input" id="titleColor" value="{{ template.title_color }}">
+              </div>
             </div>
             <div class="col-6">
               <label class="form-label small" for="titleSize">Tamaño (px)</label>
@@ -154,6 +158,20 @@
 <style nonce="{{ request.state.csp_nonce }}">
   #previewCanvas { width: 100%; display: block; }
   .wave-mode-label { cursor: default; }
+
+  /* ── Color circle picker ─────────────────────────────────────── */
+  .color-pick-wrap { position: relative; display: inline-block; width: 38px; height: 38px; }
+  .color-pick-swatch {
+    display: block;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--fc-border);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .color-pick-swatch:hover { border-color: var(--fc-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc-primary) 20%, transparent); }
+  .color-pick-input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
   /* ── Font picker ─────────────────────────────────────────────── */
   {% for key, info in audiogram_fonts.items() %}
@@ -275,6 +293,15 @@ function drawPreview() {
   var el = document.getElementById(id);
   el.addEventListener('change', drawPreview);
   el.addEventListener('input', drawPreview);
+});
+
+// Color circle swatches — init background and sync on change
+['waveColor', 'titleColor'].forEach(function (id) {
+  var input = document.getElementById(id);
+  var swatch = input.previousElementSibling;
+  swatch.style.backgroundColor = input.value;
+  input.addEventListener('input', function () { swatch.style.backgroundColor = this.value; });
+  input.addEventListener('change', function () { swatch.style.backgroundColor = this.value; });
 });
 
 // Font picker
