@@ -123,8 +123,17 @@
             <div class="col-6">
               <label class="form-label small" for="titleX">Posición X</label>
               <input type="range" class="form-range" id="titleX"
-                     min="0" max="1920" value="{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}">
-              <span class="small text-muted" id="titleXVal">{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}px</span>
+                     min="0" max="1920" value="{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}"
+                     {% if template.title_x == '(w-text_w)/2' %}data-centered="1"{% endif %}>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="small text-muted" id="titleXVal">
+                  {% if template.title_x == '(w-text_w)/2' %}centrado{% else %}{{ template.title_x }}px{% endif %}
+                </span>
+                <button type="button" class="btn btn-xs btn-outline-secondary" id="centerTitleBtn"
+                        title="Centrar texto automáticamente">
+                  <i class="ph ph-align-center-horizontal" aria-hidden="true"></i> Centrar
+                </button>
+              </div>
             </div>
             <div class="col-6">
               <label class="form-label small" for="titleY">Posición Y</label>
@@ -272,8 +281,13 @@ function drawPreview() {
   var fontStack = document.getElementById('titleFont').dataset.fontStack || 'sans-serif';
   ctx.font = 'bold ' + titleSize + 'px ' + fontStack;
   ctx.fillStyle = titleColor;
-  ctx.textAlign = 'left';
-  ctx.fillText('Título del episodio de ejemplo', titleX, titleY);
+  if (titleXSlider.getAttribute('data-centered')) {
+    ctx.textAlign = 'center';
+    ctx.fillText('Título del episodio de ejemplo', 960, titleY);
+  } else {
+    ctx.textAlign = 'left';
+    ctx.fillText('Título del episodio de ejemplo', titleX, titleY);
+  }
 
   if (wmImage) {
     ctx.globalAlpha = 0.85;
@@ -291,10 +305,27 @@ function drawPreview() {
   }
 }
 
-['waveY', 'waveH', 'titleX', 'titleY'].forEach(function (id) {
+['waveY', 'waveH', 'titleY'].forEach(function (id) {
   var el = document.getElementById(id);
   var label = document.getElementById(id + 'Val');
   el.addEventListener('input', function () { label.textContent = el.value + 'px'; drawPreview(); });
+});
+
+// Title X slider — manual move cancels centering
+var titleXSlider = document.getElementById('titleX');
+var titleXVal    = document.getElementById('titleXVal');
+titleXSlider.addEventListener('input', function () {
+  titleXSlider.removeAttribute('data-centered');
+  titleXVal.textContent = titleXSlider.value + 'px';
+  drawPreview();
+});
+
+// Center button — restores FFmpeg auto-center expression
+document.getElementById('centerTitleBtn').addEventListener('click', function () {
+  titleXSlider.setAttribute('data-centered', '1');
+  titleXSlider.value = 960;
+  titleXVal.textContent = 'centrado';
+  drawPreview();
 });
 ['waveColor', 'titleColor', 'titleSize', 'showDuration', 'waveMode'].forEach(function (id) {
   var el = document.getElementById(id);
@@ -370,7 +401,7 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
     title_font:      document.getElementById('titleFont').value,
     title_color:     document.getElementById('titleColor').value,
     title_font_size: parseInt(document.getElementById('titleSize').value),
-    title_x:         String(parseInt(document.getElementById('titleX').value)),
+    title_x:         titleXSlider.getAttribute('data-centered') ? '(w-text_w)/2' : String(parseInt(titleXSlider.value)),
     title_y:         parseInt(document.getElementById('titleY').value),
     show_duration:   document.getElementById('showDuration').checked,
   };
