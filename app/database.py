@@ -24,8 +24,17 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Create all tables. Called at startup."""
+    """Create all tables and run lightweight column migrations."""
     from app.models import podcast, episode, template, job  # noqa: F401 — register models
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Add title_font column if upgrading from a pre-0.9.12 database
+        try:
+            await conn.execute(
+                __import__("sqlalchemy", fromlist=["text"]).text(
+                    "ALTER TABLE templates ADD COLUMN title_font VARCHAR(64) NOT NULL DEFAULT 'liberation'"
+                )
+            )
+        except Exception:
+            pass  # column already exists

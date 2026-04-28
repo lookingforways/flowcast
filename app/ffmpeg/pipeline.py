@@ -28,6 +28,37 @@ VIDEO_W = 1920
 VIDEO_H = 1080
 FPS = 25
 
+_FONTS_DIR = Path(__file__).parent.parent / "static" / "fonts" / "audiogram"
+
+# Available audiogram fonts: key → filename in _FONTS_DIR (OTF/TTF)
+AUDIOGRAM_FONTS: dict[str, dict] = {
+    "liberation": {
+        "label": "Liberation Sans",
+        "file": None,  # uses system path from settings
+        "css_stack": "Liberation Sans, Arial, sans-serif",
+    },
+    "montserrat": {
+        "label": "Montserrat",
+        "file": "Montserrat-Bold.otf",
+        "css_stack": "Montserrat, sans-serif",
+    },
+    "lato": {
+        "label": "Lato",
+        "file": "Lato-Bold.ttf",
+        "css_stack": "Lato, sans-serif",
+    },
+    "bebas": {
+        "label": "Bebas Neue",
+        "file": "Bebas-Regular.ttf",
+        "css_stack": "Bebas Neue, sans-serif",
+    },
+    "ubuntu": {
+        "label": "Ubuntu",
+        "file": "Ubuntu-Bold.ttf",
+        "css_stack": "Ubuntu, sans-serif",
+    },
+}
+
 
 def _clamp(val: object, lo: int, hi: int) -> "int | str":
     """Clamp a template numeric value to a safe range.
@@ -43,7 +74,14 @@ def _clamp(val: object, lo: int, hi: int) -> "int | str":
 
 
 def _resolve_font(template: Template) -> str:
-    """Return the font path to use, falling back to system default."""
+    """Return the font file path for FFmpeg, resolving the title_font key."""
+    key = getattr(template, "title_font", "liberation") or "liberation"
+    font_info = AUDIOGRAM_FONTS.get(key)
+    if font_info and font_info["file"]:
+        candidate = _FONTS_DIR / font_info["file"]
+        if candidate.exists():
+            return str(candidate)
+    # Fallback: legacy title_font_path, then system default
     if template.title_font_path and Path(template.title_font_path).exists():
         return template.title_font_path
     system = settings.default_font_path

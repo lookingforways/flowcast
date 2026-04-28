@@ -163,12 +163,14 @@ async def templates_page(request: Request, session: AsyncSession = Depends(get_s
 async def template_editor(template_id: int, request: Request, session: AsyncSession = Depends(get_session)):
     from fastapi import HTTPException
 
+    from app.ffmpeg.pipeline import AUDIOGRAM_FONTS
+
     tmpl = await session.get(Template, template_id)
     if tmpl is None:
         raise HTTPException(404, "Template not found")
     return templates.TemplateResponse(
         "template_editor.html",
-        {**_base_ctx(request), "template": tmpl},
+        {**_base_ctx(request), "template": tmpl, "audiogram_fonts": AUDIOGRAM_FONTS},
     )
 
 

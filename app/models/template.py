@@ -28,6 +28,7 @@ class Template(Base):
 
     # Title text
     title_font_path: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    title_font: Mapped[str] = mapped_column(String(64), default="liberation", nullable=False)
     title_font_size: Mapped[int] = mapped_column(Integer, default=64, nullable=False)
     title_color: Mapped[str] = mapped_column(String(16), default="#FFFFFF", nullable=False)
     title_x: Mapped[str] = mapped_column(String(128), default="(w-text_w)/2", nullable=False)

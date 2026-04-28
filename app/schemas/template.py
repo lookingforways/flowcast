@@ -12,6 +12,7 @@ class TemplateCreate(BaseModel):
     waveform_y: int = 810
     waveform_w: int = 1920
     waveform_h: int = 270
+    title_font: str = "liberation"
     title_font_size: int = 64
     title_color: str = "#FFFFFF"
     title_x: str = "(w-text_w)/2"
@@ -38,6 +39,7 @@ class TemplateOut(BaseModel):
     waveform_w: int
     waveform_h: int
     title_font_path: Optional[str]
+    title_font: str
     title_font_size: int
     title_color: str
     title_x: str

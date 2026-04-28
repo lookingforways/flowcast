@@ -89,6 +89,24 @@
         </div>
         <div class="card-body">
           <div class="row g-2">
+
+            <div class="col-12">
+              <label class="form-label small">Tipografía</label>
+              <div class="font-picker">
+                {% for key, info in audiogram_fonts.items() %}
+                <button type="button"
+                        class="font-card {% if template.title_font == key %}selected{% endif %}"
+                        data-font-key="{{ key }}"
+                        data-font-stack="{{ info.css_stack }}"
+                        style="font-family: '{{ info.css_stack.split(',')[0] }}';">
+                  <span class="font-card-aa">Aa</span>
+                  <span class="font-card-label">{{ info.label }}</span>
+                </button>
+                {% endfor %}
+              </div>
+              <input type="hidden" id="titleFont" value="{{ template.title_font }}">
+            </div>
+
             <div class="col-6">
               <label class="form-label small" for="titleColor">Color del texto</label>
               <input type="color" class="form-control form-control-color" id="titleColor"
@@ -137,6 +155,42 @@
 <style nonce="{{ request.state.csp_nonce }}">
   #previewCanvas { width: 100%; display: block; }
   .wave-mode-label { cursor: default; }
+
+  /* ── Font picker ─────────────────────────────────────────────── */
+  {% for key, info in audiogram_fonts.items() %}
+  {% if info.file %}
+  @font-face {
+    font-family: '{{ info.css_stack.split(",")[0].strip() }}';
+    src: url('/static/fonts/audiogram/{{ info.file }}');
+    font-display: block;
+  }
+  {% endif %}
+  {% endfor %}
+
+  .font-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .font-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 80px;
+    border: 2px solid var(--fc-border);
+    border-radius: var(--fc-radius);
+    background: var(--fc-bg);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    padding: 4px;
+  }
+  .font-card:hover { border-color: var(--fc-primary); background: var(--fc-bg-hover); }
+  .font-card.selected { border-color: var(--fc-primary); background: color-mix(in srgb, var(--fc-primary) 10%, transparent); }
+  .font-card-aa { font-size: 1.8rem; line-height: 1; margin-bottom: 4px; }
+  .font-card-label { font-size: 0.65rem; text-align: center; color: var(--fc-text-secondary); font-family: var(--fc-font); }
 </style>
 {% endblock %}
 
@@ -188,7 +242,8 @@ function drawPreview() {
   }
   ctx.stroke();
 
-  ctx.font = 'bold ' + titleSize + 'px sans-serif';
+  var fontStack = document.getElementById('titleFont').dataset.fontStack || 'sans-serif';
+  ctx.font = 'bold ' + titleSize + 'px ' + fontStack;
   ctx.fillStyle = titleColor;
   ctx.textAlign = 'center';
   ctx.fillText('Título del episodio de ejemplo', 960, titleY);
@@ -219,6 +274,25 @@ function drawPreview() {
   el.addEventListener('change', drawPreview);
   el.addEventListener('input', drawPreview);
 });
+
+// Font picker
+document.querySelectorAll('.font-card').forEach(function (card) {
+  card.addEventListener('click', function () {
+    document.querySelectorAll('.font-card').forEach(function (c) { c.classList.remove('selected'); });
+    card.classList.add('selected');
+    var input = document.getElementById('titleFont');
+    input.value = card.dataset.fontKey;
+    input.dataset.fontStack = card.dataset.fontStack;
+    drawPreview();
+  });
+});
+
+// Init font stack on load from selected card
+(function () {
+  var selected = document.querySelector('.font-card.selected');
+  var input = document.getElementById('titleFont');
+  if (selected) input.dataset.fontStack = selected.dataset.fontStack;
+}());
 
 document.getElementById('bgUpload').addEventListener('change', async function (e) {
   var file = e.target.files[0];
@@ -257,6 +331,7 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
     waveform_mode:   document.getElementById('waveMode').value,
     waveform_y:      parseInt(document.getElementById('waveY').value),
     waveform_h:      parseInt(document.getElementById('waveH').value),
+    title_font:      document.getElementById('titleFont').value,
     title_color:     document.getElementById('titleColor').value,
     title_font_size: parseInt(document.getElementById('titleSize').value),
     title_y:         parseInt(document.getElementById('titleY').value),
