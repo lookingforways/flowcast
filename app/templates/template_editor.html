@@ -97,9 +97,8 @@
                 <button type="button"
                         class="font-card {% if template.title_font == key %}selected{% endif %}"
                         data-font-key="{{ key }}"
-                        data-font-stack="{{ info.css_stack }}"
-                        style="font-family: '{{ info.css_stack.split(',')[0] }}';">
-                  <span class="font-card-aa">Aa</span>
+                        data-font-stack="{{ info.css_stack }}">
+                  <span class="font-card-aa" style="font-family: '{{ info.css_stack.split(',')[0].strip() }}', sans-serif;">Aa</span>
                   <span class="font-card-label">{{ info.label }}</span>
                 </button>
                 {% endfor %}
@@ -189,7 +188,7 @@
   }
   .font-card:hover { border-color: var(--fc-primary); background: var(--fc-bg-hover); }
   .font-card.selected { border-color: var(--fc-primary); background: color-mix(in srgb, var(--fc-primary) 10%, transparent); }
-  .font-card-aa { font-size: 1.8rem; line-height: 1; margin-bottom: 4px; }
+  .font-card-aa { font-size: 1.8rem; line-height: 1; margin-bottom: 4px; color: var(--fc-text); }
   .font-card-label { font-size: 0.65rem; text-align: center; color: var(--fc-text-secondary); font-family: var(--fc-font); }
 </style>
 {% endblock %}
