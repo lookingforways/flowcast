@@ -33,7 +33,7 @@ _FONTS_DIR = Path(__file__).parent.parent / "static" / "fonts" / "audiogram"
 # Available audiogram fonts: key → filename in _FONTS_DIR (OTF/TTF)
 AUDIOGRAM_FONTS: dict[str, dict] = {
     "liberation": {
-        "label": "Liberation Sans",
+        "label": "Liberation",
         "file": None,  # uses system path from settings
         "css_stack": "Liberation Sans, Arial, sans-serif",
     },

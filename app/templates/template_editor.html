@@ -120,7 +120,13 @@
               <input type="number" class="form-control form-control-sm" id="titleSize"
                      value="{{ template.title_font_size }}" min="12" max="200">
             </div>
-            <div class="col-12">
+            <div class="col-6">
+              <label class="form-label small" for="titleX">Posición X</label>
+              <input type="range" class="form-range" id="titleX"
+                     min="0" max="1920" value="{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}">
+              <span class="small text-muted" id="titleXVal">{{ template.title_x if template.title_x|int(-1) >= 0 else 960 }}px</span>
+            </div>
+            <div class="col-6">
               <label class="form-label small" for="titleY">Posición Y</label>
               <input type="range" class="form-range" id="titleY"
                      min="0" max="1000" value="{{ template.title_y }}">
@@ -238,6 +244,7 @@ function drawPreview() {
   var waveColor = document.getElementById('waveColor').value;
   var titleColor= document.getElementById('titleColor').value;
   var titleSize = parseInt(document.getElementById('titleSize').value);
+  var titleX    = parseInt(document.getElementById('titleX').value);
   var titleY    = parseInt(document.getElementById('titleY').value);
 
   ctx.clearRect(0, 0, 1920, 1080);
@@ -265,8 +272,8 @@ function drawPreview() {
   var fontStack = document.getElementById('titleFont').dataset.fontStack || 'sans-serif';
   ctx.font = 'bold ' + titleSize + 'px ' + fontStack;
   ctx.fillStyle = titleColor;
-  ctx.textAlign = 'center';
-  ctx.fillText('Título del episodio de ejemplo', 960, titleY);
+  ctx.textAlign = 'left';
+  ctx.fillText('Título del episodio de ejemplo', titleX, titleY);
 
   if (wmImage) {
     ctx.globalAlpha = 0.85;
@@ -284,7 +291,7 @@ function drawPreview() {
   }
 }
 
-['waveY', 'waveH', 'titleY'].forEach(function (id) {
+['waveY', 'waveH', 'titleX', 'titleY'].forEach(function (id) {
   var el = document.getElementById(id);
   var label = document.getElementById(id + 'Val');
   el.addEventListener('input', function () { label.textContent = el.value + 'px'; drawPreview(); });
@@ -363,6 +370,7 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
     title_font:      document.getElementById('titleFont').value,
     title_color:     document.getElementById('titleColor').value,
     title_font_size: parseInt(document.getElementById('titleSize').value),
+    title_x:         String(parseInt(document.getElementById('titleX').value)),
     title_y:         parseInt(document.getElementById('titleY').value),
     show_duration:   document.getElementById('showDuration').checked,
   };
