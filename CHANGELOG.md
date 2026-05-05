@@ -26,7 +26,7 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ### Documentación
 
-- **README**: guía completa de deploy en **Easypanel** (6 pasos) + archivo `docker-compose.easypanel.yml` alternativo
+- **README**: guía completa de deploy en **Easypanel** (6 pasos) + archivo `docker-compose.traefik.yml` alternativo (sin Caddy, para plataformas con proxy propio)
 - **README**: aclaración de `DOMAIN` (hostname, usado por Caddy/SSL) vs `APP_BASE_URL` (URL completa, usada por OAuth2)
 - **README**: tabla de categorías YouTube más comunes (`YOUTUBE_CATEGORY_ID`) con enlace a la lista completa
 

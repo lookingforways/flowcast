@@ -153,27 +153,41 @@ git pull && docker compose up -d --build
 
 ### 1. Crear proyecto y servicio
 
-En el panel de Easypanel: **Nuevo proyecto** → dentro del proyecto, **+ Servicio** → tipo **App**.
+En el panel de Easypanel: **Nuevo proyecto** → dentro del proyecto, **+ Servicio** → tipo **Aplicación** (App).
 
-### 2. Conectar el repositorio
+### 2. Fuente → GitHub
 
-En la pestaña **General** del servicio:
-- **Source**: GitHub → `lookingforways/flowcast`
+- **Propietario**: `lookingforways`
+- **Repositorio**: `flowcast`
 - **Branch**: `main`
-- **Build method**: Dockerfile
+- **Ruta de compilación**: `/`
+
+Das clic en **Guardar**
+
+### 3. Compilación
+
+- Seleccionas **Dockerfile**
+- En archivo ponés: Dockerfile
+
+Das clic en **Guardar**
 
 > El `Dockerfile` del repositorio ya construye la imagen correcta. No es necesario configurar ningún Compose file adicional.
 
-### 3. Configurar el volumen de datos
+### 4. Configurar el volumen de datos
 
-En la pestaña **Storage** del servicio, agregá un volumen:
-- **Mount path**: `/app/data`
+En la pestaña **Almacenamiento** del servicio, agregá un volumen en **Puntos de montaje**:
+- Clic en **Agregar montaje de volumen**
+- **Crear montaje de volumen**, pones
+   - **Nombre**: `data`
+   - **Ruta de montaje**: `/app/data`   
+
+Das clic en **Crear**   
 
 Esto asegura que la base de datos, los audios descargados y los videos renderizados persistan entre deploys.
 
 ### 4. Configurar las variables de entorno
 
-En la pestaña **Environment** del servicio, agregá como mínimo:
+En la pestaña **Entorno** del servicio, en **Variables de entorno** agregá como mínimo:
 
 ```env
 GOOGLE_CLIENT_ID=...
@@ -186,26 +200,48 @@ ADMIN_PASSWORD=una-contraseña-segura
 
 > `DOMAIN` no es necesario — Easypanel gestiona el SSL y el dominio desde su propio panel.
 
-Para generar `SECRET_KEY`:
+Para generar `SECRET_KEY` podes ejecutar en tu terminal:
 ```bash
 openssl rand -base64 32
 ```
 
 ### 5. Configurar el dominio
 
-En la pestaña **Domains** del servicio:
+En la pestaña **Dominios** del servicio para producción:
 - Agregá tu dominio (ej. `flowcast.app`)
+- Cambiá el puerto `8000`
+- Eliminá el dominio de desarrollo (`*.easypanel.host`) que te ofrece Easypanel
 - Easypanel obtiene el certificado SSL automáticamente vía Let's Encrypt
 - Asegurate de que el registro DNS tipo `A` apunte a la IP del servidor
 
+>Eliminá el dominio de desarrollo (`*.easypanel.host`) aunque agregues tu dominio propio, el subdominio de Easypanel sigue accesible públicamente. En producción esto expone tu instancia a cualquiera que conozca la URL. Eliminarlo fuerza todo el tráfico a pasar por tu dominio.
+
+**Dominio de desarrollo**: Easypanel asigna automáticamente un subdominio `*.easypanel.host` que podés usar para probar sin configurar un dominio propio.
+
+Si lo usás, asegurate de que el `APP_BASE_URL` en las variables de entorno coincida con esa URL (ej. `APP_BASE_URL=https://hello-flow3.a0q3j5.easypanel.host`). Para producción, eliminá este dominio y usá el tuyo propio — el subdominio de Easypanel queda accesible aunque agregues un dominio personalizado.  
+
 ### 6. Desplegar
 
-Hacé clic en **Deploy**. En el primer arranque Easypanel construye la imagen y levanta el contenedor.
+- Hacé clic en el botón **Detener** 
+- Clic en **Implementar**.
+- Clic en **Iniciar**
+
+En el primer arranque Easypanel construye la imagen y levanta el contenedor.
 
 Para ver los logs en tiempo real, usá la pestaña **Logs** del servicio en el panel.
 
-Para actualizar cuando haya nuevos cambios en el repo, hacé clic en **Deploy** nuevamente o activá el webhook de deploy automático desde la pestaña **General**.
-Y redesplegá desde el panel o configurá el webhook de GitHub para deploys automáticos.
+###Â 7. Actualizaciones
+
+**Manual**: cuando haya nuevos cambios en el repo, hacé clic en **Implementar** desde el panel de Easypanel.
+
+**Automático (webhook)**: en la sección **Activación de implementación** del servicio encontrás una URL única. Configurála en GitHub como webhook:
+
+- GitHub → tu repo → **Settings** → **Webhooks** → **Add webhook**
+- **Payload URL**: la URL que muestra Easypanel
+- **Content type**: `application/json`
+- **Which events**: `Just the push event`
+
+A partir de ahí, cada `git push` a `main` dispara un redeploy automático en Easypanel.
 
 ---
 
