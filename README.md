@@ -230,7 +230,7 @@ En el primer arranque Easypanel construye la imagen y levanta el contenedor.
 
 Para ver los logs en tiempo real, usá la pestaña **Logs** del servicio en el panel.
 
-###Â 7. Actualizaciones
+### 7. Actualizaciones
 
 **Manual**: cuando haya nuevos cambios en el repo, hacé clic en **Implementar** desde el panel de Easypanel.
 
