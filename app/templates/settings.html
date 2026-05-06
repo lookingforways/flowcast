@@ -264,23 +264,20 @@ if (disconnectConfirm) {
   });
 }
 
-// Tipografía — preview instantáneo vía inline style en body, guardado explícito
-var FONT_CSS = {
-  cantarell:  "'Cantarell', system-ui, -apple-system, sans-serif",
-  montserrat: "'Montserrat', system-ui, sans-serif",
-  lato:       "'Lato', system-ui, sans-serif",
-  ubuntu:     "'Ubuntu', system-ui, sans-serif"
-};
-var SIZE_PX = { S: '14px', M: '16px', L: '17px', XL: '19px', XXL: '21px' };
-
+// Tipografía — preview y save usan el mismo mecanismo que el toggle de tema
 var pendingFont   = '{{ ui_font_key }}';
 var pendingSize   = '{{ ui_font_size_key }}';
 var pendingWeight = '{{ ui_font_weight_key }}';
 
 function applyPreview() {
-  document.body.style.fontFamily = FONT_CSS[pendingFont];
-  document.body.style.fontSize   = SIZE_PX[pendingSize];
-  document.body.style.fontWeight = pendingWeight === 'bold' ? '700' : '400';
+  var root = document.documentElement;
+  root.setAttribute('data-ui-font', pendingFont);
+  root.setAttribute('data-ui-font-size', pendingSize);
+  if (pendingWeight === 'bold') {
+    root.setAttribute('data-ui-font-weight', 'bold');
+  } else {
+    root.removeAttribute('data-ui-font-weight');
+  }
 }
 
 function makePicker(attr, getter, setter) {

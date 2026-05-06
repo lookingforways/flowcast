@@ -1357,5 +1357,15 @@ dialog::backdrop {
   padding: 12px;
 }
 
+/* ── UI font overrides (data-attribute pattern, same as data-theme) ── */
+[data-ui-font="montserrat"] body { font-family: 'Montserrat', system-ui, sans-serif; }
+[data-ui-font="lato"]       body { font-family: 'Lato', system-ui, sans-serif; }
+[data-ui-font="ubuntu"]     body { font-family: 'Ubuntu', system-ui, sans-serif; }
+[data-ui-font-size="S"]   html { font-size: 14px; }
+[data-ui-font-size="M"]   html { font-size: 16px; }
+[data-ui-font-size="XL"]  html { font-size: 19px; }
+[data-ui-font-size="XXL"] html { font-size: 21px; }
+[data-ui-font-weight="bold"] body { font-weight: 700; }
+
 /* ── Template preview canvas wrapper ────────────────────────────────  */
 .canvas-dark-bg { background: #111827; }

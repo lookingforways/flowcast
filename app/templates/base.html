@@ -6,7 +6,7 @@
   <title>{% block title %}FlowCast{% endblock %}</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/static/css/phosphor.css?v=0.9.27" integrity="sha384-STZFZegGTX2Ajg6bvL7dklSWo7mUekitN7wCiXkoPGKOSxDtbXcmYRVHTmXanqrJ" crossorigin="anonymous">
-  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.27" integrity="sha384-Uy+gzlVnWW3b/C17mKNP8vKGsaxDUyt9wmx3YCUynXorPJ4csR+9+rKgLHmv04zg" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/css/theme.css?v=0.9.28" integrity="sha384-brS5uzYUrrT/fnx7iKoJep7so6vpVXUn/SAExdc35wvwZK9AkkR+xrAUq7l+NobQ" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/css/app.css?v=0.9.26" integrity="sha384-vSu+hKAiiuG9bDnaQHHL+2yaGvlrjod2uwB2CTDM/+FURhjpSJA+Rxvlo34fCLhY" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/css/ui-fonts.css?v=0.9.13" integrity="sha384-u+qA0WVBmJ3rgQlBrxfaSrCkadFaybenrzaTC9IMtX4FTJTNLX/inJLObYLlYd59" crossorigin="anonymous">
   {% block styles %}{% endblock %}
@@ -16,14 +16,10 @@
       var saved = localStorage.getItem('fc-theme');
       var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', saved || sys);
-      {% if ui_font_key != 'cantarell' %}
-      document.documentElement.style.setProperty('--fc-font', "{{ ui_font.css }}");
-      {% endif %}
-      {% if ui_font_size_key != 'L' %}
-      document.documentElement.style.setProperty('--fc-font-size', '{{ ui_font_size.px }}px');
-      {% endif %}
+      document.documentElement.setAttribute('data-ui-font', '{{ ui_font_key }}');
+      document.documentElement.setAttribute('data-ui-font-size', '{{ ui_font_size_key }}');
       {% if ui_font_weight_key == 'bold' %}
-      document.documentElement.style.setProperty('--fc-font-weight', '700');
+      document.documentElement.setAttribute('data-ui-font-weight', 'bold');
       {% endif %}
     }());
   </script>
