@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.auth.youtube_oauth import is_connected
 from app.config import settings
 from app.database import get_session
+from app.services.preferences import UI_FONTS, get_ui_font
 from app.models.episode import Episode
 from app.models.job import RenderJob
 from app.models.podcast import Podcast
@@ -35,10 +36,14 @@ templates.env.filters["format_secs"] = _format_secs
 
 
 def _base_ctx(request: Request) -> dict:
+    font_key = get_ui_font()
     return {
         "request": request,
         "youtube_connected": is_connected(),
         "auto_publish": settings.flowcast_auto_publish,
+        "ui_font_key": font_key,
+        "ui_font": UI_FONTS.get(font_key, UI_FONTS["cantarell"]),
+        "ui_fonts": UI_FONTS,
     }
 
 

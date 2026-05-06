@@ -22,8 +22,9 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.auth.limiter import limiter
 from app.auth.session import is_fully_authenticated
 from app.config import settings
-from app.database import init_db
-from app.routers import auth, episodes, jobs, podcasts, proxy, templates, ui, youtube
+from app.database import AsyncSessionLocal, init_db
+from app.routers import auth, episodes, jobs, podcasts, preferences, proxy, templates, ui, youtube
+from app.services.preferences import init_preferences
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(
@@ -57,6 +58,8 @@ async def lifespan(app: FastAPI):
     settings.ensure_dirs()
     await init_db()
     await _ensure_default_template()
+    async with AsyncSessionLocal() as session:
+        await init_preferences(session)
     start_scheduler()
     logger.info("FlowCast started. Visit %s", settings.app_base_url)
     yield
@@ -207,6 +210,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth.router)
 app.include_router(proxy.router)
+app.include_router(preferences.router)
 app.include_router(ui.router)
 app.include_router(podcasts.router)
 app.include_router(episodes.router)

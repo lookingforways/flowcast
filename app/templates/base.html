@@ -9,6 +9,19 @@
   <link rel="stylesheet" href="/static/css/theme.css?v=0.9.26" integrity="sha384-BY/9/KOFv5j3aW0t8ts3Doz4O5WwjhjKj7k3szlAjoq0vMSHRGSrnaJt8CTAZJfA" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/css/app.css?v=0.9.26" integrity="sha384-vSu+hKAiiuG9bDnaQHHL+2yaGvlrjod2uwB2CTDM/+FURhjpSJA+Rxvlo34fCLhY" crossorigin="anonymous">
   {% block styles %}{% endblock %}
+  {# UI font override — only emitted when a non-default font is selected #}
+  {% if ui_font_key and ui_font_key != 'cantarell' %}
+  <style nonce="{{ request.state.csp_nonce }}">
+    @font-face {
+      font-family: '{{ ui_font.label }}';
+      src: url('/static/fonts/{{ ui_font.file }}') format('{{ ui_font.format }}');
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root { --fc-font: {{ ui_font.css }}; }
+  </style>
+  {% endif %}
   {# Prevent flash of wrong theme: apply saved/system preference before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
     (function () {

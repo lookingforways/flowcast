@@ -1,6 +1,37 @@
 {% extends "base.html" %}
 {% block title %}Configuración — FlowCast{% endblock %}
 
+{% block styles %}
+<style nonce="{{ request.state.csp_nonce }}">
+  @font-face {
+    font-family: 'Montserrat';
+    src: url('/static/fonts/audiogram/Montserrat-Bold.otf') format('opentype');
+    font-weight: 400 700; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Lato';
+    src: url('/static/fonts/audiogram/Lato-Bold.ttf') format('truetype');
+    font-weight: 400 700; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Ubuntu';
+    src: url('/static/fonts/audiogram/Ubuntu-Bold.ttf') format('truetype');
+    font-weight: 400 700; font-style: normal; font-display: swap;
+  }
+  .font-option { cursor: pointer; border: 2px solid var(--fc-border); border-radius: 12px; padding: 0.75rem 1rem; text-align: center; background: var(--fc-surface); transition: border-color 0.15s, background 0.15s; }
+  .font-option:hover { border-color: var(--fc-primary); }
+  .font-option.selected { border-color: var(--fc-primary); background: color-mix(in srgb, var(--fc-primary) 10%, transparent); }
+  .font-option-preview { font-size: 1.25rem; line-height: 1.2; }
+  .font-option-label { font-size: 0.75rem; color: var(--fc-text-muted); margin-top: 0.25rem; }
+  .font-option-preview.f-cantarell  { font-family: 'Cantarell', system-ui, sans-serif; }
+  .font-option-preview.f-montserrat { font-family: 'Montserrat', system-ui, sans-serif; }
+  .font-option-preview.f-lato       { font-family: 'Lato', system-ui, sans-serif; }
+  .font-option-preview.f-ubuntu     { font-family: 'Ubuntu', system-ui, sans-serif; }
+  .font-picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+  @media (max-width: 480px) { .font-picker-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="fc-page-header">
   <h1 class="fc-page-title">
@@ -24,6 +55,26 @@
 
 <div class="fc-grid-2col">
   <div>
+    {# Tipografía de la interfaz #}
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="ph ph-text-t me-1" aria-hidden="true"></i>Tipografía de la interfaz
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-3 small">Cambia la fuente de toda la interfaz. Se aplica inmediatamente y se mantiene entre dispositivos.</p>
+        <div class="font-picker-grid">
+          {% for key, info in ui_fonts.items() %}
+          <div class="font-option {% if ui_font_key == key %}selected{% endif %}"
+               data-font="{{ key }}" role="button" tabindex="0"
+               aria-pressed="{{ 'true' if ui_font_key == key else 'false' }}">
+            <div class="font-option-preview f-{{ key }}">Aa</div>
+            <div class="font-option-label">{{ info.label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
     {# Podcasts #}
     <div class="card mb-4">
       <div class="card-header">
@@ -186,5 +237,31 @@ if (disconnectConfirm) {
     location.reload();
   });
 }
+
+// Font picker
+var fontOptions = document.querySelectorAll('.font-option');
+fontOptions.forEach(function (opt) {
+  function selectFont() {
+    var font = opt.dataset.font;
+    fontOptions.forEach(function (o) {
+      o.classList.remove('selected');
+      o.setAttribute('aria-pressed', 'false');
+    });
+    opt.classList.add('selected');
+    opt.setAttribute('aria-pressed', 'true');
+    fetch('/api/preferences/ui-font', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ font: font })
+    }).then(function (r) {
+      if (r.ok) { location.reload(); }
+      else { showToast('Error al guardar la tipografía', 'danger'); }
+    });
+  }
+  opt.addEventListener('click', selectFont);
+  opt.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectFont(); }
+  });
+});
 </script>
 {% endblock %}

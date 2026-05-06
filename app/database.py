@@ -29,12 +29,13 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        text = __import__("sqlalchemy", fromlist=["text"]).text
         # Add title_font column if upgrading from a pre-0.9.12 database
         try:
             await conn.execute(
-                __import__("sqlalchemy", fromlist=["text"]).text(
-                    "ALTER TABLE templates ADD COLUMN title_font VARCHAR(64) NOT NULL DEFAULT 'liberation'"
-                )
+                text("ALTER TABLE templates ADD COLUMN title_font VARCHAR(64) NOT NULL DEFAULT 'liberation'")
             )
         except Exception:
             pass  # column already exists
+        # Ensure app_preferences row exists (created by init_preferences at startup)
+        # — table is created by create_all above via AppPreferences model
