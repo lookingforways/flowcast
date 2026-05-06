@@ -85,9 +85,10 @@
   --fc-radius-lg:  12px;
 
   /* Typography */
-  --fc-font:      'Cantarell', system-ui, -apple-system, sans-serif;
-  --fc-font-mono: 'Iosevka', 'Cascadia Code', ui-monospace, monospace;
-  --fc-font-size: 17px;
+  --fc-font:        'Cantarell', system-ui, -apple-system, sans-serif;
+  --fc-font-mono:   'Iosevka', 'Cascadia Code', ui-monospace, monospace;
+  --fc-font-size:   17px;
+  --fc-font-weight: 400;
 
   /* Elevation */
   --fc-shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.08);
@@ -142,6 +143,7 @@ html {
 body {
   font-family: var(--fc-font);
   font-size: 1rem;
+  font-weight: var(--fc-font-weight);
   line-height: 1.5;
   color: var(--fc-text);
   background: var(--fc-bg-window);
