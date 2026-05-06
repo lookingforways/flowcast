@@ -10,12 +10,13 @@
   <link rel="stylesheet" href="/static/css/app.css?v=0.9.26" integrity="sha384-vSu+hKAiiuG9bDnaQHHL+2yaGvlrjod2uwB2CTDM/+FURhjpSJA+Rxvlo34fCLhY" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/css/ui-fonts.css?v=0.9.13" integrity="sha384-u+qA0WVBmJ3rgQlBrxfaSrCkadFaybenrzaTC9IMtX4FTJTNLX/inJLObYLlYd59" crossorigin="anonymous">
   {% block styles %}{% endblock %}
-  {# UI font/size override — only emitted when non-default values are saved #}
-  {% if ui_font_key != 'cantarell' or ui_font_size_key != 'L' %}
+  {# UI typography override — direct rule on body to guarantee cascade #}
+  {% if ui_font_key != 'cantarell' or ui_font_size_key != 'L' or ui_font_weight_key != 'normal' %}
   <style nonce="{{ request.state.csp_nonce }}">
-    :root {
-      {% if ui_font_key != 'cantarell' %}--fc-font: {{ ui_font.css }};{% endif %}
-      {% if ui_font_size_key != 'L' %}--fc-font-size: {{ ui_font_size.px }}px;{% endif %}
+    body, button, input, select, textarea {
+      {% if ui_font_key != 'cantarell' %}font-family: {{ ui_font.css }};{% endif %}
+      {% if ui_font_size_key != 'L' %}font-size: {{ ui_font_size.px }}px;{% endif %}
+      {% if ui_font_weight_key == 'bold' %}font-weight: 700;{% endif %}
     }
   </style>
   {% endif %}

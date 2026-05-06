@@ -44,3 +44,10 @@ async def init_db() -> None:
             )
         except Exception:
             pass  # column already exists
+        # Add ui_font_weight column if upgrading from a pre-0.9.13 database
+        try:
+            await conn.execute(
+                text("ALTER TABLE app_preferences ADD COLUMN ui_font_weight VARCHAR(16) NOT NULL DEFAULT 'normal'")
+            )
+        except Exception:
+            pass  # column already exists

@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.auth.youtube_oauth import is_connected
 from app.config import settings
 from app.database import get_session
-from app.services.preferences import UI_FONTS, UI_FONT_SIZES, get_ui_font, get_ui_font_size
+from app.services.preferences import UI_FONTS, UI_FONT_SIZES, UI_FONT_WEIGHTS, get_ui_font, get_ui_font_size, get_ui_font_weight
 from app.models.episode import Episode
 from app.models.job import RenderJob
 from app.models.podcast import Podcast
@@ -38,6 +38,7 @@ templates.env.filters["format_secs"] = _format_secs
 def _base_ctx(request: Request) -> dict:
     font_key = get_ui_font()
     size_key = get_ui_font_size()
+    weight_key = get_ui_font_weight()
     return {
         "request": request,
         "youtube_connected": is_connected(),
@@ -48,6 +49,8 @@ def _base_ctx(request: Request) -> dict:
         "ui_font_size_key": size_key,
         "ui_font_size": UI_FONT_SIZES.get(size_key, UI_FONT_SIZES["L"]),
         "ui_font_sizes": UI_FONT_SIZES,
+        "ui_font_weight_key": weight_key,
+        "ui_font_weights": UI_FONT_WEIGHTS,
     }
 
 

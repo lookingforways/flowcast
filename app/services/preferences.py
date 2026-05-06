@@ -32,19 +32,26 @@ UI_FONT_SIZES: dict[str, dict] = {
     "XXL": {"label": "XXL", "px": 21},
 }
 
+UI_FONT_WEIGHTS: dict[str, dict] = {
+    "normal": {"label": "Normal"},
+    "bold":   {"label": "Negrita"},
+}
+
 _ui_font: str = "cantarell"
 _ui_font_size: str = "L"
+_ui_font_weight: str = "normal"
 
 
 async def init_preferences(session: AsyncSession) -> None:
-    global _ui_font, _ui_font_size
+    global _ui_font, _ui_font_size, _ui_font_weight
     pref = (await session.execute(select(AppPreferences))).scalar_one_or_none()
     if pref is None:
-        pref = AppPreferences(id=1, ui_font="cantarell", ui_font_size="L")
+        pref = AppPreferences(id=1, ui_font="cantarell", ui_font_size="L", ui_font_weight="normal")
         session.add(pref)
         await session.commit()
     _ui_font = pref.ui_font
     _ui_font_size = pref.ui_font_size
+    _ui_font_weight = getattr(pref, "ui_font_weight", "normal")
 
 
 def get_ui_font() -> str:
@@ -55,7 +62,12 @@ def get_ui_font_size() -> str:
     return _ui_font_size
 
 
-def set_preferences(font: str, size: str) -> None:
-    global _ui_font, _ui_font_size
+def get_ui_font_weight() -> str:
+    return _ui_font_weight
+
+
+def set_preferences(font: str, size: str, weight: str) -> None:
+    global _ui_font, _ui_font_size, _ui_font_weight
     _ui_font = font
     _ui_font_size = size
+    _ui_font_weight = weight
