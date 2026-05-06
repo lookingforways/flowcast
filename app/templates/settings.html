@@ -3,32 +3,24 @@
 
 {% block styles %}
 <style nonce="{{ request.state.csp_nonce }}">
-  @font-face {
-    font-family: 'Montserrat';
-    src: url('/static/fonts/audiogram/Montserrat-Bold.otf') format('opentype');
-    font-weight: 400 700; font-style: normal; font-display: swap;
-  }
-  @font-face {
-    font-family: 'Lato';
-    src: url('/static/fonts/audiogram/Lato-Bold.ttf') format('truetype');
-    font-weight: 400 700; font-style: normal; font-display: swap;
-  }
-  @font-face {
-    font-family: 'Ubuntu';
-    src: url('/static/fonts/audiogram/Ubuntu-Bold.ttf') format('truetype');
-    font-weight: 400 700; font-style: normal; font-display: swap;
-  }
-  .font-option { cursor: pointer; border: 2px solid var(--fc-border); border-radius: 12px; padding: 0.75rem 1rem; text-align: center; background: var(--fc-surface); transition: border-color 0.15s, background 0.15s; }
-  .font-option:hover { border-color: var(--fc-primary); }
-  .font-option.selected { border-color: var(--fc-primary); background: color-mix(in srgb, var(--fc-primary) 10%, transparent); }
-  .font-option-preview { font-size: 1.25rem; line-height: 1.2; }
-  .font-option-label { font-size: 0.75rem; color: var(--fc-text-muted); margin-top: 0.25rem; }
-  .font-option-preview.f-cantarell  { font-family: 'Cantarell', system-ui, sans-serif; }
-  .font-option-preview.f-montserrat { font-family: 'Montserrat', system-ui, sans-serif; }
-  .font-option-preview.f-lato       { font-family: 'Lato', system-ui, sans-serif; }
-  .font-option-preview.f-ubuntu     { font-family: 'Ubuntu', system-ui, sans-serif; }
+  /* Font picker — fonts loaded via ui-fonts.css linked stylesheet */
+  .typo-picker-option { cursor: pointer; border: 2px solid var(--fc-border); border-radius: 12px; padding: 0.6rem 0.5rem; text-align: center; background: var(--fc-surface); transition: border-color 0.15s, background 0.15s; user-select: none; }
+  .typo-picker-option:hover { border-color: var(--fc-primary); }
+  .typo-picker-option.selected { border-color: var(--fc-primary); background: color-mix(in srgb, var(--fc-primary) 10%, transparent); }
+  .typo-option-preview { font-size: 1.2rem; line-height: 1.2; }
+  .typo-option-label { font-size: 0.7rem; color: var(--fc-text-muted); margin-top: 0.2rem; }
+  .f-cantarell  { font-family: 'Cantarell', system-ui, sans-serif; }
+  .f-montserrat { font-family: 'Montserrat', sans-serif; }
+  .f-lato       { font-family: 'Lato', sans-serif; }
+  .f-ubuntu     { font-family: 'Ubuntu', sans-serif; }
   .font-picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-  @media (max-width: 480px) { .font-picker-grid { grid-template-columns: repeat(2, 1fr); } }
+  .size-picker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+  .size-s   { font-size: 0.9rem; }
+  .size-m   { font-size: 1.05rem; }
+  .size-l   { font-size: 1.15rem; }
+  .size-xl  { font-size: 1.3rem; }
+  .size-xxl { font-size: 1.5rem; }
+  @media (max-width: 560px) { .font-picker-grid { grid-template-columns: repeat(2, 1fr); } .size-picker-grid { grid-template-columns: repeat(5, 1fr); } }
 </style>
 {% endblock %}
 
@@ -61,17 +53,35 @@
         <i class="ph ph-text-t me-1" aria-hidden="true"></i>Tipografía de la interfaz
       </div>
       <div class="card-body">
-        <p class="text-muted mb-3 small">Cambia la fuente de toda la interfaz. Se aplica inmediatamente y se mantiene entre dispositivos.</p>
-        <div class="font-picker-grid">
+        <p class="text-muted small mb-3">Elegí una fuente y un tamaño. Hacé clic para ver el cambio al instante — cuando estés conforme, guardá.</p>
+
+        <label class="form-label fw-semibold small">Fuente</label>
+        <div class="font-picker-grid mb-3">
           {% for key, info in ui_fonts.items() %}
-          <div class="font-option {% if ui_font_key == key %}selected{% endif %}"
+          <div class="typo-picker-option {% if ui_font_key == key %}selected{% endif %}"
                data-font="{{ key }}" role="button" tabindex="0"
                aria-pressed="{{ 'true' if ui_font_key == key else 'false' }}">
-            <div class="font-option-preview f-{{ key }}">Aa</div>
-            <div class="font-option-label">{{ info.label }}</div>
+            <div class="typo-option-preview f-{{ key }}">Aa</div>
+            <div class="typo-option-label">{{ info.label }}</div>
           </div>
           {% endfor %}
         </div>
+
+        <label class="form-label fw-semibold small">Tamaño</label>
+        <div class="size-picker-grid mb-4">
+          {% for key, info in ui_font_sizes.items() %}
+          <div class="typo-picker-option {% if ui_font_size_key == key %}selected{% endif %}"
+               data-size="{{ key }}" role="button" tabindex="0"
+               aria-pressed="{{ 'true' if ui_font_size_key == key else 'false' }}">
+            <div class="typo-option-preview size-{{ key | lower }}">Aa</div>
+            <div class="typo-option-label">{{ info.label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <button class="btn btn-primary btn-sm" id="saveTypoBtn" type="button">
+          <i class="ph ph-floppy-disk me-1" aria-hidden="true"></i>Guardar tipografía
+        </button>
       </div>
     </div>
 
@@ -238,30 +248,59 @@ if (disconnectConfirm) {
   });
 }
 
-// Font picker
-var fontOptions = document.querySelectorAll('.font-option');
-fontOptions.forEach(function (opt) {
-  function selectFont() {
-    var font = opt.dataset.font;
-    fontOptions.forEach(function (o) {
-      o.classList.remove('selected');
-      o.setAttribute('aria-pressed', 'false');
+// Tipografía — preview instantáneo, guardado explícito
+var FONT_CSS = {
+  cantarell:  "'Cantarell', system-ui, -apple-system, sans-serif",
+  montserrat: "'Montserrat', system-ui, sans-serif",
+  lato:       "'Lato', system-ui, sans-serif",
+  ubuntu:     "'Ubuntu', system-ui, sans-serif"
+};
+var SIZE_PX = { S: '14px', M: '16px', L: '17px', XL: '19px', XXL: '21px' };
+
+var pendingFont = '{{ ui_font_key }}';
+var pendingSize = '{{ ui_font_size_key }}';
+
+function applyPreview() {
+  document.documentElement.style.setProperty('--fc-font', FONT_CSS[pendingFont]);
+  document.documentElement.style.setProperty('--fc-font-size', SIZE_PX[pendingSize]);
+}
+
+document.querySelectorAll('[data-font]').forEach(function (opt) {
+  function pick() {
+    pendingFont = opt.dataset.font;
+    document.querySelectorAll('[data-font]').forEach(function (o) {
+      o.classList.remove('selected'); o.setAttribute('aria-pressed', 'false');
     });
-    opt.classList.add('selected');
-    opt.setAttribute('aria-pressed', 'true');
-    fetch('/api/preferences/ui-font', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ font: font })
-    }).then(function (r) {
-      if (r.ok) { location.reload(); }
-      else { showToast('Error al guardar la tipografía', 'danger'); }
-    });
+    opt.classList.add('selected'); opt.setAttribute('aria-pressed', 'true');
+    applyPreview();
   }
-  opt.addEventListener('click', selectFont);
-  opt.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectFont(); }
+  opt.addEventListener('click', pick);
+  opt.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+});
+
+document.querySelectorAll('[data-size]').forEach(function (opt) {
+  function pick() {
+    pendingSize = opt.dataset.size;
+    document.querySelectorAll('[data-size]').forEach(function (o) {
+      o.classList.remove('selected'); o.setAttribute('aria-pressed', 'false');
+    });
+    opt.classList.add('selected'); opt.setAttribute('aria-pressed', 'true');
+    applyPreview();
+  }
+  opt.addEventListener('click', pick);
+  opt.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+});
+
+document.getElementById('saveTypoBtn').addEventListener('click', async function () {
+  var btn = this;
+  btn.disabled = true;
+  var r = await fetch('/api/preferences', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ui_font: pendingFont, ui_font_size: pendingSize })
   });
+  if (r.ok) { location.reload(); }
+  else { showToast('Error al guardar la tipografía', 'danger'); btn.disabled = false; }
 });
 </script>
 {% endblock %}

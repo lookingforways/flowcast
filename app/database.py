@@ -25,7 +25,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db() -> None:
     """Create all tables and run lightweight column migrations."""
-    from app.models import podcast, episode, template, job  # noqa: F401 — register models
+    from app.models import podcast, episode, template, job, preferences  # noqa: F401 — register models
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -37,5 +37,10 @@ async def init_db() -> None:
             )
         except Exception:
             pass  # column already exists
-        # Ensure app_preferences row exists (created by init_preferences at startup)
-        # — table is created by create_all above via AppPreferences model
+        # Add ui_font_size column if upgrading from a pre-0.9.13 database
+        try:
+            await conn.execute(
+                text("ALTER TABLE app_preferences ADD COLUMN ui_font_size VARCHAR(8) NOT NULL DEFAULT 'L'")
+            )
+        except Exception:
+            pass  # column already exists
