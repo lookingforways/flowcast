@@ -17,7 +17,7 @@
       var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', saved || sys);
       {% if ui_font_key != 'cantarell' %}
-      document.documentElement.style.setProperty('--fc-font', '{{ ui_font.css }}');
+      document.documentElement.style.setProperty('--fc-font', "{{ ui_font.css }}");
       {% endif %}
       {% if ui_font_size_key != 'L' %}
       document.documentElement.style.setProperty('--fc-font-size', '{{ ui_font_size.px }}px');
