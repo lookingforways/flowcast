@@ -126,7 +126,18 @@ ADMIN_PASSWORD=una-contraseña-segura
 > `DOMAIN=flowcast.app` (solo host, para Caddy y el certificado SSL) y
 > `APP_BASE_URL=https://flowcast.app` (URL completa, para el callback de OAuth2 con YouTube).
 
-### 5. Arrancar
+### 5. Preparar el directorio de datos
+
+El contenedor corre como usuario no-root (UID 1001). Creá el directorio de datos con el ownership correcto **antes** de levantar:
+
+```bash
+mkdir -p data
+sudo chown 1001:1001 data
+```
+
+> Si omitís este paso, Docker crea `./data` como `root` y el contenedor falla al intentar escribir la base de datos.
+
+### 6. Arrancar
 
 ```bash
 docker compose up -d
@@ -143,10 +154,13 @@ docker compose logs -f flowcast
 docker compose logs -f caddy     # logs de Caddy / TLS
 ```
 
-Para actualizar cuando haya cambios:
+### 7. Actualizar a nuevas versiones
+
 ```bash
 git pull && docker compose up -d --build
 ```
+
+> El directorio `./data` ya existe con el ownership correcto desde la instalación inicial — no hace falta repetir el `chown` en actualizaciones.
 
 ---
 
