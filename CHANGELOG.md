@@ -8,6 +8,16 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ## [0.9.13] — 2026-05-07
 
+### Nuevas funcionalidades
+
+- **Tipografía de interfaz personalizable**: selector de fuente (Cantarell, Montserrat, Lato, Ubuntu), tamaño (S / M / L / XL / XXL) y grosor (Normal / Negrita) en Configuración — la preferencia se persiste en SQLite y aplica sin recargar la página
+- **Fuentes Regular agregadas**: Montserrat (variable font), Lato-Regular.ttf y Ubuntu-Regular.ttf incluidas para el selector de grosor Normal
+
+### Correcciones
+
+- **Picker de tipografía**: cajas con dimensiones fijas idénticas — eliminado el crecimiento variable según el contenido de cada opción
+- **Botón "Guardar cambios"** en Configuración unificado visualmente con el del editor de plantillas
+
 ### Seguridad — Auditoría multi-agente (Fase 1)
 
 Segunda auditoría de seguridad con Red Team, Blue Team, Senior Pentesting Lead y segunda opinión MiniMax M2.7. Todos los hallazgos bloqueantes para producción han sido corregidos.
@@ -17,6 +27,8 @@ Segunda auditoría de seguridad con Red Team, Blue Team, Senior Pentesting Lead 
 - **A-02 OAuth CSRF**: el `state` OAuth se guarda en sesión firmada (itsdangerous) al iniciar el flujo de YouTube, se verifica con `secrets.compare_digest` en el callback y se consume (elimina de la sesión) tras un callback exitoso
 - **A-03 SSRF residual**: tres gaps cerrados en `url_validator.py` — unwrap de IPv4-mapped IPv6 (`::ffff:x.x.x.x`) antes de verificar rangos; bloqueo de CG-NAT `100.64.0.0/10` (no cubierto por `is_private`); rechazo de literales octales (ej. `0177.0.0.1`) antes de llegar al resolver del SO
 - **A-04 SSRF feedparser + downloader**: `_SSRFRedirectHandler` (subclase de `HTTPRedirectHandler`) re-valida cada redirect de feedparser con `validate_external_url` antes de seguirlo; event hook en `httpx.AsyncClient` del downloader de MP3 valida el header `Location` de cada respuesta 3xx
+- **SSRF DNS**: el validador de URLs resuelve el hostname con `getaddrinfo` y verifica cada IP retornada, bloqueando FQDNs que apunten a rangos privados o de loopback
+- **Proxy de imágenes**: `follow_redirects=False` en `/api/img` — elimina el vector de blind SSRF por redirección
 
 ---
 
