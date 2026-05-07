@@ -43,7 +43,17 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
         from app.utils.progress import set_progress, clear_progress
         validate_external_url(episode.mp3_url)
         set_progress("download", episode.id, 0)
-        async with httpx.AsyncClient(follow_redirects=True, timeout=300.0) as client:
+
+        async def _ssrf_redirect_hook(response: httpx.Response) -> None:
+            if response.is_redirect:
+                location = response.headers.get("location", "")
+                validate_external_url(location)
+
+        async with httpx.AsyncClient(
+            follow_redirects=True,
+            timeout=300.0,
+            event_hooks={"response": [_ssrf_redirect_hook]},
+        ) as client:
             async with client.stream("GET", episode.mp3_url) as resp:
                 resp.raise_for_status()
                 total = int(resp.headers.get("content-length", 0))

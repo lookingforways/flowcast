@@ -54,9 +54,12 @@ async def youtube_callback(request: Request, code: str, state: str = ""):
     if not stored_state or not secrets.compare_digest(stored_state, state):
         logger.warning("OAuth state mismatch — possible CSRF attempt")
         return RedirectResponse("/settings?youtube=error")
+    session.pop("oauth_state", None)
     try:
         exchange_code(code, state)
-        return RedirectResponse("/settings?youtube=connected")
+        response = RedirectResponse("/settings?youtube=connected")
+        set_session(response, session)
+        return response
     except Exception as exc:
         logger.error("YouTube OAuth callback failed: %s", exc)
         return RedirectResponse("/settings?youtube=error")

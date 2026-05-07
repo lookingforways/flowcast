@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,7 +20,7 @@ class TemplateCreate(BaseModel):
     waveform_y: int = 810
     waveform_w: int = 1920
     waveform_h: int = 270
-    title_font: str = "liberation"
+    title_font: Literal["liberation", "montserrat", "lato", "bebas", "ubuntu"] = "liberation"
     title_font_size: int = 64
     title_color: str = "#FFFFFF"
     title_x: str = "(w-text_w)/2"
