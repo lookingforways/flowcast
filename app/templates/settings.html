@@ -16,23 +16,20 @@
   /* Font options: tall enough for Aa */
   .font-opt { padding: 0.75rem 0.5rem; }
   .font-opt-aa { font-size: 1.25rem; line-height: 1.2; }
-  /* Size options: compact, just the label at respective size */
-  .size-opt { padding: 0.55rem 0.25rem; min-height: 2.75rem; }
-  .sz-s   { font-size: 0.875rem; }
-  .sz-m   { font-size: 1rem; }
-  .sz-l   { font-size: 1.125rem; }
-  .sz-xl  { font-size: 1.375rem; }
-  .sz-xxl { font-size: 1.625rem; }
-  /* Weight options */
-  .weight-opt { padding: 0.55rem 0.5rem; min-height: 2.75rem; font-size: 0.9rem; }
+  /* Size label classes — solo cambian el texto, no la caja */
+  .sz-s   { font-size: 0.8rem; }
+  .sz-m   { font-size: 0.95rem; }
+  .sz-l   { font-size: 1.1rem; }
+  .sz-xl  { font-size: 1.25rem; }
+  .sz-xxl { font-size: 1.45rem; }
+  /* Todas las cajas: dimensiones fijas idénticas */
+  .size-opt, .weight-opt { width: 4.25rem; height: 2.75rem; font-size: 0.9rem; }
   .w-bold { font-weight: 700; }
+  /* Cajas en fila */
+  .sz-group-boxes { display: flex; gap: 0.4rem; }
   /* Grids */
   .font-picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-  .size-picker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
-  .weight-picker-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
   @media (max-width: 560px) { .font-picker-grid { grid-template-columns: repeat(2, 1fr); } }
-  .typo-size-col { flex: 1 1 0; min-width: 0; }
-  .typo-weight-col { min-width: 9rem; }
 </style>
 {% endblock %}
 
@@ -79,38 +76,32 @@
           {% endfor %}
         </div>
 
-        <div class="d-flex gap-3 flex-wrap mb-3">
-          <div class="typo-size-col">
-            <label class="form-label fw-semibold small mb-1">Tamaño</label>
-            <div class="size-picker-grid">
-              {% set size_css = {'S': 'sz-s', 'M': 'sz-m', 'L': 'sz-l', 'XL': 'sz-xl', 'XXL': 'sz-xxl'} %}
-              {% for key, info in ui_font_sizes.items() %}
-              <div class="typo-opt size-opt {% if ui_font_size_key == key %}selected{% endif %}"
-                   data-size="{{ key }}" role="button" tabindex="0"
-                   aria-pressed="{{ 'true' if ui_font_size_key == key else 'false' }}">
-                <span class="{{ size_css[key] }}">{{ info.label }}</span>
-              </div>
-              {% endfor %}
-            </div>
+        <label class="form-label fw-semibold small mb-1">Tamaño</label>
+        <div class="sz-group-boxes mb-3">
+          {% set size_css = {'S': 'sz-s', 'M': 'sz-m', 'L': 'sz-l', 'XL': 'sz-xl', 'XXL': 'sz-xxl'} %}
+          {% for key, info in ui_font_sizes.items() %}
+          <div class="typo-opt size-opt {% if ui_font_size_key == key %}selected{% endif %}"
+               data-size="{{ key }}" role="button" tabindex="0"
+               aria-pressed="{{ 'true' if ui_font_size_key == key else 'false' }}">
+            <span class="{{ size_css[key] }}">{{ info.label }}</span>
           </div>
+          {% endfor %}
+        </div>
 
-          <div class="typo-weight-col">
-            <label class="form-label fw-semibold small mb-1">Grosor</label>
-            <div class="weight-picker-grid">
-              {% for key, info in ui_font_weights.items() %}
-              <div class="typo-opt weight-opt {% if key == 'bold' %}w-bold{% endif %} {% if ui_font_weight_key == key %}selected{% endif %}"
-                   data-weight="{{ key }}" role="button" tabindex="0"
-                   aria-pressed="{{ 'true' if ui_font_weight_key == key else 'false' }}">
-                {{ info.label }}
-              </div>
-              {% endfor %}
-            </div>
+        <label class="form-label fw-semibold small mb-1">Grosor</label>
+        <div class="sz-group-boxes mb-3">
+          {% for key, info in ui_font_weights.items() %}
+          <div class="typo-opt weight-opt {% if key == 'bold' %}w-bold{% endif %} {% if ui_font_weight_key == key %}selected{% endif %}"
+               data-weight="{{ key }}" role="button" tabindex="0"
+               aria-pressed="{{ 'true' if ui_font_weight_key == key else 'false' }}">
+            {{ info.label }}
           </div>
+          {% endfor %}
         </div>
 
         <div class="d-flex justify-content-end">
-          <button class="btn btn-primary btn-sm" id="saveTypoBtn" type="button">
-            <i class="ph ph-floppy-disk me-1" aria-hidden="true"></i>Guardar tipografía
+          <button class="btn btn-primary" id="saveTypoBtn" type="button">
+            <i class="ph ph-floppy-disk me-1" aria-hidden="true"></i>Guardar cambios
           </button>
         </div>
       </div>
