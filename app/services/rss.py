@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import logging
 import re
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -14,8 +16,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.episode import Episode
 from app.utils.html_sanitizer import sanitize_html
+from app.utils.url_validator import validate_external_url
 
 logger = logging.getLogger(__name__)
+
+
+class _SSRFRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        try:
+            validate_external_url(newurl)
+        except ValueError as exc:
+            raise urllib.error.URLError(f"SSRF redirect blocked: {exc}") from exc
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 @dataclass
@@ -70,9 +82,8 @@ def _parse_pub_date(entry: feedparser.FeedParserDict) -> Optional[datetime]:
 
 def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
     """Parse the RSS feed and return a list of ParsedEpisode objects."""
-    from app.utils.url_validator import validate_external_url
     validate_external_url(feed_url)
-    feed = feedparser.parse(feed_url)
+    feed = feedparser.parse(feed_url, handlers=[_SSRFRedirectHandler()])
     if feed.bozo and not feed.entries:
         raise ValueError(f"Failed to parse feed: {feed_url} — {feed.bozo_exception}")
 
