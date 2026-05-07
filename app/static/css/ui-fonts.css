@@ -1,22 +1,42 @@
-/* UI alternate fonts — Montserrat, Lato, Ubuntu (served from same origin) */
+/* UI alternate fonts — Montserrat (variable), Lato, Ubuntu (served from same origin) */
+
+/* Montserrat — variable font, soporta pesos 100–900 con un solo archivo */
 @font-face {
   font-family: 'Montserrat';
-  src: url('../fonts/audiogram/Montserrat-Bold.otf') format('opentype');
-  font-weight: 400 700;
+  src: url('../fonts/audiogram/Montserrat-VF.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lato */
+@font-face {
+  font-family: 'Lato';
+  src: url('../fonts/audiogram/Lato-Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Lato';
   src: url('../fonts/audiogram/Lato-Bold.ttf') format('truetype');
-  font-weight: 400 700;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Ubuntu */
+@font-face {
+  font-family: 'Ubuntu';
+  src: url('../fonts/audiogram/Ubuntu-Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Ubuntu';
   src: url('../fonts/audiogram/Ubuntu-Bold.ttf') format('truetype');
-  font-weight: 400 700;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
