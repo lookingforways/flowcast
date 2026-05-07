@@ -1365,6 +1365,7 @@ html[data-ui-font-size="S"]   { font-size: 14px; }
 html[data-ui-font-size="M"]   { font-size: 16px; }
 html[data-ui-font-size="XL"]  { font-size: 19px; }
 html[data-ui-font-size="XXL"] { font-size: 21px; }
+[data-ui-font-weight="bold"] { --fc-font-weight: 700; }
 [data-ui-font-weight="bold"] body { font-weight: 700; }
 
 /* ── Template preview canvas wrapper ────────────────────────────────  */

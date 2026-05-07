@@ -25,6 +25,15 @@ RUN mkdir -p /app/data/db /app/data/uploads/backgrounds /app/data/uploads/fonts 
 # Secure token directory
 RUN chmod 700 /app/data/tokens
 
+# Fix font permissions — Ubuntu-Bold.ttf entered the repo with mode 600
+RUN chmod 644 /app/app/static/fonts/audiogram/Ubuntu-Bold.ttf
+
+# Non-root user — run the app as flowcast (UID 1001) instead of root
+RUN groupadd -r flowcast && \
+    useradd -r -g flowcast -d /app -s /sbin/nologin --uid 1001 flowcast
+RUN chown -R flowcast:flowcast /app/data
+USER flowcast
+
 EXPOSE 8000
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

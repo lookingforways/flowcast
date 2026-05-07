@@ -3,6 +3,8 @@ services:
     build: .
     container_name: flowcast
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     expose:
       - "8000"
     volumes:

@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.8 (2026-04-09).
+Última actualización: v0.9.30 (2026-05-07).
 
 ---
 
@@ -192,21 +192,29 @@ Toda URL externa que la app fetcha pasa por `validate_external_url()` antes de h
 
 **Bloqueos:**
 - Esquemas distintos a `http`/`https` (bloquea `file://`, `javascript:`, `ftp://`, etc.)
-- Direcciones loopback (`127.0.0.1`, `::1`)
-- Rangos privados (`10.x`, `172.16-31.x`, `192.168.x`)
-- Link-local (`169.254.x.x`, `fe80::`)
-- Rangos reservados
+- IPs literales privadas, loopback, link-local y reservadas
+- **FQDNs que resuelven a IPs privadas** — el validador resuelve DNS con `socket.getaddrinfo()` y verifica cada dirección retornada, bloqueando ataques de DNS rebinding
 
 ```python
 # app/utils/url_validator.py
-if parsed.scheme not in ("http", "https"):
-    raise ValueError(...)
-addr = ipaddress.ip_address(hostname)
-if addr.is_loopback or addr.is_private or addr.is_link_local or addr.is_reserved:
-    raise ValueError(...)
+try:
+    _check_addr(ipaddress.ip_address(hostname))  # IP literal
+except ValueError as exc:
+    if "URL targets" in str(exc):
+        raise
+    # FQDN — resolver DNS y verificar cada IP retornada
+    try:
+        results = socket.getaddrinfo(hostname, None)
+        for result in results:
+            _check_addr(ipaddress.ip_address(result[4][0]))
+    except (socket.gaierror, UnicodeError):
+        raise ValueError(f"Cannot resolve hostname: {hostname}")
 ```
 
-**Archivo:** `app/utils/url_validator.py`
+**Proxy de imágenes — sin seguimiento de redirects:**
+`/api/img` usa `follow_redirects=False` para evitar SSRF ciego por redirección (un servidor externo podría responder con `Location: http://192.168.1.1/`). El downloader de audio usa `follow_redirects=True` intencionalmente — los podcasts sirven MP3 vía CDN con redirects legítimos.
+
+**Archivo:** `app/utils/url_validator.py`, `app/routers/proxy.py`
 
 ---
 
@@ -243,18 +251,23 @@ Esto previene despliegues accidentales con credenciales predeterminadas.
 
 ## 11. Control de tamaño de cuerpo
 
-Los endpoints de autenticación rechazan bodies mayores a **2 KB** antes de que FastAPI lea el cuerpo:
+Los endpoints sensibles rechazan bodies mayores a **2 KB** antes de que FastAPI lea el cuerpo:
 
 ```python
 _MAX_FORM_BODY = 2048
+# Endpoints de autenticación (públicos, sin auth previa)
 if request.method == "POST" and request.url.path in ("/login", "/2fa"):
+    content_length = int(request.headers.get("content-length", 0))
+    if content_length > _MAX_FORM_BODY: return JSONResponse(400)
+# Endpoint de preferencias de interfaz
+if request.method == "PATCH" and request.url.path == "/api/preferences":
     content_length = int(request.headers.get("content-length", 0))
     if content_length > _MAX_FORM_BODY: return JSONResponse(400)
 ```
 
-Mitiga ataques de cuerpo grande en los endpoints más expuestos (son públicos, sin auth previa).
+El endpoint `PATCH /api/preferences` usa además un schema Pydantic con tipos `Literal` que valida estructura y valores permitidos antes de tocar la base de datos (`app/routers/preferences.py`).
 
-**Archivo:** `app/main.py:159-162`
+**Archivo:** `app/main.py`
 
 ---
 
@@ -263,7 +276,8 @@ Mitiga ataques de cuerpo grande en los endpoints más expuestos (son públicos, 
 CORS configurado con `allow_origins=[]` — no se permiten peticiones cross-origin desde ningún origen externo.
 
 ```python
-CORSMiddleware(allow_origins=[], allow_credentials=False, ...)
+CORSMiddleware(allow_origins=[], allow_credentials=False,
+               allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"], ...)
 ```
 
 Esto complementa `SameSite=lax` en cookies para bloquear ataques CSRF vía fetch cross-origin.

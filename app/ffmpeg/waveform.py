@@ -6,8 +6,11 @@ frequency analysis and Pillow to draw smooth, symmetric bars with glow.
 from __future__ import annotations
 
 import asyncio
+import os
 import subprocess
 import tempfile
+
+from app.config import settings
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
@@ -155,9 +158,8 @@ def _generate_sync(
     fft_sz = _fft_size(spf)
     color = _hex_to_rgb(color_hex)
 
-    tmp = tempfile.NamedTemporaryFile(suffix=".mkv", delete=False)
-    out_path = tmp.name
-    tmp.close()
+    tmp_fd, out_path = tempfile.mkstemp(suffix=".mkv", dir=str(settings.renders_dir))
+    os.close(tmp_fd)
 
     proc = subprocess.Popen(
         [

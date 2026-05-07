@@ -137,7 +137,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -164,8 +164,12 @@ async def security_middleware(request: Request, call_next):
     nonce = secrets.token_hex(16)
     request.state.csp_nonce = nonce
 
-    # Block oversized bodies on auth form endpoints before FastAPI reads them
+    # Block oversized bodies before FastAPI reads them
     if request.method == "POST" and request.url.path in ("/login", "/2fa"):
+        content_length = int(request.headers.get("content-length", 0))
+        if content_length > _MAX_FORM_BODY:
+            return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
+    if request.method == "PATCH" and request.url.path == "/api/preferences":
         content_length = int(request.headers.get("content-length", 0))
         if content_length > _MAX_FORM_BODY:
             return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
