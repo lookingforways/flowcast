@@ -1,10 +1,12 @@
 import logging
+import secrets
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
 logger = logging.getLogger(__name__)
 
+from app.auth.session import get_session, set_session
 from app.auth.youtube_oauth import (
     exchange_code,
     get_authorization_url,
@@ -32,17 +34,26 @@ async def youtube_status():
 
 
 @router.get("/auth/youtube")
-async def youtube_auth():
+async def youtube_auth(request: Request):
     if not settings.google_client_id or not settings.google_client_secret:
         return {
             "error": "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set in .env"
         }
-    url, _ = get_authorization_url()
-    return RedirectResponse(url)
+    url, state = get_authorization_url()
+    session = get_session(request)
+    session["oauth_state"] = state
+    response = RedirectResponse(url)
+    set_session(response, session)
+    return response
 
 
 @router.get("/auth/youtube/callback")
-async def youtube_callback(code: str, state: str = ""):
+async def youtube_callback(request: Request, code: str, state: str = ""):
+    session = get_session(request)
+    stored_state = session.get("oauth_state", "")
+    if not stored_state or not secrets.compare_digest(stored_state, state):
+        logger.warning("OAuth state mismatch — possible CSRF attempt")
+        return RedirectResponse("/settings?youtube=error")
     try:
         exchange_code(code, state)
         return RedirectResponse("/settings?youtube=connected")

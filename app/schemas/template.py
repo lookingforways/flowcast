@@ -1,7 +1,15 @@
+import re
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+# Hex color: exactly #RRGGBB
+_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+# FFmpeg expression for positional fields: digits, basic arithmetic operators,
+# known variables, parens — no colons (option separator), quotes, semicolons, etc.
+_EXPR_RE = re.compile(r"^[0-9A-Za-z_()\-+*/. ]{1,80}$")
 
 
 class TemplateCreate(BaseModel):
@@ -21,6 +29,20 @@ class TemplateCreate(BaseModel):
     watermark_y: str = "40"
     watermark_scale: int = 200
     show_duration: bool = True
+
+    @field_validator("waveform_color", "title_color")
+    @classmethod
+    def validate_color(cls, v: str) -> str:
+        if not _COLOR_RE.match(v):
+            raise ValueError("debe ser un color hex válido (#RRGGBB)")
+        return v
+
+    @field_validator("title_x", "watermark_x", "watermark_y")
+    @classmethod
+    def validate_expr(cls, v: str) -> str:
+        if not _EXPR_RE.match(v):
+            raise ValueError("expresión FFmpeg inválida")
+        return v
 
 
 class TemplateUpdate(TemplateCreate):
