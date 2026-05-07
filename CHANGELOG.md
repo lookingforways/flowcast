@@ -6,6 +6,20 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.13] — 2026-05-07
+
+### Seguridad — Auditoría multi-agente (Fase 1)
+
+Segunda auditoría de seguridad con Red Team, Blue Team, Senior Pentesting Lead y segunda opinión MiniMax M2.7. Todos los hallazgos bloqueantes para producción han sido corregidos.
+
+- **Docker non-root**: el contenedor ahora corre como usuario `flowcast` (UID 1001) en lugar de root — `groupadd -r` + `useradd -r --uid 1001` + `chown -R flowcast:flowcast /app/data` + `USER flowcast` en Dockerfile; `security_opt: no-new-privileges:true` en docker-compose
+- **A-01 FFmpeg injection**: validators Pydantic en `TemplateCreate` — `_COLOR_RE` (`^#[0-9A-Fa-f]{6}$`) para colores waveform y título; `_EXPR_RE` (`^[0-9A-Za-z_()\-+*/. ]{1,80}$`) para expresiones posicionales (`title_x`, `watermark_x/y`); `title_font` como `Literal` con las 5 fuentes válidas — bloquea cualquier carácter que pueda inyectarse como opción FFmpeg
+- **A-02 OAuth CSRF**: el `state` OAuth se guarda en sesión firmada (itsdangerous) al iniciar el flujo de YouTube, se verifica con `secrets.compare_digest` en el callback y se consume (elimina de la sesión) tras un callback exitoso
+- **A-03 SSRF residual**: tres gaps cerrados en `url_validator.py` — unwrap de IPv4-mapped IPv6 (`::ffff:x.x.x.x`) antes de verificar rangos; bloqueo de CG-NAT `100.64.0.0/10` (no cubierto por `is_private`); rechazo de literales octales (ej. `0177.0.0.1`) antes de llegar al resolver del SO
+- **A-04 SSRF feedparser + downloader**: `_SSRFRedirectHandler` (subclase de `HTTPRedirectHandler`) re-valida cada redirect de feedparser con `validate_external_url` antes de seguirlo; event hook en `httpx.AsyncClient` del downloader de MP3 valida el header `Location` de cada respuesta 3xx
+
+---
+
 ## [0.9.12] — 2026-04-27
 
 ### Nuevas funcionalidades

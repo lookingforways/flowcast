@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.30 (2026-05-07).
+Última actualización: v0.9.13 (2026-05-07).
 
 ---
 
@@ -193,28 +193,17 @@ Toda URL externa que la app fetcha pasa por `validate_external_url()` antes de h
 **Bloqueos:**
 - Esquemas distintos a `http`/`https` (bloquea `file://`, `javascript:`, `ftp://`, etc.)
 - IPs literales privadas, loopback, link-local y reservadas
-- **FQDNs que resuelven a IPs privadas** — el validador resuelve DNS con `socket.getaddrinfo()` y verifica cada dirección retornada, bloqueando ataques de DNS rebinding
+- **CG-NAT `100.64.0.0/10`** — bloqueado explícitamente (no cubierto por `is_private`)
+- **IPv4-mapped IPv6** (`::ffff:x.x.x.x`) — desenvuelto a IPv4 antes de verificar rangos privados
+- **Notación octal** (ej. `0177.0.0.1`) — rechazada antes de llegar al resolver del SO (el regex `_IP_LIKE` detecta literales de solo dígitos/puntos y los fuerza por `ipaddress`, que rechaza octal)
+- **FQDNs que resuelven a IPs privadas** — el validador resuelve DNS con `socket.getaddrinfo()` y verifica cada dirección retornada
 
-```python
-# app/utils/url_validator.py
-try:
-    _check_addr(ipaddress.ip_address(hostname))  # IP literal
-except ValueError as exc:
-    if "URL targets" in str(exc):
-        raise
-    # FQDN — resolver DNS y verificar cada IP retornada
-    try:
-        results = socket.getaddrinfo(hostname, None)
-        for result in results:
-            _check_addr(ipaddress.ip_address(result[4][0]))
-    except (socket.gaierror, UnicodeError):
-        raise ValueError(f"Cannot resolve hostname: {hostname}")
-```
+**Redirects validados en todos los puntos de fetch:**
+- **Feedparser** (`rss.py`): `_SSRFRedirectHandler` subclasea `urllib.request.HTTPRedirectHandler` y llama a `validate_external_url` en cada redirect antes de seguirlo
+- **Downloader MP3** (`downloader.py`): event hook `"response"` en `httpx.AsyncClient` valida el header `Location` de cada respuesta 3xx antes de que httpx construya la nueva request
+- **Proxy de imágenes** (`proxy.py`): `follow_redirects=False` — no sigue redirects
 
-**Proxy de imágenes — sin seguimiento de redirects:**
-`/api/img` usa `follow_redirects=False` para evitar SSRF ciego por redirección (un servidor externo podría responder con `Location: http://192.168.1.1/`). El downloader de audio usa `follow_redirects=True` intencionalmente — los podcasts sirven MP3 vía CDN con redirects legítimos.
-
-**Archivo:** `app/utils/url_validator.py`, `app/routers/proxy.py`
+**Archivo:** `app/utils/url_validator.py`, `app/services/rss.py`, `app/services/downloader.py`, `app/routers/proxy.py`
 
 ---
 
@@ -227,8 +216,9 @@ El token OAuth2 de YouTube (access + refresh token) se almacena cifrado en disco
 - **Permisos de archivo:** `0o600` (solo lectura/escritura del propietario del proceso).
 - **Rotación automática:** si el refresh token expira (`invalid_grant`), se borra el archivo y la UI muestra "desconectado" con instrucciones para reconectar.
 - **Migración:** archivos en formato plain JSON previo al cifrado se re-cifran automáticamente al cargar.
+- **CSRF en flujo OAuth**: el `state` generado por la librería OAuth se almacena en la sesión firmada al iniciar el flujo. El callback lo verifica con `secrets.compare_digest` antes de aceptar el código de autorización. El state se consume (elimina de la sesión) tras un callback exitoso — no puede reutilizarse.
 
-**Archivo:** `app/auth/youtube_oauth.py`
+**Archivo:** `app/auth/youtube_oauth.py`, `app/routers/youtube.py`
 
 ---
 
@@ -347,7 +337,7 @@ Ambos son creados/actualizados con `os.chmod(path, 0o600)` explícito después d
 
 - **TLS:** Caddy con HTTPS automático (Let's Encrypt) en tu dominio de producción.
 - **Reverse proxy:** Caddy → Docker container (solo el puerto HTTP interno expuesto a localhost).
-- **Contenedor Docker:** usuario no-root, sin privilegios adicionales.
+- **Contenedor Docker:** usuario `flowcast` (UID 1001), sin privilegios de root; `security_opt: no-new-privileges:true` en docker-compose.
 - **`robots.txt`:** `Disallow: /` — evita indexación por crawlers.
 - **`/.well-known/security.txt`:** contacto de seguridad publicado con expiración anual.
 

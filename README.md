@@ -49,12 +49,14 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 
 ## Seguridad
 
-FlowCast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/100**.
+FlowCast ha pasado por múltiples rondas de auditoría externa activa (última: mayo 2026).
 
 | Área | Implementación |
 |------|---------------|
 | Autenticación | Usuario + contraseña + TOTP 2FA obligatorio |
+| Docker non-root | Contenedor corre como usuario `flowcast` (UID 1001); `security_opt: no-new-privileges:true` |
 | CSRF | Double-submit cookie con token firmado (itsdangerous); token reutilizado si válido (evita invalidación por favicon) |
+| OAuth CSRF | State generado, almacenado en sesión firmada, verificado con `compare_digest` y consumido tras uso exitoso |
 | Sesión | Cookie httponly, SameSite=Lax, Secure (en HTTPS), firmada con itsdangerous |
 | Headers HTTP | HSTS 2 años, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP — aplicados a **todas** las respuestas |
 | CSP | Nonce único por request; sin `unsafe-inline` en ninguna directiva; Bootstrap JS eliminado |
@@ -64,7 +66,8 @@ FlowCast ha pasado por 4 rondas de auditoría externa activa. Score final: **92/
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
 | Rate limiting | 5 req/minuto en `/login` y `/2fa` (por IP, con slowapi) |
 | SRI | `integrity=` sha384 en todos los assets CSS/JS — verifica integridad en el browser |
-| SSRF | Validación de URLs externas (IP privadas bloqueadas) antes de fetch RSS y descarga de MP3 |
+| SSRF | Validación de URLs externas (IP privadas, CG-NAT 100.64/10, IPv4-mapped IPv6, octal bloqueados) antes de fetch RSS y descarga de MP3. Redirects re-validados en todos los puntos de fetch |
+| FFmpeg injection | Validators Pydantic con whitelist estricto para colores (`#RRGGBB`) y expresiones posicionales — bloquean inyección via opciones FFmpeg |
 | Proxy de imágenes | `/api/img` descarga imágenes externas server-side con allowlist de content-types y límite 5 MB |
 | Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) derivando clave del `SECRET_KEY` |
 | Credenciales | La app no arranca si `SECRET_KEY` o `ADMIN_PASSWORD` usan valores por defecto |
