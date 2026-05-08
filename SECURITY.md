@@ -81,10 +81,10 @@ GET /login → POST /login → sesión {authenticated: True, totp_verified: Fals
 
 Implementación doble: **token firmado en cookie** + **mismo token en formulario** (double-submit + firma criptográfica).
 
-- Token generado con `secrets.token_hex(16)` envuelto en `URLSafeTimedSerializer` (salt `"flowcast-csrf"`, TTL 1 hora).
+- Token generado con `secrets.token_hex(16)` envuelto en `URLSafeTimedSerializer` (salt `"flowcast-csrf"`, TTL token 1 hora).
 - Comparación con `secrets.compare_digest` para evitar timing attacks.
 - Aplicado en: `POST /login` y `POST /2fa`.
-- Cookie CSRF: `HttpOnly`, `SameSite=lax`, `Secure` en HTTPS, TTL 1 hora.
+- Cookie CSRF: `HttpOnly`, `SameSite=lax`, `Secure` en HTTPS, `max_age=1800` (30 minutos) — el TTL efectivo es 30 minutos (la cookie expira antes que el token).
 
 ```python
 # verify_csrf en app/auth/csrf.py
@@ -317,8 +317,9 @@ Cualquier ruta `/static/` no incluida en los prefijos públicos retorna `403` (n
 Los handlers de excepción no exponen stack traces ni detalles internos al cliente:
 
 - `400 ValidationError` → `{"detail": "Solicitud inválida"}`
-- `4xx/5xx HTTP` (no-API) → página HTML genérica sin información del error
-- `500 unhandled` → HTML genérico; el detalle se loguea internamente con `exc_info`
+- `404` (no-API) → página HTML genérica sin información del error
+- Otros `4xx/5xx` (no-API) → `{"detail": "Error"}` en JSON
+- `500 unhandled` → HTML genérico (`_500_HTML`); el detalle se loguea internamente con `exc_info`
 - Errores de API → `{"detail": "Error"}` o `{"detail": "Error interno"}`
 
 **Archivo:** `app/main.py:104-123`
@@ -349,9 +350,16 @@ Ambos son creados/actualizados con `os.chmod(path, 0o600)` explícito después d
 
 ## 18. Auditoría externa
 
-Score: **92/100** en auditoría de seguridad externa (fecha: 2026-Q1).
+Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blue Team, Senior Pentesting Lead).
 
-Hallazgos menores ya corregidos incluidos en esta documentación.
+| Ronda | Fecha | Estado |
+|-------|-------|--------|
+| Auditoría v1 (score 92/100) | 2026-Q1 | ✓ Todos los hallazgos corregidos en v0.9.10 |
+| Auditoría multi-agente — Fase 1 (5 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.13 |
+| Auditoría multi-agente — Fase 2 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.14 |
+| Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ⏳ En progreso |
+
+Score actualizado pendiente de completar Fase 3.
 
 ---
 
