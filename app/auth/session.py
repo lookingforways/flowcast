@@ -28,13 +28,13 @@ def get_session(request: Request) -> dict:
         return {}
 
 
-def set_session(response: Response, data: dict) -> None:
+def set_session(response: Response, data: dict, max_age: Optional[int] = None) -> None:
     """Write signed session data to cookie."""
     signed = _serializer().dumps(data)
     response.set_cookie(
         COOKIE_NAME,
         signed,
-        max_age=settings.session_max_age,
+        max_age=max_age if max_age is not None else settings.session_max_age,
         httponly=True,
         samesite="lax",
         secure=settings.app_base_url.startswith("https://"),

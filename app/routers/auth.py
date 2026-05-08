@@ -76,7 +76,7 @@ async def login_submit(
         and password == settings.admin_password
     ):
         response = RedirectResponse("/2fa", status_code=302)
-        set_session(response, {"authenticated": True, "totp_verified": False})
+        set_session(response, {"authenticated": True, "totp_verified": False}, max_age=300)
         return response
 
     response = RedirectResponse("/login", status_code=302)
