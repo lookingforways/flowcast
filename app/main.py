@@ -208,6 +208,8 @@ async def security_middleware(request: Request, call_next):
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
     response.headers["server"] = ""
+    if settings.app_base_url.startswith("https://"):
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     return response
 
 
