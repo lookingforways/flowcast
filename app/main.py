@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTex
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.auth.limiter import limiter
 from app.auth.session import is_fully_authenticated
@@ -209,6 +210,8 @@ async def security_middleware(request: Request, call_next):
     response.headers["server"] = ""
     return response
 
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
