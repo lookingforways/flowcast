@@ -9,8 +9,6 @@ class JobOut(BaseModel):
     episode_id: int
     template_id: int
     status: str
-    ffmpeg_cmd: Optional[str]
-    ffmpeg_log: Optional[str]
     started_at: Optional[datetime]
     finished_at: Optional[datetime]
     error_msg: Optional[str]

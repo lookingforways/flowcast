@@ -12,8 +12,6 @@ class EpisodeOut(BaseModel):
     mp3_url: str
     duration_secs: Optional[int]
     pub_date: Optional[datetime]
-    mp3_path: Optional[str]
-    render_path: Optional[str]
     youtube_id: Optional[str]
     status: str
     error_msg: Optional[str]

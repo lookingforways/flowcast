@@ -120,8 +120,6 @@ async def trigger_render(
         "episode_id": episode_id,
         "template_id": template_id or 0,
         "status": "queued",
-        "ffmpeg_cmd": None,
-        "ffmpeg_log": None,
         "started_at": None,
         "finished_at": None,
         "error_msg": None,
