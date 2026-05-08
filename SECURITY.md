@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.13 (2026-05-07).
+Última actualización: v0.9.14 (2026-05-08).
 
 ---
 
@@ -65,7 +65,7 @@ GET /login → POST /login → sesión {authenticated: True, totp_verified: Fals
 |----------------|---------------------------------------------------|
 | Nombre cookie  | `flowcast_session`                                |
 | Firma          | HMAC con `SECRET_KEY` + salt `"flowcast-session"` |
-| Expiración     | 7 días (`SESSION_MAX_AGE=604800`)                 |
+| Expiración     | 7 días (`SESSION_MAX_AGE=604800`) para sesión completa; **300 segundos** para sesión half-auth (contraseña verificada, TOTP pendiente) |
 | `HttpOnly`     | Sí — inaccesible desde JavaScript                 |
 | `SameSite`     | `lax` — bloquea envío cross-site en POST          |
 | `Secure`       | Sí cuando `APP_BASE_URL` comienza con `https://`  |
@@ -102,10 +102,12 @@ return secrets.compare_digest(str(form_nonce), str(cookie_nonce))
 | Endpoint      | Límite     | Clave       |
 |---------------|------------|-------------|
 | `POST /login` | 5/minuto   | IP remota   |
+| `POST /2fa`   | 5/minuto   | IP remota   |
 | `GET /health` | 30/minuto  | IP remota   |
 
 - Respuesta 429 con `Retry-After: 60` en JSON `{"detail": "Demasiados intentos. Reintentá en un momento."}`.
 - No expone información sobre la existencia de usuarios (mismo mensaje para usuario correcto/incorrecto).
+- **Detrás de Caddy**: `ProxyHeadersMiddleware` (Starlette) lee `X-Forwarded-For` y actualiza `request.client.host` con la IP real del cliente antes de que slowapi la evalúe — el rate limiting opera sobre la IP del cliente, no la IP interna de Docker.
 
 **Archivo:** `app/auth/limiter.py`, `app/main.py:92-100`
 
@@ -152,6 +154,7 @@ Aplicados en `security_middleware` a todas las respuestas:
 | `Cross-Origin-Opener-Policy`    | `same-origin`                          | Aísla el contexto de navegación        |
 | `Cross-Origin-Resource-Policy`  | `same-origin`                          | Bloquea carga cross-origin de recursos |
 | `server`                        | `""` (vacío)                           | No expone tecnología del servidor      |
+| `Strict-Transport-Security`     | `max-age=63072000; includeSubDomains; preload` | HTTPS forzado por el browser (2 años); elegible para HSTS preload list. Solo cuando `APP_BASE_URL` comienza con `https://` |
 
 **Archivo:** `app/main.py:151-197`
 
@@ -338,6 +341,7 @@ Ambos son creados/actualizados con `os.chmod(path, 0o600)` explícito después d
 - **TLS:** Caddy con HTTPS automático (Let's Encrypt) en tu dominio de producción.
 - **Reverse proxy:** Caddy → Docker container (solo el puerto HTTP interno expuesto a localhost).
 - **Contenedor Docker:** usuario `flowcast` (UID 1001), sin privilegios de root; `security_opt: no-new-privileges:true` en docker-compose.
+- **IP real del cliente:** `ProxyHeadersMiddleware` configurado como middleware más exterior — lee `X-Forwarded-For` de Caddy para que rate limiting y logs operen con la IP real del cliente.
 - **`robots.txt`:** `Disallow: /` — evita indexación por crawlers.
 - **`/.well-known/security.txt`:** contacto de seguridad publicado con expiración anual.
 

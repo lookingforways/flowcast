@@ -6,6 +6,17 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.14] — 2026-05-08
+
+### Seguridad — Auditoría multi-agente (Fase 2, ítems M-01 a M-04)
+
+- **M-01 Rate limiting real detrás de Caddy**: `ProxyHeadersMiddleware` lee el header `X-Forwarded-For` enviado por Caddy y actualiza `request.client.host` con la IP real del cliente. Sin este fix, el rate limiting en `/login` y `/2fa` era inoperante — todas las peticiones llegaban con la IP interna de Docker
+- **M-02 Sesión half-auth**: la cookie del paso intermedio (contraseña verificada, TOTP pendiente) ahora expira en 300 segundos en lugar de 7 días — reduce la ventana de ataque en caso de cookie robada antes de completar el 2FA
+- **M-03 Paths internos eliminados de la API**: `mp3_path` y `render_path` eliminados de `EpisodeOut`; `ffmpeg_cmd` y `ffmpeg_log` eliminados de `JobOut` — las respuestas JSON ya no exponen rutas internas del contenedor ni comandos FFmpeg
+- **M-04 HSTS en la app**: el header `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` lo emite ahora la app directamente (además de Caddy) cuando `APP_BASE_URL` comienza con `https://`
+
+---
+
 ## [0.9.13] — 2026-05-07
 
 ### Nuevas funcionalidades
