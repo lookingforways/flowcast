@@ -6,6 +6,17 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.16] — 2026-05-08
+
+### Documentación
+
+- **SECURITY.md**: referencias de línea actualizadas en §5 (CSP), §6 (HTTP headers), §12 (CORS) y §15 (error handlers) — desplazadas por los cambios de Fase 2 y Fase 3
+- **SECURITY.md §3**: aclarado que el TTL efectivo del CSRF es 30 minutos (cookie) aunque el token admita 1 hora
+- **SECURITY.md §15**: corregida la descripción del manejo de errores — solo 404 devuelve HTML; el resto de errores no-API devuelven JSON
+- **SECURITY.md §18**: tabla de auditorías por fase reemplaza el score único desactualizado (92/100); score formal pendiente de re-evaluación
+
+---
+
 ## [0.9.15] — 2026-05-08
 
 ### Seguridad — Auditoría multi-agente (Fase 3, ítems B-01 a B-08)
