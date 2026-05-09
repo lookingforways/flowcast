@@ -6,6 +6,15 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.17] — 2026-05-08
+
+### Seguridad
+
+- **Excepción amplia reducida**: `except (InvalidToken, Exception)` → `except InvalidToken` en la ruta de migración de `youtube_oauth.py` — solo se captura el error esperado de descifrado, no errores arbitrarios que podrían enmascarar fallos de disco u otros problemas
+- **Aviso de contacto de seguridad**: si `SECURITY_CONTACT` tiene el valor por defecto (`security@your-domain.com`), el dashboard muestra un banner de advertencia dismissable indicando que debe configurarse para que `/.well-known/security.txt` sea válido
+
+---
+
 ## [0.9.16] — 2026-05-08
 
 ### Documentación

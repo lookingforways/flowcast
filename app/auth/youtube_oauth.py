@@ -103,7 +103,7 @@ def load_credentials() -> Optional[Credentials]:
         raw = token_path.read_bytes()
         try:
             data = json.loads(_get_fernet().decrypt(raw))
-        except (InvalidToken, Exception):
+        except InvalidToken:
             # Migration: file may be plain JSON from before encryption was added
             data = json.loads(raw.decode())
             # Re-save encrypted

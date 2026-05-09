@@ -96,6 +96,7 @@ async def dashboard(request: Request, session: AsyncSession = Depends(get_sessio
             "total_podcasts": total_podcasts,
             "recent_jobs": recent_jobs,
             "render_counts": render_counts,
+            "security_contact_default": settings.security_contact == "security@your-domain.com",
         },
     )
 

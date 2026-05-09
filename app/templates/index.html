@@ -8,6 +8,18 @@
   </h1>
 </div>
 
+{# ── Security contact warning ─────────────────────────────────── #}
+{% if security_contact_default %}
+<div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+  <i class="ph ph-warning me-1" aria-hidden="true"></i>
+  <strong>Configura tu contacto de seguridad.</strong>
+  El valor por defecto <code>security@your-domain.com</code> está activo en
+  <code>SECURITY_CONTACT</code>. Actualízalo en tu archivo <code>.env</code>
+  para que <code>/.well-known/security.txt</code> sea válido.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+</div>
+{% endif %}
+
 {# ── Stat cards ──────────────────────────────────────────────────── #}
 <div class="fc-stats-grid">
   <div class="fc-stat-card fc-stat-primary">
