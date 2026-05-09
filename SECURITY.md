@@ -103,6 +103,7 @@ return secrets.compare_digest(str(form_nonce), str(cookie_nonce))
 |---------------|------------|-------------|
 | `POST /login` | 5/minuto   | IP remota   |
 | `POST /2fa`   | 5/minuto   | IP remota   |
+| `POST /logout`| Sin límite | — (requiere CSRF válido) |
 | `GET /health` | 30/minuto  | IP remota   |
 
 - Respuesta 429 con `Retry-After: 60` en JSON `{"detail": "Demasiados intentos. Reintentá en un momento."}`.
@@ -360,7 +361,7 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Auditoría multi-agente — Fase 2 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.14 |
 | Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.15 |
 
-Score formal pendiente de re-evaluación post Fase 3.
+**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones: body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
 
 ---
 
