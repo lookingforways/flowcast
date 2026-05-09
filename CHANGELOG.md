@@ -6,6 +6,17 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.15] — 2026-05-08
+
+### Seguridad — Auditoría multi-agente (Fase 3, ítems B-01 a B-08)
+
+- **B-01 `/health` público**: agregado a `_PUBLIC_PREFIXES` — herramientas de monitoreo y healthcheck de Docker ya no reciben un redirect 302 a `/login`. Rate limiting de 30/minuto sigue activo
+- **B-02 Race condition `youtube_token.json`**: `os.umask(0o177)` + `try/finally` aplicado antes de `write_bytes()` en `save_credentials()` y en la ruta de migración — el archivo nace con permisos `0o600` desde el primer byte, eliminando la ventana de exposición
+- **B-05 Logout vía GET sin CSRF**: `/logout` cambiado de `GET` a `POST` con verificación CSRF. El botón de cerrar sesión en el sidebar y el enlace en la pantalla de 2FA ahora usan `<form method="POST">` con token CSRF
+- **B-07/B-08 SRI en login y 2FA**: `integrity="sha384-..."` y `crossorigin="anonymous"` agregados a `phosphor.css` y `theme.css` en `login.html` y `totp_verify.html`. Bonus: hash incorrecto de `theme.css` en `base.html` corregido (el hash desactualizado causaba que browsers bloquearan el CSS por fallo de SRI)
+
+---
+
 ## [0.9.14] — 2026-05-08
 
 ### Seguridad — Auditoría multi-agente (Fase 2, ítems M-01 a M-04)
