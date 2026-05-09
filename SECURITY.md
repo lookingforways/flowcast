@@ -301,6 +301,7 @@ _PUBLIC_PREFIXES = (
     "/static/js/",
     "/static/fonts/",
     "/static/img/flowcast-logo-", # logos del sidebar/login/2FA
+    "/health",                   # healthcheck — protegido solo por rate limiting
 )
 ```
 
@@ -357,9 +358,9 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Auditoría v1 (score 92/100) | 2026-Q1 | ✓ Todos los hallazgos corregidos en v0.9.10 |
 | Auditoría multi-agente — Fase 1 (5 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.13 |
 | Auditoría multi-agente — Fase 2 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.14 |
-| Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ⏳ En progreso |
+| Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.15 |
 
-Score actualizado pendiente de completar Fase 3.
+Score formal pendiente de re-evaluación post Fase 3.
 
 ---
 
