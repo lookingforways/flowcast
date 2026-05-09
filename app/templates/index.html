@@ -10,13 +10,13 @@
 
 {# ── Security contact warning ─────────────────────────────────── #}
 {% if security_contact_default %}
-<div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+<div class="alert alert-warning mb-3">
   <i class="ph ph-warning me-1" aria-hidden="true"></i>
   <strong>Configura tu contacto de seguridad.</strong>
   El valor por defecto <code>security@your-domain.com</code> está activo en
   <code>SECURITY_CONTACT</code>. Actualízalo en tu archivo <code>.env</code>
   para que <code>/.well-known/security.txt</code> sea válido.
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
 </div>
 {% endif %}
 
@@ -144,4 +144,17 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if security_contact_default %}
+<script nonce="{{ request.state.csp_nonce }}">
+document.querySelectorAll('[data-close-alert]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var el = btn.closest('.alert');
+    if (el) el.remove();
+  });
+});
+</script>
+{% endif %}
 {% endblock %}
