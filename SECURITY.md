@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.17 (2026-05-09).
+Última actualización: v0.9.18 (2026-05-09).
 
 ---
 

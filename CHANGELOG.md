@@ -6,6 +6,18 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.18] — 2026-05-09
+
+### Correcciones
+
+- **ProxyHeadersMiddleware — import correcto**: la importación se hacía desde `starlette.middleware.proxy_headers`, módulo que Starlette removió en versiones recientes. Corregido a `uvicorn.middleware.proxy_headers` — sin este fix la app no arrancaba en producción con uvicorn 0.34+
+- **Botón "MP3 local disponible" eliminado**: el botón en el detalle de episodio apuntaba a `/api/episodes/{id}/audio`, endpoint que nunca existió — el link era siempre un error 404
+- **Aviso de seguridad como dialog modal nativo**: el aviso de `SECURITY_CONTACT` sin configurar usa ahora un `<dialog>` HTML nativo que se abre automáticamente al cargar el dashboard, reemplazando un banner inline que usaba incorrectamente atributos de Bootstrap JS (`data-bs-dismiss`, `fade show`)
+- **CSS `dialog-header-warning`**: nueva clase en `theme.css` con los colores de advertencia del sistema de tokens (`--fc-warning-bg`, `--fc-warning-s`) — consistente con `dialog-header-destructive` existente
+- **SRI `theme.css` actualizado**: hash `sha384` actualizado a `v0.9.30` en `base.html`, `login.html` y `totp_verify.html` tras la modificación de `theme.css`
+
+---
+
 ## [0.9.17] — 2026-05-08
 
 ### Seguridad
