@@ -8,16 +8,27 @@
   </h1>
 </div>
 
-{# ── Security contact warning ─────────────────────────────────── #}
 {% if security_contact_default %}
-<div class="alert alert-warning mb-3">
-  <i class="ph ph-warning me-1" aria-hidden="true"></i>
-  <strong>Configura tu contacto de seguridad.</strong>
-  El valor por defecto <code>security@your-domain.com</code> está activo en
-  <code>SECURITY_CONTACT</code>. Actualízalo en tu archivo <code>.env</code>
-  para que <code>/.well-known/security.txt</code> sea válido.
-  <button type="button" class="btn-close" data-close-alert aria-label="Cerrar">✕</button>
-</div>
+<dialog id="securityContactModal" aria-labelledby="securityContactTitle" aria-modal="true">
+  <div class="dialog-header dialog-header-warning">
+    <h4 id="securityContactTitle">
+      <i class="ph ph-warning" aria-hidden="true"></i> Contacto de seguridad sin configurar
+    </h4>
+    <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
+  </div>
+  <div class="dialog-body">
+    <p>La variable <code>SECURITY_CONTACT</code> tiene el valor por defecto:</p>
+    <p><code>security@your-domain.com</code></p>
+    <p class="text-muted small mb-0">
+      Actualízala en tu archivo <code>.env</code> para que:
+      <br><code>/.well-known/security.txt</code><br>Sea válido y los investigadores
+      de seguridad puedan contactarte.
+    </p>
+  </div>
+  <div class="dialog-footer">
+    <button type="button" class="btn btn-secondary" data-close-dialog>Entendido</button>
+  </div>
+</dialog>
 {% endif %}
 
 {# ── Stat cards ──────────────────────────────────────────────────── #}
@@ -149,12 +160,15 @@
 {% block scripts %}
 {% if security_contact_default %}
 <script nonce="{{ request.state.csp_nonce }}">
-document.querySelectorAll('[data-close-alert]').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    var el = btn.closest('.alert');
-    if (el) el.remove();
-  });
-});
+(function () {
+  var modal = document.getElementById('securityContactModal');
+  if (modal) {
+    modal.showModal();
+    modal.querySelectorAll('[data-close-dialog]').forEach(function (btn) {
+      btn.addEventListener('click', function () { modal.close(); });
+    });
+  }
+}());
 </script>
 {% endif %}
 {% endblock %}

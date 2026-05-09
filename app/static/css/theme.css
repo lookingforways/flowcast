@@ -1164,6 +1164,16 @@ dialog::backdrop {
 
 .dialog-header-destructive .btn-close { color: var(--fc-error); opacity: 0.8; }
 
+.dialog-header-warning {
+  background: var(--fc-warning-bg);
+  border-bottom-color: rgba(246, 211, 45, 0.25);
+}
+
+.dialog-header-warning h3,
+.dialog-header-warning h4 { color: var(--fc-warning-s); }
+
+.dialog-header-warning .btn-close { color: var(--fc-warning-s); opacity: 0.8; }
+
 /* ── Button group ────────────────────────────────────────────────── */
 .btn-group {
   display: inline-flex;
