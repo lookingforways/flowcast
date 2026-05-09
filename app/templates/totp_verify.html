@@ -181,10 +181,13 @@
         </button>
       </form>
 
-      <a href="/logout" class="fc-back-link">
-        <i class="ph ph-arrow-left" aria-hidden="true"></i>
-        Volver al login
-      </a>
+      <form method="POST" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="fc-back-link">
+          <i class="ph ph-arrow-left" aria-hidden="true"></i>
+          Volver al login
+        </button>
+      </form>
 
     </div>
   </div>

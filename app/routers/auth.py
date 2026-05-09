@@ -139,8 +139,11 @@ async def totp_submit(
     return response
 
 
-@router.get("/logout")
-async def logout():
+@router.post("/logout")
+async def logout(request: Request, csrf_token: str = Form(...)):
+    cookie_csrf = request.cookies.get(CSRF_COOKIE, "")
+    if not verify_csrf(csrf_token, cookie_csrf):
+        return RedirectResponse("/login", status_code=302)
     response = RedirectResponse("/login", status_code=302)
     clear_session(response)
     return response
