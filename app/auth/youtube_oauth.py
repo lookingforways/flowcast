@@ -86,7 +86,11 @@ def save_credentials(creds: Credentials) -> None:
         "scopes": list(creds.scopes) if creds.scopes else SCOPES,
     }
     encrypted = _get_fernet().encrypt(json.dumps(token_data).encode())
-    token_path.write_bytes(encrypted)
+    old_umask = os.umask(0o177)
+    try:
+        token_path.write_bytes(encrypted)
+    finally:
+        os.umask(old_umask)
     os.chmod(token_path, 0o600)
     logger.info("YouTube credentials saved (encrypted) to %s", token_path)
 
@@ -103,7 +107,11 @@ def load_credentials() -> Optional[Credentials]:
             # Migration: file may be plain JSON from before encryption was added
             data = json.loads(raw.decode())
             # Re-save encrypted
-            token_path.write_bytes(_get_fernet().encrypt(json.dumps(data).encode()))
+            old_umask = os.umask(0o177)
+            try:
+                token_path.write_bytes(_get_fernet().encrypt(json.dumps(data).encode()))
+            finally:
+                os.umask(old_umask)
             os.chmod(token_path, 0o600)
             logger.info("Migrated YouTube token to encrypted format")
         creds = Credentials(
