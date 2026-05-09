@@ -137,7 +137,7 @@ upgrade-insecure-requests
 - **No se usan** `onclick=`, `onchange=` u otros event handlers inline — serían bloqueados por el CSP. Toda la lógica JS va en bloques `<script nonce="...">` con `addEventListener`.
 - Scripts externos: ninguno — solo `'self'`.
 
-**Archivo:** `app/main.py:175-189`
+**Archivo:** `app/main.py:189-203`
 
 ---
 
@@ -156,7 +156,7 @@ Aplicados en `security_middleware` a todas las respuestas:
 | `server`                        | `""` (vacío)                           | No expone tecnología del servidor      |
 | `Strict-Transport-Security`     | `max-age=63072000; includeSubDomains; preload` | HTTPS forzado por el browser (2 años); elegible para HSTS preload list. Solo cuando `APP_BASE_URL` comienza con `https://` |
 
-**Archivo:** `app/main.py:151-197`
+**Archivo:** `app/main.py:163-215`
 
 ---
 
@@ -275,7 +275,7 @@ CORSMiddleware(allow_origins=[], allow_credentials=False,
 
 Esto complementa `SameSite=lax` en cookies para bloquear ataques CSRF vía fetch cross-origin.
 
-**Archivo:** `app/main.py:127-133`
+**Archivo:** `app/main.py:137-143`
 
 ---
 
@@ -323,7 +323,7 @@ Los handlers de excepción no exponen stack traces ni detalles internos al clien
 - `500 unhandled` → HTML genérico (`_500_HTML`); el detalle se loguea internamente con `exc_info`
 - Errores de API → `{"detail": "Error"}` o `{"detail": "Error interno"}`
 
-**Archivo:** `app/main.py:104-123`
+**Archivo:** `app/main.py:113-132`
 
 ---
 
