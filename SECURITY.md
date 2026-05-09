@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.16 (2026-05-08).
+Última actualización: v0.9.17 (2026-05-09).
 
 ---
 
@@ -219,7 +219,7 @@ El token OAuth2 de YouTube (access + refresh token) se almacena cifrado en disco
 - **Clave derivada:** `SHA-256(SECRET_KEY)` → base64url → clave Fernet. Misma entropía que la SECRET_KEY del sistema.
 - **Permisos de archivo:** `0o600` (solo lectura/escritura del propietario del proceso).
 - **Rotación automática:** si el refresh token expira (`invalid_grant`), se borra el archivo y la UI muestra "desconectado" con instrucciones para reconectar.
-- **Migración:** archivos en formato plain JSON previo al cifrado se re-cifran automáticamente al cargar.
+- **Migración:** archivos en formato plain JSON previo al cifrado se re-cifran automáticamente al cargar. El bloque de migración captura únicamente `InvalidToken` (error de descifrado esperado) — otros errores de I/O propagan normalmente sin silenciarse.
 - **CSRF en flujo OAuth**: el `state` generado por la librería OAuth se almacena en la sesión firmada al iniciar el flujo. El callback lo verifica con `secrets.compare_digest` antes de aceptar el código de autorización. El state se consume (elimina de la sesión) tras un callback exitoso — no puede reutilizarse.
 
 **Archivo:** `app/auth/youtube_oauth.py`, `app/routers/youtube.py`
@@ -335,7 +335,7 @@ Los handlers de excepción no exponen stack traces ni detalles internos al clien
 | `data/tokens/totp_secret.txt`        | `0o600`  | Secreto TOTP en base32       |
 | `data/tokens/youtube_token.json`     | `0o600`  | Token OAuth2 cifrado (Fernet)|
 
-Ambos son creados/actualizados con `os.chmod(path, 0o600)` explícito después de cada escritura.
+Ambos son creados con `os.umask(0o177)` activo durante el `write_bytes()` y `os.chmod(path, 0o600)` explícito inmediatamente después — el archivo nace con permisos `0o600` desde el primer byte, sin ventana de exposición entre escritura y chmod.
 
 ---
 
@@ -360,8 +360,11 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Auditoría multi-agente — Fase 1 (5 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.13 |
 | Auditoría multi-agente — Fase 2 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.14 |
 | Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.15 |
+| Correcciones adicionales (2 ítems) | mayo 2026 | ✓ Corregidos en v0.9.17 |
 
-**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones: body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
+**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones originales (6): body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
+
+En v0.9.17 se cerraron 2 deducciones adicionales: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto. Deducciones pendientes: body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, ausencia de rate limiting en endpoints de mutación.
 
 ---
 
