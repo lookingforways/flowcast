@@ -77,7 +77,9 @@ async def trigger_download(
     if ep.status not in ("discovered", "failed"):
         raise HTTPException(400, f"Episode is in status '{ep.status}', cannot download")
 
-    from app.utils.progress import set_progress
+    from app.utils.progress import set_progress, is_active
+    if is_active("download", episode_id):
+        raise HTTPException(409, "Ya hay una descarga en curso para este episodio")
     set_progress("download", episode_id, 0)
     background_tasks.add_task(_run_download, episode_id)
     return ep
@@ -108,7 +110,9 @@ async def trigger_render(
     if ep.status not in ("downloaded", "rendered", "failed"):
         raise HTTPException(400, f"Episode must be downloaded first (current: '{ep.status}')")
 
-    from app.utils.progress import set_progress
+    from app.utils.progress import set_progress, is_active
+    if is_active("render", episode_id):
+        raise HTTPException(409, "Ya hay un render en curso para este episodio")
     set_progress("render", episode_id, 0)
     background_tasks.add_task(_run_render, episode_id, template_id)
     # Return a placeholder response; actual job created async

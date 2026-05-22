@@ -15,7 +15,7 @@ _EXPR_RE = re.compile(r"^[0-9A-Za-z_()\-+*/. ]{1,80}$")
 class TemplateCreate(BaseModel):
     name: str
     waveform_color: str = "#00FF88"
-    waveform_mode: str = "cline"
+    waveform_mode: Literal["bars"] = "bars"
     waveform_x: int = 0
     waveform_y: int = 810
     waveform_w: int = 1920

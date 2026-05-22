@@ -18,6 +18,7 @@ from app.schemas.template import TemplateCreate, TemplateOut, TemplateUpdate
 router = APIRouter(prefix="/api/templates", tags=["templates"])
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
+_MAX_UPLOAD_SIZE = 20 * 1024 * 1024  # 20 MB
 
 
 def _safe_unlink(path_str: str, allowed_parent: Path) -> None:
@@ -108,7 +109,13 @@ async def upload_background(
     if file.content_type not in _ALLOWED_IMAGE_TYPES:
         raise HTTPException(400, f"Unsupported image type: {file.content_type}. Use JPEG, PNG, or WebP.")
 
+    if int(file.headers.get("content-length", 0)) > _MAX_UPLOAD_SIZE:
+        raise HTTPException(413, "El archivo supera el límite de 20 MB")
+
     content = await file.read()
+    if len(content) > _MAX_UPLOAD_SIZE:
+        raise HTTPException(413, "El archivo supera el límite de 20 MB")
+
     # Validate it's actually an image
     try:
         img = Image.open(io.BytesIO(content))
@@ -164,7 +171,13 @@ async def upload_watermark(
     if file.content_type not in _ALLOWED_IMAGE_TYPES:
         raise HTTPException(400, "Unsupported image type.")
 
+    if int(file.headers.get("content-length", 0)) > _MAX_UPLOAD_SIZE:
+        raise HTTPException(413, "El archivo supera el límite de 20 MB")
+
     content = await file.read()
+    if len(content) > _MAX_UPLOAD_SIZE:
+        raise HTTPException(413, "El archivo supera el límite de 20 MB")
+
     try:
         img = Image.open(io.BytesIO(content))
         img.verify()
