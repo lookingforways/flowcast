@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.20 (2026-05-22).
+Última actualización: v0.9.21 (2026-05-22).
 
 ---
 
@@ -36,7 +36,7 @@ Documento de referencia de todos los controles de seguridad implementados en la 
 ### Paso 1 — Contraseña
 - Credenciales configuradas en `.env` (`ADMIN_USERNAME`, `ADMIN_PASSWORD`).
 - La app **no arranca** si la contraseña es el valor por defecto `changeme` (ver §10).
-- Comparación directa de string; el username/password se trunca antes de comparar para evitar timing attacks en cadenas largas (`_MAX_USERNAME=150`, `_MAX_PASSWORD=256`).
+- Comparación con `secrets.compare_digest()` — timing-safe, sin short-circuit. El username/password se limita a `_MAX_USERNAME=150` / `_MAX_PASSWORD=256` caracteres antes de comparar.
 
 **Archivo:** `app/routers/auth.py:58-84`
 
@@ -83,8 +83,9 @@ Implementación doble: **token firmado en cookie** + **mismo token en formulario
 
 - Token generado con `secrets.token_hex(16)` envuelto en `URLSafeTimedSerializer` (salt `"flowcast-csrf"`, TTL token 1 hora).
 - Comparación con `secrets.compare_digest` para evitar timing attacks.
-- Aplicado en: `POST /login` y `POST /2fa`.
+- Aplicado en: `POST /login`, `POST /2fa` y `POST /logout`.
 - Cookie CSRF: `HttpOnly`, `SameSite=lax`, `Secure` en HTTPS, `max_age=1800` (30 minutos) — el TTL efectivo es 30 minutos (la cookie expira antes que el token).
+- Los endpoints JSON de la API (`/api/*`) no usan token CSRF — protegidos por `SameSite=Lax` + CORS vacío. Ver §19 para justificación.
 
 ```python
 # verify_csrf en app/auth/csrf.py
@@ -108,6 +109,7 @@ return secrets.compare_digest(str(form_nonce), str(cookie_nonce))
 | `POST /api/episodes/{id}/download` | 10/minuto | IP remota |
 | `POST /api/episodes/{id}/render`   | 10/minuto | IP remota |
 | `POST /api/episodes/{id}/publish`  | 10/minuto | IP remota |
+| `GET /api/img`                     | 30/minuto | IP remota |
 
 - Respuesta 429 con `Retry-After: 60` en JSON `{"detail": "Demasiados intentos. Reintentá en un momento."}`.
 - No expone información sobre la existencia de usuarios (mismo mensaje para usuario correcto/incorrecto).
@@ -387,8 +389,15 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Correcciones adicionales (2 ítems) | mayo 2026 | ✓ Corregidos en v0.9.17 |
 | Hardening plan v1.0 (5 grupos, 15+ mejoras) | mayo 2026 | ✓ Corregidos en v0.9.19 |
 | Cierre final B-03 + M-05 | mayo 2026 | ✓ Corregidos en v0.9.20 |
+| Auditoría Opus — pre-v1.0 (10 hallazgos, score 88/100) | mayo 2026 | ✓ 4 cerrados en v0.9.21; 3 aceptados documentados en §19 |
 
-**Score final: 100/100** — todas las deducciones originales cerradas. Evaluación independiente mayo 2026, verificada por pentester senior y developer senior.
+**Score auditoría Opus: 88/100 → ~93/100** post-fix (v0.9.21). Hallazgos cerrados en v0.9.21:
+- **Timing attack en login** (-4 pts): `secrets.compare_digest()` en `auth.py`
+- **FFmpeg `%` macros** (-1 pt): `%` → `%%` en `escape_drawtext()`
+- **`_safe_unlink` `startswith` anti-pattern** (-0.5 pts): `Path.is_relative_to()` en `episodes.py` y `templates.py`
+- **Proxy de imágenes sin rate limit** (-0.5 pts): `@limiter.limit("30/minute")` en `/api/img`
+
+Hallazgos aceptados (-6 pts restantes) — documentados en §19 con justificación.
 
 Deducciones originales (6) y versión de cierre:
 - `security_contact` placeholder → cerrado en v0.9.17
@@ -397,8 +406,6 @@ Deducciones originales (6) y versión de cierre:
 - Ausencia de rate limiting en endpoints de mutación → cerrado en v0.9.19
 - **B-03** body check chunked → cerrado en v0.9.20
 - **M-05** DNS TOCTOU → cerrado en v0.9.20
-
-Sin deducciones pendientes.
 
 ---
 
@@ -409,4 +416,6 @@ Sin deducciones pendientes.
 | YouTube OAuth en modo *Testing* | Intencional durante desarrollo | Tokens expiran cada 7 días. La UI avisa claramente con pasos para reconectar. Cambiar a modo producción en Google Cloud Console antes del release público. |
 | Usuario único (`admin`) | Diseño intencional | App self-hosted de un solo usuario. No hay sistema multi-usuario ni roles. |
 | Sin 2FA para desconectar YouTube | Aceptado | Requiere sesión completamente autenticada (password + TOTP). |
-| TOTP sin protección anti-replay | Bajo riesgo | `valid_window=1` permite el mismo token en ~60 segundos. Mitigado por rate limiting en login y HTTPS. |
+| TOTP sin protección anti-replay | Aceptado | `valid_window=1` acepta el mismo código durante ~90 segundos (3 ventanas de 30 s). Para invalidarlo habría que mantener un store de códigos usados. Mitigado por rate limiting de 5/min en `POST /2fa` y HTTPS. |
+| Sesión sin invalidación server-side | Aceptado | La sesión es una cookie firmada stateless (`itsdangerous`). El logout borra la cookie del browser, pero un token capturado antes del logout puede usarse hasta que expire su `max_age` de 7 días. Solución real requeriría una lista negra en DB/Redis. Mitigado por HTTPS (TLS impide interceptación) y `HttpOnly` (JavaScript no puede leer la cookie). |
+| CSRF no verificado en endpoints JSON de API | Aceptado | Los 16 endpoints `/api/*` de mutación no verifican token CSRF. La protección depende de `SameSite=Lax` (browsers modernos no envían la cookie en requests cross-site) y CORS vacío (bloquea fetch cross-origin). Ambas mitigaciones son sólidas en browsers modernos. Agregar CSRF tokens a APIs JSON es posible pero innecesario dado el threat model de app self-hosted mono-usuario. |
