@@ -6,6 +6,15 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.22] — 2026-05-22
+
+### Seguridad
+
+- **SVG eliminado del proxy de imágenes**: `image/svg+xml` removido de la allowlist de content-types en `/api/img` — las portadas de podcasts son siempre JPEG/PNG/WebP; SVG no es necesario y puede ejecutar scripts si el browser lo renderiza como documento
+- **Limitaciones documentadas en SECURITY.md**: `fontfile` sin escapar y rate limit en endpoints autenticados restantes documentados como aceptados con justificación — completa la cobertura de todos los hallazgos de la auditoría Opus pre-v1.0
+
+---
+
 ## [0.9.21] — 2026-05-22
 
 ### Seguridad

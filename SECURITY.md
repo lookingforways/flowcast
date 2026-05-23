@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.21 (2026-05-22).
+Última actualización: v0.9.22 (2026-05-22).
 
 ---
 
@@ -391,13 +391,16 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Cierre final B-03 + M-05 | mayo 2026 | ✓ Corregidos en v0.9.20 |
 | Auditoría Opus — pre-v1.0 (10 hallazgos, score 88/100) | mayo 2026 | ✓ 4 cerrados en v0.9.21; 3 aceptados documentados en §19 |
 
-**Score auditoría Opus: 88/100 → ~93/100** post-fix (v0.9.21). Hallazgos cerrados en v0.9.21:
+**Score auditoría Opus: 88/100 → ~95/100** post-fix (v0.9.21–v0.9.22). Hallazgos cerrados en v0.9.21:
 - **Timing attack en login** (-4 pts): `secrets.compare_digest()` en `auth.py`
 - **FFmpeg `%` macros** (-1 pt): `%` → `%%` en `escape_drawtext()`
 - **`_safe_unlink` `startswith` anti-pattern** (-0.5 pts): `Path.is_relative_to()` en `episodes.py` y `templates.py`
 - **Proxy de imágenes sin rate limit** (-0.5 pts): `@limiter.limit("30/minute")` en `/api/img`
 
-Hallazgos aceptados (-6 pts restantes) — documentados en §19 con justificación.
+Hallazgo cerrado en v0.9.22:
+- **SVG en proxy de imágenes** (-0.5 pts): `image/svg+xml` eliminado de `_ALLOWED_CONTENT_TYPES` en `proxy.py`
+
+Hallazgos aceptados (-5 pts restantes) — documentados en §19 con justificación.
 
 Deducciones originales (6) y versión de cierre:
 - `security_contact` placeholder → cerrado en v0.9.17
@@ -419,3 +422,5 @@ Deducciones originales (6) y versión de cierre:
 | TOTP sin protección anti-replay | Aceptado | `valid_window=1` acepta el mismo código durante ~90 segundos (3 ventanas de 30 s). Para invalidarlo habría que mantener un store de códigos usados. Mitigado por rate limiting de 5/min en `POST /2fa` y HTTPS. |
 | Sesión sin invalidación server-side | Aceptado | La sesión es una cookie firmada stateless (`itsdangerous`). El logout borra la cookie del browser, pero un token capturado antes del logout puede usarse hasta que expire su `max_age` de 7 días. Solución real requeriría una lista negra en DB/Redis. Mitigado por HTTPS (TLS impide interceptación) y `HttpOnly` (JavaScript no puede leer la cookie). |
 | CSRF no verificado en endpoints JSON de API | Aceptado | Los 16 endpoints `/api/*` de mutación no verifican token CSRF. La protección depende de `SameSite=Lax` (browsers modernos no envían la cookie en requests cross-site) y CORS vacío (bloquea fetch cross-origin). Ambas mitigaciones son sólidas en browsers modernos. Agregar CSRF tokens a APIs JSON es posible pero innecesario dado el threat model de app self-hosted mono-usuario. |
+| `fontfile` path sin escapar en FFmpeg | Aceptado | El path de fuente en `pipeline.py` se interpola sin escapar comillas simples. No explotable: `title_font_path` no está expuesto en ningún endpoint de API — solo modificable con acceso directo a la base de datos. Las fuentes predefinidas en `AUDIOGRAM_FONTS` y `default_font_path` son paths del sistema controlados por el operador. |
+| Rate limiting en endpoints autenticados restantes | Aceptado | Los endpoints CRUD de podcasts, templates, youtube disconnect y episodes DELETE no tienen rate limit. Todos requieren sesión completamente autenticada (password + TOTP). El riesgo es negligible en una app mono-usuario: el único actor autenticado es el administrador. |
