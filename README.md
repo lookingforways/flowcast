@@ -379,14 +379,18 @@ El render usa todos los cores disponibles. Se recomienda procesar episodios en l
 
 ## Actualizar schema de base de datos
 
-Si actualizás FlowCast y hay cambios en el schema de la DB:
+A partir de v1.0, FlowCast usa **Alembic** para gestionar migraciones de schema. Las migraciones se aplican automáticamente al arrancar el contenedor — no es necesario ningún paso manual.
 
 ```bash
-rm ~/flowcast/data/db/flowcast.db
-docker compose restart flowcast
+git pull && docker compose up -d --build
 ```
 
-> Esto borra todos los datos. Hacelo solo en instalaciones nuevas o cuando se indique explícitamente en el CHANGELOG.
+Al arrancar, FlowCast detecta si la base de datos ya tiene historial de migraciones:
+- **Instalación nueva**: crea las tablas y marca el estado inicial
+- **Instalación existente con Alembic**: aplica las migraciones pendientes automáticamente
+- **Instalación existente pre-v1.0**: detecta la ausencia de historial, marca el estado actual como base y queda lista para migraciones futuras
+
+> Los datos existentes (episodios, plantillas, configuración) se preservan en todos los casos.
 
 ---
 

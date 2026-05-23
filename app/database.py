@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -23,31 +24,43 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+async def _has_alembic_version() -> bool:
+    """Return True if the alembic_version table exists in the database."""
+    async with engine.connect() as conn:
+        result = await conn.execute(
+            text("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='alembic_version'")
+        )
+        return result.scalar() > 0
+
+
+def _alembic_stamp_head() -> None:
+    from alembic import command
+    from alembic.config import Config
+    cfg = Config("alembic.ini")
+    cfg.set_main_option("sqlalchemy.url", settings.db_url.replace("+aiosqlite", ""))
+    command.stamp(cfg, "head")
+
+
+def _alembic_upgrade_head() -> None:
+    from alembic import command
+    from alembic.config import Config
+    cfg = Config("alembic.ini")
+    cfg.set_main_option("sqlalchemy.url", settings.db_url.replace("+aiosqlite", ""))
+    command.upgrade(cfg, "head")
+
+
 async def init_db() -> None:
-    """Create all tables and run lightweight column migrations."""
+    """Initialize database: create tables for new installs, run migrations for existing ones."""
+    import asyncio
     from app.models import podcast, episode, template, job, preferences  # noqa: F401 — register models
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        text = __import__("sqlalchemy", fromlist=["text"]).text
-        # Add title_font column if upgrading from a pre-0.9.12 database
-        try:
-            await conn.execute(
-                text("ALTER TABLE templates ADD COLUMN title_font VARCHAR(64) NOT NULL DEFAULT 'liberation'")
-            )
-        except Exception:
-            pass  # column already exists
-        # Add ui_font_size column if upgrading from a pre-0.9.13 database
-        try:
-            await conn.execute(
-                text("ALTER TABLE app_preferences ADD COLUMN ui_font_size VARCHAR(8) NOT NULL DEFAULT 'L'")
-            )
-        except Exception:
-            pass  # column already exists
-        # Add ui_font_weight column if upgrading from a pre-0.9.13 database
-        try:
-            await conn.execute(
-                text("ALTER TABLE app_preferences ADD COLUMN ui_font_weight VARCHAR(16) NOT NULL DEFAULT 'normal'")
-            )
-        except Exception:
-            pass  # column already exists
+    if not await _has_alembic_version():
+        # New install or pre-Alembic existing install:
+        # create_all is idempotent — safe to run on both cases.
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        # Stamp at head so future migrations run correctly.
+        await asyncio.to_thread(_alembic_stamp_head)
+    else:
+        # Alembic-managed install: apply any pending migrations.
+        await asyncio.to_thread(_alembic_upgrade_head)

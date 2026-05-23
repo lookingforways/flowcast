@@ -6,6 +6,18 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [Unreleased] — v1.0 en progreso
+
+### Infraestructura
+
+- **Alembic — migraciones automáticas de schema**: reemplaza los `ALTER TABLE` inline en `database.py`. Al arrancar, FlowCast detecta si la DB tiene historial Alembic: si no lo tiene (instalación nueva o pre-v1.0), crea las tablas y stampa el estado base; si lo tiene, aplica las migraciones pendientes. Los datos existentes se preservan en todos los casos.
+- **Grupo 1 — Bloqueantes v1.0**: límite de 20 MB en upload de imágenes de plantilla; guards de concurrencia en download y render (409 si ya hay una operación en curso); `waveform_mode` validado como `Literal["bars"]` en `TemplateCreate`
+- **Grupo 2 — Seguridad**: rate limiting `10/minute` en `POST /api/episodes/{id}/download`, `/render` y `/publish`; `TRUSTED_PROXY_IPS` como variable de entorno configurable (default `"*"`)
+- **Grupo 3 — Robustez**: validación de `status` contra whitelist en `GET /api/episodes`; `podcast_id` como filtro en la API REST; advertencia de single-worker en Dockerfile y README
+- **Tests de seguridad**: cobertura del SSRF validator (15 casos incluyendo octal IP), template schema validators (19 casos), y CSRF (9 casos)
+
+---
+
 ## [0.9.18] — 2026-05-09
 
 ### Correcciones
