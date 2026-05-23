@@ -36,4 +36,7 @@ USER flowcast
 
 EXPOSE 8000
 
+# workers=1 es obligatorio: el progress store (download/render/upload) vive en
+# RAM del proceso — múltiples workers tendrían dicts independientes y el
+# tracking de progreso quebraría silenciosamente.
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -16,6 +16,8 @@ from app.schemas.job import JobOut
 
 router = APIRouter(prefix="/api/episodes", tags=["episodes"])
 
+_VALID_STATUSES = frozenset({"discovered", "downloaded", "rendered", "published", "failed"})
+
 
 def _safe_unlink(path_str: str, *allowed_parents: Path) -> None:
     """Delete a file only if it resides within one of the allowed directories."""
@@ -34,11 +36,16 @@ async def list_episodes(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: str | None = Query(None),
+    podcast_id: int | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
+    if status and status not in _VALID_STATUSES:
+        raise HTTPException(400, f"Estado inválido. Valores aceptados: {', '.join(sorted(_VALID_STATUSES))}")
     q = select(Episode).order_by(Episode.pub_date.desc().nullslast(), Episode.created_at.desc())
     if status:
         q = q.where(Episode.status == status)
+    if podcast_id:
+        q = q.where(Episode.podcast_id == podcast_id)
 
     total = (await session.execute(select(func.count()).select_from(q.subquery()))).scalar_one()
     items = (await session.execute(q.offset((page - 1) * per_page).limit(per_page))).scalars().all()

@@ -289,6 +289,8 @@ docker compose up -d
 
 Accede a `http://localhost:8000` (o tu dominio).
 
+> **Nota — workers:** FlowCast debe correr con `--workers 1` (es el default). El seguimiento de progreso de descarga, render y publicación vive en memoria del proceso — aumentar workers causaría que las barras de progreso dejen de funcionar silenciosamente.
+
 ---
 
 ## Autenticación y 2FA
