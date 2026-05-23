@@ -6,15 +6,31 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
-## [Unreleased] — v1.0 en progreso
+## [0.9.19] — 2026-05-22
 
 ### Infraestructura
 
-- **Alembic — migraciones automáticas de schema**: reemplaza los `ALTER TABLE` inline en `database.py`. Al arrancar, FlowCast detecta si la DB tiene historial Alembic: si no lo tiene (instalación nueva o pre-v1.0), crea las tablas y stampa el estado base; si lo tiene, aplica las migraciones pendientes. Los datos existentes se preservan en todos los casos.
-- **Grupo 1 — Bloqueantes v1.0**: límite de 20 MB en upload de imágenes de plantilla; guards de concurrencia en download y render (409 si ya hay una operación en curso); `waveform_mode` validado como `Literal["bars"]` en `TemplateCreate`
-- **Grupo 2 — Seguridad**: rate limiting `10/minute` en `POST /api/episodes/{id}/download`, `/render` y `/publish`; `TRUSTED_PROXY_IPS` como variable de entorno configurable (default `"*"`)
-- **Grupo 3 — Robustez**: validación de `status` contra whitelist en `GET /api/episodes`; `podcast_id` como filtro en la API REST; advertencia de single-worker en Dockerfile y README
-- **Tests de seguridad**: cobertura del SSRF validator (15 casos incluyendo octal IP), template schema validators (19 casos), y CSRF (9 casos)
+- **Alembic — migraciones automáticas de schema**: reemplaza los `ALTER TABLE` inline en `database.py`. Al arrancar, FlowCast detecta si la DB tiene historial Alembic: si no lo tiene (instalación nueva o pre-v0.9.19), crea las tablas y stampa el estado base; si lo tiene, aplica las migraciones pendientes. Los datos existentes se preservan en todos los casos. Elimina la instrucción de "borrar la DB" para cambios de schema.
+
+### Seguridad
+
+- **Rate limiting en mutaciones**: `@limiter.limit("10/minute")` en `POST /api/episodes/{id}/download`, `/render` y `/publish` — cierra deducción de auditoría
+- **`TRUSTED_PROXY_IPS`**: nueva variable de entorno para configurar `ProxyHeadersMiddleware` (default `"*"`, compatible con Caddy/Traefik/Easypanel) — cierra deducción de auditoría
+- **Límite de 20 MB en upload de imágenes**: `POST /api/templates/{id}/background` y `/watermark` rechazan archivos mayores a 20 MB con 413 — doble check (header + post-read)
+- **Guards de concurrencia en download y render**: 409 si ya hay una operación en curso para el mismo episodio — consistente con el guard ya existente en publish
+- **`waveform_mode` validado**: `Literal["bars"]` en `TemplateCreate` — reemplaza `str` libre; único valor válido hasta que se agreguen más estilos
+
+### Robustez
+
+- **Validación de `status`** en `GET /api/episodes`: whitelist de valores válidos — devuelve 400 para valores desconocidos en lugar de resultados vacíos silenciosos
+- **`podcast_id` como filtro** en `GET /api/episodes`: la API REST expone el mismo filtro que ya tenía el UI router
+- **Advertencia de single-worker**: comentario en `Dockerfile` y nota en README explicando por qué `--workers 1` es obligatorio (progress store en RAM)
+
+### Tests
+
+- **`tests/test_url_validator.py`** (15 tests): SSRF validator — loopback, redes privadas, CG-NAT, IPv6, IPv4-mapped, octal IP (`0177.0.0.1`), schemes inválidos
+- **`tests/test_template_schema.py`** (19 tests): color validator, expression validator (FFmpeg injection), `waveform_mode` Literal, `title_font` Literal
+- **`tests/test_csrf.py`** (9 tests): token válido, manipulado, expirado (`unittest.mock.patch`), `verify_csrf` con nonces coincidentes/distintos/inválidos
 
 ---
 

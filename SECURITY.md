@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.18 (2026-05-09).
+Última actualización: v0.9.19 (2026-05-22).
 
 ---
 
@@ -105,6 +105,9 @@ return secrets.compare_digest(str(form_nonce), str(cookie_nonce))
 | `POST /2fa`   | 5/minuto   | IP remota   |
 | `POST /logout`| Sin límite | — (requiere CSRF válido) |
 | `GET /health` | 30/minuto  | IP remota   |
+| `POST /api/episodes/{id}/download` | 10/minuto | IP remota |
+| `POST /api/episodes/{id}/render`   | 10/minuto | IP remota |
+| `POST /api/episodes/{id}/publish`  | 10/minuto | IP remota |
 
 - Respuesta 429 con `Retry-After: 60` en JSON `{"detail": "Demasiados intentos. Reintentá en un momento."}`.
 - No expone información sobre la existencia de usuarios (mismo mensaje para usuario correcto/incorrecto).
@@ -261,7 +264,18 @@ if request.method == "PATCH" and request.url.path == "/api/preferences":
 
 El endpoint `PATCH /api/preferences` usa además un schema Pydantic con tipos `Literal` que valida estructura y valores permitidos antes de tocar la base de datos (`app/routers/preferences.py`).
 
-**Archivo:** `app/main.py`
+Los endpoints de carga de imágenes (`POST /api/templates/{id}/background` y `.../watermark`) aplican un **doble check de 20 MB**: rechazo anticipado por `Content-Length` antes de leer el cuerpo, y verificación de `len(content)` post-lectura para cubrir casos sin `Content-Length` (ej. transfer-encoding chunked).
+
+```python
+_MAX_UPLOAD_SIZE = 20 * 1024 * 1024  # 20 MB
+if int(file.headers.get("content-length", 0)) > _MAX_UPLOAD_SIZE:
+    raise HTTPException(413, "El archivo supera el límite de 20 MB")
+content = await file.read()
+if len(content) > _MAX_UPLOAD_SIZE:
+    raise HTTPException(413, "El archivo supera el límite de 20 MB")
+```
+
+**Archivo:** `app/main.py`, `app/routers/templates.py`
 
 ---
 
@@ -361,14 +375,15 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Auditoría multi-agente — Fase 2 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.14 |
 | Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.15 |
 | Correcciones adicionales (2 ítems) | mayo 2026 | ✓ Corregidos en v0.9.17 |
+| Hardening plan v1.0 (5 grupos, 15+ mejoras) | mayo 2026 | ✓ Corregidos en v0.9.19 |
 
-**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones originales (6): body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
+**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones originales (6): body check chunked (B-03), DNS TOCTOU (M-05), `trusted_proxy_ips="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
 
-En v0.9.17 se cerraron 2 deducciones adicionales: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto.
+En v0.9.17 se cerraron 2 deducciones: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto.
 
-En post-v0.9.18 (Grupo 2 del plan v1.0) se cerraron 2 deducciones adicionales:
+En v0.9.19 se cerraron 2 deducciones adicionales:
 - **Rate limiting en mutaciones**: `@limiter.limit("10/minute")` en `POST /api/episodes/{id}/download`, `/render` y `/publish`
-- **`trusted_hosts="*"`**: reemplazado por variable de entorno `TRUSTED_PROXY_IPS` (default `"*"` para compatibilidad con Caddy/Traefik/Easypanel; configurar con IP del proxy para hardening)
+- **`trusted_hosts="*"`**: reemplazado por variable de entorno `TRUSTED_PROXY_IPS` (default `"*"` para compatibilidad; configurar con IP exacta del proxy para hardening)
 
 Deducciones pendientes: body check chunked (B-03), DNS TOCTOU (M-05).
 
