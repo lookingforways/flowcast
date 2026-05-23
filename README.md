@@ -64,7 +64,7 @@ FlowCast ha pasado por múltiples rondas de auditoría externa activa (última: 
 | JS sin `innerHTML` | Todo el código JS usa `textContent` + DOM methods — sin superficie de XSS DOM-based |
 | Sanitización HTML | Descripciones RSS sanitizadas con `nh3` (ammonia) antes de guardar en DB — allowlist estricto de tags seguros; `html_to_text()` convierte a texto estructurado para YouTube |
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
-| Rate limiting | 5 req/minuto en `/login` y `/2fa` (por IP, con slowapi) |
+| Rate limiting | 5 req/min en `/login` y `/2fa`; 10 req/min en download, render y publish; 30 req/min en `/api/img` — por IP, con slowapi |
 | SRI | `integrity=` sha384 en todos los assets CSS/JS — verifica integridad en el browser |
 | SSRF | Validación de URLs externas (IP privadas, CG-NAT 100.64/10, IPv4-mapped IPv6, octal bloqueados) antes de fetch RSS y descarga de MP3. Redirects re-validados en todos los puntos de fetch |
 | FFmpeg injection | Validators Pydantic con whitelist estricto para colores (`#RRGGBB`) y expresiones posicionales — bloquean inyección via opciones FFmpeg |
@@ -379,7 +379,7 @@ El render usa todos los cores disponibles. Se recomienda procesar episodios en l
 
 ## Actualizar schema de base de datos
 
-A partir de v1.0, FlowCast usa **Alembic** para gestionar migraciones de schema. Las migraciones se aplican automáticamente al arrancar el contenedor — no es necesario ningún paso manual.
+A partir de v0.9.19, FlowCast usa **Alembic** para gestionar migraciones de schema. Las migraciones se aplican automáticamente al arrancar el contenedor — no es necesario ningún paso manual.
 
 ```bash
 git pull && docker compose up -d --build
