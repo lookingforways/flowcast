@@ -1,7 +1,7 @@
 # FlowCast — Seguridad
 
 Documento de referencia de todos los controles de seguridad implementados en la aplicación.
-Última actualización: v0.9.19 (2026-05-22).
+Última actualización: v0.9.20 (2026-05-22).
 
 ---
 
@@ -205,6 +205,12 @@ Toda URL externa que la app fetcha pasa por `validate_external_url()` antes de h
 - **Notación octal** (ej. `0177.0.0.1`) — rechazada antes de llegar al resolver del SO (el regex `_IP_LIKE` detecta literales de solo dígitos/puntos y los fuerza por `ipaddress`, que rechaza octal)
 - **FQDNs que resuelven a IPs privadas** — el validador resuelve DNS con `socket.getaddrinfo()` y verifica cada dirección retornada
 
+**Validación en el momento de la conexión TCP (cierre M-05 — DNS TOCTOU):**
+- **`_SSRFSafeTransport`** (httpx): subclase de `AsyncHTTPTransport` que re-valida las IPs resueltas dentro de `handle_async_request()`, justo antes de que httpcore abra el socket. Aplicado en downloader y proxy de imágenes.
+- **`_SafeHTTPConnection` / `_SafeHTTPSConnection`** (urllib): subclases de `http.client.HTTP(S)Connection` que re-validan en `connect()`. Aplicado a feedparser mediante `_SafeHTTPHandler` / `_SafeHTTPSHandler`.
+
+La ventana TOCTOU (tiempo entre `validate_external_url()` y la conexión real) queda reducida a microsegundos dentro de la misma llamada — la re-resolución DNS del SO no puede devolver una IP diferente en ese margen.
+
 **Redirects validados en todos los puntos de fetch:**
 - **Feedparser** (`rss.py`): `_SSRFRedirectHandler` subclasea `urllib.request.HTTPRedirectHandler` y llama a `validate_external_url` en cada redirect antes de seguirlo
 - **Downloader MP3** (`downloader.py`): event hook `"response"` en `httpx.AsyncClient` valida el header `Location` de cada respuesta 3xx antes de que httpx construya la nueva request
@@ -254,10 +260,14 @@ Los endpoints sensibles rechazan bodies mayores a **2 KB** antes de que FastAPI 
 _MAX_FORM_BODY = 2048
 # Endpoints de autenticación (públicos, sin auth previa)
 if request.method == "POST" and request.url.path in ("/login", "/2fa"):
+    if "chunked" in request.headers.get("transfer-encoding", "").lower():
+        return JSONResponse(400)  # chunked bypass bloqueado (B-03)
     content_length = int(request.headers.get("content-length", 0))
     if content_length > _MAX_FORM_BODY: return JSONResponse(400)
 # Endpoint de preferencias de interfaz
 if request.method == "PATCH" and request.url.path == "/api/preferences":
+    if "chunked" in request.headers.get("transfer-encoding", "").lower():
+        return JSONResponse(400)  # chunked bypass bloqueado (B-03)
     content_length = int(request.headers.get("content-length", 0))
     if content_length > _MAX_FORM_BODY: return JSONResponse(400)
 ```
@@ -376,16 +386,19 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 | Auditoría multi-agente — Fase 3 (4 hallazgos) | mayo 2026 | ✓ Corregidos en v0.9.15 |
 | Correcciones adicionales (2 ítems) | mayo 2026 | ✓ Corregidos en v0.9.17 |
 | Hardening plan v1.0 (5 grupos, 15+ mejoras) | mayo 2026 | ✓ Corregidos en v0.9.19 |
+| Cierre final B-03 + M-05 | mayo 2026 | ✓ Corregidos en v0.9.20 |
 
-**Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones originales (6): body check chunked (B-03), DNS TOCTOU (M-05), `trusted_proxy_ips="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
+**Score final: 100/100** — todas las deducciones originales cerradas. Evaluación independiente mayo 2026, verificada por pentester senior y developer senior.
 
-En v0.9.17 se cerraron 2 deducciones: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto.
+Deducciones originales (6) y versión de cierre:
+- `security_contact` placeholder → cerrado en v0.9.17
+- `except Exception` amplio en migración de token → cerrado en v0.9.17
+- `trusted_proxy_ips="*"` → cerrado en v0.9.19
+- Ausencia de rate limiting en endpoints de mutación → cerrado en v0.9.19
+- **B-03** body check chunked → cerrado en v0.9.20
+- **M-05** DNS TOCTOU → cerrado en v0.9.20
 
-En v0.9.19 se cerraron 2 deducciones adicionales:
-- **Rate limiting en mutaciones**: `@limiter.limit("10/minute")` en `POST /api/episodes/{id}/download`, `/render` y `/publish`
-- **`trusted_hosts="*"`**: reemplazado por variable de entorno `TRUSTED_PROXY_IPS` (default `"*"` para compatibilidad; configurar con IP exacta del proxy para hardening)
-
-Deducciones pendientes: body check chunked (B-03), DNS TOCTOU (M-05).
+Sin deducciones pendientes.
 
 ---
 

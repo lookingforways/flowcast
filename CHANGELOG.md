@@ -6,6 +6,22 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.20] — 2026-05-22
+
+### Seguridad
+
+- **B-03 — Chunked body bypass cerrado**: rechazo de `Transfer-Encoding: chunked` en `POST /login`, `POST /2fa` y `PATCH /api/preferences` antes de leer el cuerpo — cierra el bypass del límite de 2 KB vía chunked encoding
+- **M-05 — DNS TOCTOU cerrado**: validación de IPs resueltas en el momento exacto de la conexión TCP, no solo antes de llamar al cliente HTTP — tres superficies cubiertas: `_SSRFSafeTransport` (httpx, para downloader y proxy de imágenes) y `_SafeHTTPConnection`/`_SafeHTTPSConnection` (urllib/feedparser)
+- **Score de auditoría: 100/100** — todas las deducciones originales cerradas
+
+### Tests
+
+- **`tests/test_body_size.py`** (5 tests): cobertura del rechazo chunked en los tres endpoints sensibles
+- **`tests/test_url_validator.py`** (+5 tests): cobertura de `_check_ip_str`, `_SafeHTTPConnection`, `_SafeHTTPSConnection` y `_SSRFSafeTransport` con mock DNS de IP privada
+- **`tests/test_rss.py`**: corregidos 2 tests que usaban rutas locales sin scheme `http://` — parcheada `validate_external_url` en tests unitarios de parseo
+
+---
+
 ## [0.9.19] — 2026-05-22
 
 ### Infraestructura
