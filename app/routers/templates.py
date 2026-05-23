@@ -25,7 +25,7 @@ def _safe_unlink(path_str: str, allowed_parent: Path) -> None:
     """Delete a file only if it resides within the allowed directory."""
     try:
         p = Path(path_str).resolve()
-        if str(p).startswith(str(allowed_parent.resolve())):
+        if p.is_relative_to(allowed_parent.resolve()):
             p.unlink(missing_ok=True)
     except Exception:
         pass

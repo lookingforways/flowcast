@@ -1,6 +1,8 @@
 """Login, 2FA, and logout routes."""
 from __future__ import annotations
 
+import secrets
+
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -72,8 +74,8 @@ async def login_submit(
     if (
         len(username) <= _MAX_USERNAME
         and len(password) <= _MAX_PASSWORD
-        and username == settings.admin_username
-        and password == settings.admin_password
+        and secrets.compare_digest(username, settings.admin_username)
+        and secrets.compare_digest(password, settings.admin_password)
     ):
         response = RedirectResponse("/2fa", status_code=302)
         set_session(response, {"authenticated": True, "totp_verified": False}, max_age=300)

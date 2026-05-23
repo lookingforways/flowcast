@@ -6,6 +6,17 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.21] — 2026-05-22
+
+### Seguridad
+
+- **Timing-safe login**: comparación de credenciales con `secrets.compare_digest()` en lugar de `==` — elimina timing attack en `POST /login`
+- **FFmpeg `%` macros bloqueadas**: `escape_drawtext()` ahora reemplaza `%` → `%%` — previene expansión de macros `%{expr}` en títulos de episodios
+- **`_safe_unlink` con `Path.is_relative_to()`**: reemplaza `str.startswith()` anti-pattern en `episodes.py` y `templates.py` — verificación de path correcta
+- **Rate limiting en proxy de imágenes**: `GET /api/img` limitado a 30/minute por IP — previene abuso como port scanner
+
+---
+
 ## [0.9.20] — 2026-05-22
 
 ### Seguridad

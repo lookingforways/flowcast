@@ -13,10 +13,12 @@ def escape_drawtext(text: str) -> str:
     1. Backslash must be first (it is the escape character)
     2. Single-quote (used as filter value delimiter)
     3. Colon (used as filter option separator)
+    4. Percent (FFmpeg %{expr} macro expansion)
     """
     text = text.replace("\\", "\\\\")
     text = text.replace("'", "\\'")
     text = text.replace(":", "\\:")
+    text = text.replace("%", "%%")
     # Newlines in drawtext cause parse errors; replace with space
     text = text.replace("\n", " ").replace("\r", "")
     return text

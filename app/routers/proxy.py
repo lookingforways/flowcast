@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import httpx
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response
 
+from app.auth.limiter import limiter
 from app.utils.url_validator import validate_external_url, _SSRFSafeTransport
 
 router = APIRouter(prefix="/api", tags=["proxy"])
@@ -14,7 +15,8 @@ _MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 
 
 @router.get("/img")
-async def proxy_image(url: str = Query(...)):
+@limiter.limit("30/minute")
+async def proxy_image(request: Request, url: str = Query(...)):
     """Proxy an external image through the server.
 
     Validates the URL against SSRF attacks before fetching.

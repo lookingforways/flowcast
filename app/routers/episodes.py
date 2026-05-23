@@ -25,7 +25,7 @@ def _safe_unlink(path_str: str, *allowed_parents: Path) -> None:
     try:
         p = Path(path_str).resolve()
         for parent in allowed_parents:
-            if str(p).startswith(str(parent.resolve())):
+            if p.is_relative_to(parent.resolve()):
                 p.unlink(missing_ok=True)
                 return
     except Exception:
