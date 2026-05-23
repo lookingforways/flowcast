@@ -450,6 +450,7 @@ Reinicia el contenedor. A partir de ahora:
 | `SESSION_MAX_AGE` | `604800` | Duración de la sesión en segundos (default: 7 días) |
 | `LOG_LEVEL` | `INFO` | Nivel de log: DEBUG, INFO, WARNING, ERROR |
 | `SECURITY_CONTACT` | `security@your-domain.com` | Email publicado en `/.well-known/security.txt` |
+| `TRUSTED_PROXY_IPS` | `*` | IPs de confianza para `X-Forwarded-For`. `*` funciona con Caddy, Traefik y Easypanel. Para hardening: IP exacta del contenedor reverse proxy (ej. `172.18.0.2`) |
 
 ---
 

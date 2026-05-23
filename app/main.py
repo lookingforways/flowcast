@@ -213,7 +213,7 @@ async def security_middleware(request: Request, call_next):
     return response
 
 
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=settings.trusted_proxy_ips)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

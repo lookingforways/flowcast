@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     admin_password: str = "changeme"
     session_max_age: int = 86400 * 7  # 7 days in seconds
 
+    # Proxy — IPs de confianza para X-Forwarded-For (hardening opcional)
+    # "*" acepta cualquier proxy (default, compatible con Caddy/Traefik/Easypanel)
+    # Para hardening: usar la IP del reverse proxy, ej. "172.18.0.0/16"
+    trusted_proxy_ips: str = "*"
+
     # Derived paths (computed properties)
     @property
     def db_path(self) -> Path:

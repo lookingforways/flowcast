@@ -364,7 +364,13 @@ Múltiples rondas de auditoría activa con agentes especializados (Red Team, Blu
 
 **Score post-fixes: 92/100** — evaluación independiente mayo 2026, verificada por pentester senior y developer senior. Deducciones originales (6): body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, `security_contact` placeholder, `except Exception` amplio en migración de token, ausencia de rate limiting en endpoints de mutación.
 
-En v0.9.17 se cerraron 2 deducciones adicionales: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto. Deducciones pendientes: body check chunked (B-03), DNS TOCTOU (M-05), `trusted_hosts="*"`, ausencia de rate limiting en endpoints de mutación.
+En v0.9.17 se cerraron 2 deducciones adicionales: `except Exception` reducido a `except InvalidToken`, y aviso activo en dashboard cuando `SECURITY_CONTACT` tiene el valor por defecto.
+
+En post-v0.9.18 (Grupo 2 del plan v1.0) se cerraron 2 deducciones adicionales:
+- **Rate limiting en mutaciones**: `@limiter.limit("10/minute")` en `POST /api/episodes/{id}/download`, `/render` y `/publish`
+- **`trusted_hosts="*"`**: reemplazado por variable de entorno `TRUSTED_PROXY_IPS` (default `"*"` para compatibilidad con Caddy/Traefik/Easypanel; configurar con IP del proxy para hardening)
+
+Deducciones pendientes: body check chunked (B-03), DNS TOCTOU (M-05).
 
 ---
 

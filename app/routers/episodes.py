@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pathlib import Path
 
+from app.auth.limiter import limiter
 from app.config import settings
 from app.database import get_session
 from app.models.episode import Episode
@@ -71,7 +72,9 @@ async def get_episode(episode_id: int, session: AsyncSession = Depends(get_sessi
 
 
 @router.post("/{episode_id}/download", response_model=EpisodeOut)
+@limiter.limit("10/minute")
 async def trigger_download(
+    request: Request,
     episode_id: int,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
@@ -103,7 +106,9 @@ async def _run_download(episode_id: int) -> None:
 
 
 @router.post("/{episode_id}/render", response_model=JobOut)
+@limiter.limit("10/minute")
 async def trigger_render(
+    request: Request,
     episode_id: int,
     template_id: int | None = Query(None),
     background_tasks: BackgroundTasks = None,
@@ -150,7 +155,9 @@ async def _run_render(episode_id: int, template_id: int | None) -> None:
 
 
 @router.post("/{episode_id}/publish", response_model=EpisodeOut)
+@limiter.limit("10/minute")
 async def trigger_publish(
+    request: Request,
     episode_id: int,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
