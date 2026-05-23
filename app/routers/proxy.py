@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, Query
 from fastapi.responses import Response
 
-from app.utils.url_validator import validate_external_url
+from app.utils.url_validator import validate_external_url, _SSRFSafeTransport
 
 router = APIRouter(prefix="/api", tags=["proxy"])
 
@@ -26,7 +26,7 @@ async def proxy_image(url: str = Query(...)):
         return Response(status_code=400)
 
     try:
-        async with httpx.AsyncClient(timeout=10, follow_redirects=False) as client:
+        async with httpx.AsyncClient(transport=_SSRFSafeTransport(), timeout=10, follow_redirects=False) as client:
             resp = await client.get(url, headers={"User-Agent": "FlowCast/1.0"})
 
         if resp.status_code != 200:

@@ -1,8 +1,10 @@
 """RSS feed fetching and episode diffing."""
 from __future__ import annotations
 
+import http.client
 import logging
 import re
+import socket
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -16,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.episode import Episode
 from app.utils.html_sanitizer import sanitize_html
-from app.utils.url_validator import validate_external_url
+from app.utils.url_validator import _check_ip_str, validate_external_url
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,32 @@ class _SSRFRedirectHandler(urllib.request.HTTPRedirectHandler):
         except ValueError as exc:
             raise urllib.error.URLError(f"SSRF redirect blocked: {exc}") from exc
         return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+class _SafeHTTPConnection(http.client.HTTPConnection):
+    """HTTPConnection that validates resolved IPs at connect time (closes DNS TOCTOU gap)."""
+    def connect(self) -> None:
+        for info in socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM):
+            _check_ip_str(info[4][0])
+        super().connect()
+
+
+class _SafeHTTPSConnection(http.client.HTTPSConnection):
+    """HTTPSConnection that validates resolved IPs at connect time (closes DNS TOCTOU gap)."""
+    def connect(self) -> None:
+        for info in socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM):
+            _check_ip_str(info[4][0])
+        super().connect()
+
+
+class _SafeHTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_SafeHTTPConnection, req)
+
+
+class _SafeHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(_SafeHTTPSConnection, req, context=self._context)
 
 
 @dataclass
@@ -83,7 +111,7 @@ def _parse_pub_date(entry: feedparser.FeedParserDict) -> Optional[datetime]:
 def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
     """Parse the RSS feed and return a list of ParsedEpisode objects."""
     validate_external_url(feed_url)
-    feed = feedparser.parse(feed_url, handlers=[_SSRFRedirectHandler()])
+    feed = feedparser.parse(feed_url, handlers=[_SSRFRedirectHandler(), _SafeHTTPHandler(), _SafeHTTPSHandler()])
     if feed.bozo and not feed.entries:
         raise ValueError(f"Failed to parse feed: {feed_url} — {feed.bozo_exception}")
 

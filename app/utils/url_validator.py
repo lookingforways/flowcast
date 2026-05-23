@@ -1,6 +1,7 @@
 """SSRF protection: validate URLs before making outbound HTTP requests."""
 from __future__ import annotations
 
+import asyncio
 import ipaddress
 import re
 import socket
@@ -28,6 +29,11 @@ def _check_addr(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> None:
         raise ValueError(f"URL targets a reserved IP address: {addr}")
     if isinstance(addr, ipaddress.IPv4Address) and addr in _CGNAT:
         raise ValueError(f"URL targets a CG-NAT address: {addr}")
+
+
+def _check_ip_str(ip: str) -> None:
+    """Validate a resolved IP string. Raises ValueError if the IP is disallowed."""
+    _check_addr(ipaddress.ip_address(ip))
 
 
 def validate_external_url(url: str) -> str:
@@ -79,3 +85,28 @@ def validate_external_url(url: str) -> str:
             raise ValueError(f"Cannot resolve hostname: {hostname}")
 
     return url
+
+
+class _SSRFSafeTransport:
+    """httpx AsyncHTTPTransport that re-validates resolved IPs at connect time.
+
+    Closes the DNS TOCTOU gap: even if the hostname resolves to a different IP
+    between validate_external_url() and the actual TCP connection, this transport
+    checks every resolved IP again immediately before httpcore opens the socket.
+    """
+
+    def __new__(cls):
+        import httpx
+
+        class _Transport(httpx.AsyncHTTPTransport):
+            async def handle_async_request(self, request):
+                host = request.url.host
+                port = request.url.port or (443 if request.url.scheme == "https" else 80)
+                infos = await asyncio.to_thread(
+                    socket.getaddrinfo, host, port, 0, socket.SOCK_STREAM
+                )
+                for info in infos:
+                    _check_ip_str(info[4][0])
+                return await super().handle_async_request(request)
+
+        return _Transport()

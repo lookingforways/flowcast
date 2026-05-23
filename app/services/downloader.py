@@ -39,7 +39,7 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
 
     logger.info("Downloading %s → %s", episode.mp3_url, dest_path)
     try:
-        from app.utils.url_validator import validate_external_url
+        from app.utils.url_validator import validate_external_url, _SSRFSafeTransport
         from app.utils.progress import set_progress, clear_progress
         validate_external_url(episode.mp3_url)
         set_progress("download", episode.id, 0)
@@ -50,6 +50,7 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
                 validate_external_url(location)
 
         async with httpx.AsyncClient(
+            transport=_SSRFSafeTransport(),
             follow_redirects=True,
             timeout=300.0,
             event_hooks={"response": [_ssrf_redirect_hook]},

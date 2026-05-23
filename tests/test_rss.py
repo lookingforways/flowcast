@@ -1,5 +1,6 @@
 """Tests for RSS feed parsing."""
 import pytest
+from unittest.mock import patch
 from app.services.rss import fetch_feed, _extract_mp3_url, _parse_duration, ParsedEpisode
 
 SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
@@ -33,7 +34,8 @@ def test_fetch_feed_from_string(tmp_path):
     """Test feed parsing from a file URL."""
     feed_file = tmp_path / "feed.xml"
     feed_file.write_text(SAMPLE_RSS)
-    episodes = fetch_feed(str(feed_file))
+    with patch("app.services.rss.validate_external_url"):
+        episodes = fetch_feed(str(feed_file))
 
     assert len(episodes) == 2  # No-audio item excluded
     assert episodes[0].guid == "ep-001"
@@ -51,7 +53,8 @@ def test_parse_duration_formats():
 def test_special_chars_in_title(tmp_path):
     feed_file = tmp_path / "feed.xml"
     feed_file.write_text(SAMPLE_RSS)
-    episodes = fetch_feed(str(feed_file))
+    with patch("app.services.rss.validate_external_url"):
+        episodes = fetch_feed(str(feed_file))
     ep2 = next(e for e in episodes if e.guid == "ep-002")
     assert "Colon" in ep2.title
     assert ep2.duration_secs == 3600 + 2 * 60 + 15

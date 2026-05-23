@@ -76,3 +76,63 @@ def test_empty_url_blocked():
 def test_no_hostname_blocked():
     with pytest.raises(ValueError):
         validate_external_url("https:///path")
+
+
+# ── M-05: DNS TOCTOU — connect-time IP validation ────────────────────────────
+
+def test_check_ip_str_blocks_private():
+    from app.utils.url_validator import _check_ip_str
+    with pytest.raises(ValueError, match="private"):
+        _check_ip_str("192.168.1.1")
+
+
+def test_check_ip_str_blocks_loopback():
+    from app.utils.url_validator import _check_ip_str
+    with pytest.raises(ValueError, match="loopback"):
+        _check_ip_str("127.0.0.1")
+
+
+def test_safe_http_connection_blocks_private_ip():
+    """_SafeHTTPConnection must reject private IPs at connect() time (DNS TOCTOU gap)."""
+    import socket
+    from unittest.mock import patch
+    from app.services.rss import _SafeHTTPConnection
+
+    conn = _SafeHTTPConnection("example.com", 80)
+    fake = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("192.168.1.100", 80))]
+    with patch("app.services.rss.socket.getaddrinfo", return_value=fake):
+        with pytest.raises(ValueError, match="private"):
+            conn.connect()
+
+
+def test_safe_https_connection_blocks_private_ip():
+    """_SafeHTTPSConnection must reject private IPs at connect() time (DNS TOCTOU gap)."""
+    import socket
+    from unittest.mock import patch
+    from app.services.rss import _SafeHTTPSConnection
+
+    conn = _SafeHTTPSConnection("example.com", 443)
+    fake = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.1", 443))]
+    with patch("app.services.rss.socket.getaddrinfo", return_value=fake):
+        with pytest.raises(ValueError, match="private"):
+            conn.connect()
+
+
+def test_ssrf_safe_transport_blocks_private_ip():
+    """_SSRFSafeTransport must reject private IPs resolved at handle_async_request time."""
+    import asyncio
+    import socket
+    import httpx
+    from unittest.mock import patch
+    from app.utils.url_validator import _SSRFSafeTransport
+
+    transport = _SSRFSafeTransport()
+    fake = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("192.168.1.1", 443))]
+
+    async def _run():
+        request = httpx.Request("GET", "https://example.com/")
+        with patch("app.utils.url_validator.socket.getaddrinfo", return_value=fake):
+            await transport.handle_async_request(request)
+
+    with pytest.raises(ValueError, match="private"):
+        asyncio.run(_run())

@@ -167,10 +167,14 @@ async def security_middleware(request: Request, call_next):
 
     # Block oversized bodies before FastAPI reads them
     if request.method == "POST" and request.url.path in ("/login", "/2fa"):
+        if "chunked" in request.headers.get("transfer-encoding", "").lower():
+            return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
         content_length = int(request.headers.get("content-length", 0))
         if content_length > _MAX_FORM_BODY:
             return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
     if request.method == "PATCH" and request.url.path == "/api/preferences":
+        if "chunked" in request.headers.get("transfer-encoding", "").lower():
+            return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
         content_length = int(request.headers.get("content-length", 0))
         if content_length > _MAX_FORM_BODY:
             return JSONResponse({"detail": "Solicitud inválida"}, status_code=400)
