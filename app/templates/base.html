@@ -10,6 +10,16 @@
   <link rel="stylesheet" href="/static/css/app.css?v=0.9.26" integrity="sha384-vSu+hKAiiuG9bDnaQHHL+2yaGvlrjod2uwB2CTDM/+FURhjpSJA+Rxvlo34fCLhY" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/css/ui-fonts.css?v=0.9.30" integrity="sha384-MISqEktsrYH5ftCTJ0UpuhXRx9GbpFyqRApuKuMPG07QCI4ThEtH9ql/QQhcX5QC" crossorigin="anonymous">
   {% block styles %}{% endblock %}
+  <style nonce="{{ request.state.csp_nonce }}">
+    .fc-yt-warn {
+      font-size: 0.75rem;
+      color: var(--fc-warning);
+      padding: 6px 12px;
+      line-height: 1.4;
+      margin: 0;
+    }
+    [data-theme="light"] .fc-yt-warn { color: #92400e; }
+  </style>
   {# Prevent flash of wrong theme/font: apply preferences before first paint #}
   <script nonce="{{ request.state.csp_nonce }}">
     (function () {
@@ -71,6 +81,7 @@
           YouTube conectado
         </span>
       {% else %}
+        <p class="fc-yt-warn">Los renders no se publicarán automáticamente</p>
         <a href="/auth/youtube" class="fc-yt-badge fc-yt-disconnected">
           <i class="ph ph-youtube-logo" aria-hidden="true"></i>
           Conectar YouTube
