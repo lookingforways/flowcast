@@ -127,6 +127,40 @@
 
 </div>{# /.fc-app #}
 
+{% if request.query_params.get('yt_config_error') %}
+<dialog id="ytConfigErrorModal" aria-labelledby="ytConfigErrorTitle" aria-modal="true">
+  <div class="dialog-header dialog-header-warning">
+    <h4 id="ytConfigErrorTitle">
+      <i class="ph ph-youtube-logo" aria-hidden="true"></i> YouTube no configurado
+    </h4>
+    <button type="button" class="btn-close" data-close-dialog aria-label="Cerrar">✕</button>
+  </div>
+  <div class="dialog-body">
+    <p>Para conectar YouTube necesitás configurar las credenciales OAuth2 en tu archivo <code>.env</code>:</p>
+    <p><code>GOOGLE_CLIENT_ID=...</code><br><code>GOOGLE_CLIENT_SECRET=...</code></p>
+    <p class="text-muted small mb-0">
+      Podés obtenerlas en <strong>Google Cloud Console</strong> → APIs y servicios → Credenciales.
+      Consultá el README para los pasos detallados.
+    </p>
+  </div>
+  <div class="dialog-footer">
+    <button type="button" class="btn btn-secondary" data-close-dialog>Entendido</button>
+  </div>
+</dialog>
+<script nonce="{{ request.state.csp_nonce }}">
+(function () {
+  var modal = document.getElementById('ytConfigErrorModal');
+  if (modal) {
+    modal.showModal();
+    history.replaceState(null, '', window.location.pathname);
+    modal.querySelectorAll('[data-close-dialog]').forEach(function (btn) {
+      btn.addEventListener('click', function () { modal.close(); });
+    });
+  }
+}());
+</script>
+{% endif %}
+
 <script src="/static/js/app.js?v=0.9.26" nonce="{{ request.state.csp_nonce }}" integrity="sha384-gHQOHfPcQSEgVc2c2/JW61HkOHlO6SIoPM3vrPmBMQYtQLf42XNQi4CeKhIeYd/k" crossorigin="anonymous"></script>
 {% block scripts %}{% endblock %}
 </body>

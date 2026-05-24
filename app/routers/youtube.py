@@ -36,9 +36,12 @@ async def youtube_status():
 @router.get("/auth/youtube")
 async def youtube_auth(request: Request):
     if not settings.google_client_id or not settings.google_client_secret:
-        return {
-            "error": "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set in .env"
-        }
+        from urllib.parse import urlparse
+        referer = request.headers.get("referer", "")
+        back = urlparse(referer).path if referer else "/"
+        if not back or back == "/auth/youtube":
+            back = "/"
+        return RedirectResponse(f"{back}?yt_config_error=1")
     url, state = get_authorization_url()
     session = get_session(request)
     session["oauth_state"] = state
