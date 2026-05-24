@@ -6,6 +6,24 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.23] — 2026-05-24
+
+### Añadido
+
+- **Imagen de portada en listado de podcasts**: al hacer poll del feed RSS se extrae la URL de la portada (`<itunes:image>` con fallback a `<image>`) y se persiste en `podcasts.image_url`. Se muestra como thumbnail 80×80 en la tarjeta del podcast vía el proxy `/api/img` — sin SSRF adicional porque la URL pasa por la protección existente.
+- **Migración Alembic 0002**: añade la columna `image_url VARCHAR(2048)` a la tabla `podcasts`. Las instalaciones existentes la reciben automáticamente al arrancar.
+
+### Mejorado
+
+- **`init_db()` — detección de instalaciones pre-Alembic**: ahora distingue tres casos: instalación nueva (sin tabla `podcasts` → `create_all` + stamp head), instalación pre-v0.9.19 (tabla existe pero sin `alembic_version` → stamp `0001` + `upgrade head`), e instalación Alembic-gestionada (→ `upgrade head`). Previene skip silencioso de migraciones.
+- **Poll de RSS — transacción única**: `image_url` y los episodios nuevos se persisten en un solo `commit()` tanto en el scheduler como en el endpoint manual `POST /api/podcasts/{id}/poll`.
+
+### Corregido
+
+- **Botón "Volver al login" en 2FA**: estilos inline del browser eliminados; ahora usa clase `.fc-back-link` con colores del design system (`--fc-text-muted` / `--fc-text` en hover).
+
+---
+
 ## [0.9.22] — 2026-05-22
 
 ### Seguridad
