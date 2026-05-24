@@ -36,11 +36,11 @@ async def _poll_podcast(podcast: Podcast) -> None:
             podcast_db = await session.get(Podcast, podcast.id)
             if podcast_db:
                 podcast_db.image_url = meta.image_url
-                await session.commit()
 
         new_episodes = await diff_feed(
             session, parsed, podcast_id=podcast.id, feed_url=podcast.feed_url
         )
+        await session.commit()
 
         if not settings.flowcast_auto_publish:
             if not new_episodes:
