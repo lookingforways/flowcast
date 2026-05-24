@@ -59,6 +59,11 @@ class _SafeHTTPSHandler(urllib.request.HTTPSHandler):
 
 
 @dataclass
+class FeedMeta:
+    image_url: Optional[str]
+
+
+@dataclass
 class ParsedEpisode:
     guid: str
     title: str
@@ -108,12 +113,31 @@ def _parse_pub_date(entry: feedparser.FeedParserDict) -> Optional[datetime]:
     return None
 
 
-def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
-    """Parse the RSS feed and return a list of ParsedEpisode objects."""
+def _extract_feed_image(feed: feedparser.FeedParserDict) -> Optional[str]:
+    """Extract the podcast cover image URL from feed-level metadata."""
+    # iTunes artwork takes priority (typically higher resolution)
+    itunes_img = feed.feed.get("itunes_image")
+    if itunes_img:
+        url = itunes_img.get("href") or itunes_img.get("url")
+        if url and url.startswith(("http://", "https://")):
+            return url
+    # Fall back to RSS <image> element
+    img = feed.feed.get("image")
+    if img:
+        url = img.get("href") or img.get("url")
+        if url and url.startswith(("http://", "https://")):
+            return url
+    return None
+
+
+def fetch_feed(feed_url: str) -> tuple[list[ParsedEpisode], FeedMeta]:
+    """Parse the RSS feed and return episodes plus feed-level metadata."""
     validate_external_url(feed_url)
     feed = feedparser.parse(feed_url, handlers=[_SSRFRedirectHandler(), _SafeHTTPHandler(), _SafeHTTPSHandler()])
     if feed.bozo and not feed.entries:
         raise ValueError(f"Failed to parse feed: {feed_url} — {feed.bozo_exception}")
+
+    meta = FeedMeta(image_url=_extract_feed_image(feed))
 
     episodes: list[ParsedEpisode] = []
     for entry in feed.entries:
@@ -143,7 +167,7 @@ def fetch_feed(feed_url: str) -> list[ParsedEpisode]:
         )
 
     logger.info("Fetched %d episodes from %s", len(episodes), feed_url)
-    return episodes
+    return episodes, meta
 
 
 async def diff_feed(

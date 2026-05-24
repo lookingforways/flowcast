@@ -26,12 +26,18 @@ async def _poll_podcast(podcast: Podcast) -> None:
 
     logger.info("Polling feed for '%s': %s", podcast.name, podcast.feed_url)
     try:
-        parsed = fetch_feed(podcast.feed_url)
+        parsed, meta = fetch_feed(podcast.feed_url)
     except Exception as exc:
         logger.error("Feed fetch failed for '%s': %s", podcast.name, exc)
         return
 
     async with AsyncSessionLocal() as session:
+        if meta.image_url:
+            podcast_db = await session.get(Podcast, podcast.id)
+            if podcast_db:
+                podcast_db.image_url = meta.image_url
+                await session.commit()
+
         new_episodes = await diff_feed(
             session, parsed, podcast_id=podcast.id, feed_url=podcast.feed_url
         )

@@ -51,6 +51,7 @@ class PodcastOut(BaseModel):
     description: Optional[str]
     youtube_playlist_id: Optional[str]
     default_template_id: Optional[int]
+    image_url: Optional[str] = None
     is_active: bool
     created_at: datetime
     updated_at: datetime

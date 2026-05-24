@@ -120,7 +120,10 @@ async def _run_poll(podcast_id: int) -> None:
         if not podcast:
             return
         try:
-            parsed = fetch_feed(podcast.feed_url)
+            parsed, meta = fetch_feed(podcast.feed_url)
+            if meta.image_url:
+                podcast.image_url = meta.image_url
+                await session.commit()
             await diff_feed(session, parsed, podcast_id=podcast_id)
         except Exception as exc:
             import logging

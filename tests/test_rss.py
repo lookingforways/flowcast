@@ -1,7 +1,7 @@
 """Tests for RSS feed parsing."""
 import pytest
 from unittest.mock import patch
-from app.services.rss import fetch_feed, _extract_mp3_url, _parse_duration, ParsedEpisode
+from app.services.rss import fetch_feed, _extract_mp3_url, _parse_duration, FeedMeta, ParsedEpisode
 
 SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
@@ -29,19 +29,49 @@ SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
   </channel>
 </rss>"""
 
+SAMPLE_RSS_WITH_IMAGE = """<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Test Podcast</title>
+    <itunes:image href="https://example.com/artwork.jpg"/>
+    <item>
+      <title>Episode 1</title>
+      <guid>ep-001</guid>
+      <enclosure url="https://example.com/ep1.mp3" type="audio/mpeg" length="1234"/>
+    </item>
+  </channel>
+</rss>"""
+
+SAMPLE_RSS_WITH_RSS_IMAGE = """<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Podcast</title>
+    <image>
+      <url>https://example.com/cover.png</url>
+      <title>Test Podcast</title>
+    </image>
+    <item>
+      <title>Episode 1</title>
+      <guid>ep-001</guid>
+      <enclosure url="https://example.com/ep1.mp3" type="audio/mpeg" length="1234"/>
+    </item>
+  </channel>
+</rss>"""
+
 
 def test_fetch_feed_from_string(tmp_path):
     """Test feed parsing from a file URL."""
     feed_file = tmp_path / "feed.xml"
     feed_file.write_text(SAMPLE_RSS)
     with patch("app.services.rss.validate_external_url"):
-        episodes = fetch_feed(str(feed_file))
+        episodes, meta = fetch_feed(str(feed_file))
 
     assert len(episodes) == 2  # No-audio item excluded
     assert episodes[0].guid == "ep-001"
     assert episodes[0].title == "Episode 1: Hello World"
     assert episodes[0].mp3_url == "https://example.com/ep1.mp3"
     assert episodes[0].duration_secs == 45 * 60 + 30
+    assert meta.image_url is None
 
 
 def test_parse_duration_formats():
@@ -54,7 +84,23 @@ def test_special_chars_in_title(tmp_path):
     feed_file = tmp_path / "feed.xml"
     feed_file.write_text(SAMPLE_RSS)
     with patch("app.services.rss.validate_external_url"):
-        episodes = fetch_feed(str(feed_file))
+        episodes, meta = fetch_feed(str(feed_file))
     ep2 = next(e for e in episodes if e.guid == "ep-002")
     assert "Colon" in ep2.title
     assert ep2.duration_secs == 3600 + 2 * 60 + 15
+
+
+def test_fetch_feed_itunes_image(tmp_path):
+    feed_file = tmp_path / "feed.xml"
+    feed_file.write_text(SAMPLE_RSS_WITH_IMAGE)
+    with patch("app.services.rss.validate_external_url"):
+        episodes, meta = fetch_feed(str(feed_file))
+    assert meta.image_url == "https://example.com/artwork.jpg"
+
+
+def test_fetch_feed_rss_image_fallback(tmp_path):
+    feed_file = tmp_path / "feed.xml"
+    feed_file.write_text(SAMPLE_RSS_WITH_RSS_IMAGE)
+    with patch("app.services.rss.validate_external_url"):
+        episodes, meta = fetch_feed(str(feed_file))
+    assert meta.image_url == "https://example.com/cover.png"

@@ -18,6 +18,8 @@ class Podcast(Base):
     # YouTube playlist ID (e.g. PLxxxxx) — optional, videos go to channel root if null
     youtube_playlist_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
+    image_url: Mapped[Optional[str]] = mapped_column(String(2048), nullable=True)
+
     # Default template for this podcast's audiograms
     default_template_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("templates.id", ondelete="SET NULL"), nullable=True
