@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     # Para hardening: usar la IP del reverse proxy, ej. "172.18.0.0/16"
     trusted_proxy_ips: str = "*"
 
+    # Webhook — notificaciones salientes (opcional)
+    webhook_url: str = ""
+    webhook_secret: str = ""
+    webhook_timeout: float = 10.0
+
     # Derived paths (computed properties)
     @property
     def db_path(self) -> Path:
