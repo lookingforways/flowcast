@@ -56,6 +56,12 @@ _500_HTML = (
 async def lifespan(app: FastAPI):
     # Startup
     settings.validate_secrets()
+    if settings.webhook_url:
+        from app.utils.url_validator import validate_external_url
+        try:
+            validate_external_url(settings.webhook_url)
+        except ValueError as exc:
+            raise RuntimeError(f"WEBHOOK_URL inválida: {exc}") from exc
     settings.ensure_dirs()
     await init_db()
     await _ensure_default_template()

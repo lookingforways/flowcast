@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models.episode import Episode
+from app.models.podcast import Podcast
+from app.services.notifier import notify
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +85,13 @@ async def download_episode(session: AsyncSession, episode: Episode) -> Path:
         from app.utils.progress import clear_progress
         clear_progress("download", episode.id)
         await session.commit()
+        podcast = await session.get(Podcast, episode.podcast_id)
+        podcast_name = podcast.name if podcast else str(episode.podcast_id or "unknown")
+        await notify("download_error", {
+            "podcast": podcast_name,
+            "episode": episode.title,
+            "error": str(exc),
+        })
         if dest_path.exists():
             dest_path.unlink()
         raise
