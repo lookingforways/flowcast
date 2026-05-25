@@ -43,6 +43,7 @@ Las páginas cargan con datos del servidor (server-rendered). Las interacciones 
 - **Publicación en YouTube** con OAuth2 — asigna automáticamente la playlist del podcast
 - **Autenticación**: login con usuario/contraseña + 2FA TOTP (Google Authenticator, Authy, 1Password)
 - **Progreso en tiempo real**: barras de progreso para descarga, render (waveform + FFmpeg) y publicación en YouTube — persisten al recargar la página
+- **Notificaciones webhook**: avisos automáticos al completar o fallar cada etapa del pipeline (`publish_success`, `download_error`, `render_error`, `publish_error`) — compatible con ntfy, Telegram, Slack, Discord o cualquier endpoint HTTP POST
 - **Self-hosted**: corre en tu VPS con Docker
 
 ---
@@ -66,7 +67,7 @@ FlowCast ha pasado por múltiples rondas de auditoría externa activa (última: 
 | Archivos estáticos | `/static/img/` requiere autenticación. `/static/css/` y `/static/js/` son públicos (solo contienen el design system visual, no lógica de negocio) |
 | Rate limiting | 5 req/min en `/login` y `/2fa`; 10 req/min en download, render y publish; 30 req/min en `/api/img` — por IP, con slowapi |
 | SRI | `integrity=` sha384 en todos los assets CSS/JS — verifica integridad en el browser |
-| SSRF | Validación de URLs externas (IP privadas, CG-NAT 100.64/10, IPv4-mapped IPv6, octal bloqueados) antes de fetch RSS y descarga de MP3. Redirects re-validados en todos los puntos de fetch |
+| SSRF | Validación de URLs externas (IP privadas, CG-NAT 100.64/10, IPv4-mapped IPv6, octal bloqueados) antes de fetch RSS, descarga de MP3 y entrega de webhook. Redirects re-validados en todos los puntos de fetch |
 | FFmpeg injection | Validators Pydantic con whitelist estricto para colores (`#RRGGBB`) y expresiones posicionales — bloquean inyección via opciones FFmpeg |
 | Proxy de imágenes | `/api/img` descarga imágenes externas server-side con allowlist de content-types y límite 5 MB |
 | Tokens YouTube | Cifrados en disco con Fernet (AES-128-CBC) derivando clave del `SECRET_KEY` |

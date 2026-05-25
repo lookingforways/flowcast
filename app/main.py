@@ -31,6 +31,7 @@ from app.services.scheduler import start_scheduler, stop_scheduler
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
     format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
+    force=True,
 )
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,11 @@ async def lifespan(app: FastAPI):
             raise RuntimeError(f"WEBHOOK_URL inválida: {exc}") from exc
     settings.ensure_dirs()
     await init_db()
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level.upper(), logging.INFO),
+        format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
+        force=True,
+    )
     await _ensure_default_template()
     async with AsyncSessionLocal() as session:
         await init_preferences(session)
@@ -94,7 +100,7 @@ async def _ensure_default_template() -> None:
 app = FastAPI(
     title="FlowCast",
     description="Self-hosted audiogram generator for podcasts",
-    version="0.9.23",
+    version="0.9.24",
     openapi_url=None,
     docs_url=None,
     redoc_url=None,

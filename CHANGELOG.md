@@ -6,6 +6,20 @@ Versionado semántico: MAJOR.MINOR.PATCH
 
 ---
 
+## [0.9.24] — 2026-05-25
+
+### Añadido
+
+- **Notificaciones webhook**: webhook saliente configurable para cuatro eventos del pipeline — `publish_success`, `download_error`, `render_error`, `publish_error`. Compatible con ntfy, Telegram bots, Slack, Discord o cualquier endpoint HTTP POST. Payload JSON firmado opcionalmente con HMAC-SHA256 (`X-FlowCast-Signature`). Protección SSRF doble: validación en startup y en connect-time via `_SSRFSafeTransport`. Variables de entorno: `WEBHOOK_URL`, `WEBHOOK_SECRET`, `WEBHOOK_TIMEOUT`.
+- **Modal cuando YouTube no está configurado**: al intentar conectar YouTube sin `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` en `.env`, muestra una ventana modal con instrucciones en lugar del JSON crudo. Redirige de vuelta a la página de origen y limpia la URL (`history.replaceState`).
+- **Aviso YouTube desconectado en sidebar**: indicador visible en el footer del sidebar cuando YouTube no está conectado, sin interrumpir la navegación.
+
+### Corregido
+
+- **Logs de startup suprimidos tras Alembic**: `fileConfig()` en `alembic/env.py` deshabilitaba silenciosamente todos los loggers creados antes de las migraciones (`disable_existing_loggers=True` por defecto de Python). Corregido con `disable_existing_loggers=False` en `fileConfig()` y `logging.basicConfig(force=True)` en el lifespan después de `init_db()`. Los mensajes `"FlowCast started"` y `"Application startup complete"` ahora aparecen correctamente en los logs del container.
+
+---
+
 ## [0.9.23] — 2026-05-24
 
 ### Añadido
