@@ -12,7 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.youtube_oauth import load_credentials
 from app.config import settings
 from app.models.episode import Episode
+from app.models.podcast import Podcast
+from app.services.notifier import notify
 from app.utils.html_sanitizer import html_to_text
+from app.utils.progress import clear_progress, set_progress
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +110,6 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
     part = "snippet,status,recordingDetails" if episode.pub_date else "snippet,status"
     request = youtube.videos().insert(part=part, body=body, media_body=media)
 
-    from app.utils.progress import set_progress, clear_progress
     set_progress("upload", episode.id, 0)
     _ep_id = episode.id
 
@@ -121,36 +123,58 @@ async def publish_episode(session: AsyncSession, episode: Episode) -> str:
                 set_progress("upload", _ep_id, pct)
         return resp["id"]
 
-    video_id = await asyncio.to_thread(_do_upload)
-    clear_progress("upload", episode.id)
-    logger.info("Uploaded to YouTube: https://youtu.be/%s", video_id)
+    try:
+        video_id = await asyncio.to_thread(_do_upload)
+        clear_progress("upload", episode.id)
+        logger.info("Uploaded to YouTube: https://youtu.be/%s", video_id)
 
-    # Assign to playlist if the podcast has one configured
-    playlist_id = None
-    if episode.podcast_id:
-        from app.models.podcast import Podcast
+        # Assign to playlist if the podcast has one configured
+        playlist_id = None
+        if episode.podcast_id:
+            podcast = await session.get(Podcast, episode.podcast_id)
+            if podcast and podcast.youtube_playlist_id:
+                playlist_id = podcast.youtube_playlist_id
+
+        if playlist_id:
+            try:
+                youtube.playlistItems().insert(
+                    part="snippet",
+                    body={
+                        "snippet": {
+                            "playlistId": playlist_id,
+                            "resourceId": {"kind": "youtube#video", "videoId": video_id},
+                        }
+                    },
+                ).execute()
+                logger.info("Added video %s to playlist %s", video_id, playlist_id)
+            except Exception as exc:
+                logger.warning("Could not add video to playlist: %s", exc)
+
+        episode.youtube_id = video_id
+        episode.status = "published"
+        episode.error_msg = None
+        await session.commit()
+
         podcast = await session.get(Podcast, episode.podcast_id)
-        if podcast and podcast.youtube_playlist_id:
-            playlist_id = podcast.youtube_playlist_id
+        podcast_name = podcast.name if podcast else str(episode.podcast_id or "unknown")
+        await notify("publish_success", {
+            "podcast": podcast_name,
+            "episode": episode.title,
+            "youtube_url": f"https://youtu.be/{video_id}",
+        })
+        return video_id
 
-    if playlist_id:
-        try:
-            youtube.playlistItems().insert(
-                part="snippet",
-                body={
-                    "snippet": {
-                        "playlistId": playlist_id,
-                        "resourceId": {"kind": "youtube#video", "videoId": video_id},
-                    }
-                },
-            ).execute()
-            logger.info("Added video %s to playlist %s", video_id, playlist_id)
-        except Exception as exc:
-            logger.warning("Could not add video to playlist: %s", exc)
-
-    episode.youtube_id = video_id
-    episode.status = "published"
-    episode.error_msg = None
-    await session.commit()
-
-    return video_id
+    except Exception as exc:
+        logger.error("Publish failed for episode %d: %s", episode.id, exc)
+        episode.status = "failed"
+        episode.error_msg = str(exc)
+        clear_progress("upload", episode.id)
+        await session.commit()
+        podcast = await session.get(Podcast, episode.podcast_id)
+        podcast_name = podcast.name if podcast else str(episode.podcast_id or "unknown")
+        await notify("publish_error", {
+            "podcast": podcast_name,
+            "episode": episode.title,
+            "error": str(exc),
+        })
+        raise
