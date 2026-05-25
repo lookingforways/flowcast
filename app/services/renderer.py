@@ -13,7 +13,9 @@ from app.config import settings
 from app.ffmpeg.pipeline import run_pipeline
 from app.models.episode import Episode
 from app.models.job import RenderJob
+from app.models.podcast import Podcast
 from app.models.template import Template
+from app.services.notifier import notify
 
 logger = logging.getLogger(__name__)
 
@@ -111,4 +113,14 @@ async def render_episode(
 
     await session.commit()
     await session.refresh(job)
+
+    if job.status == "failed":
+        podcast = await session.get(Podcast, episode.podcast_id)
+        podcast_name = podcast.name if podcast else str(episode.podcast_id or "unknown")
+        await notify("render_error", {
+            "podcast": podcast_name,
+            "episode": episode.title,
+            "error": job.error_msg or "Render fallido",
+        })
+
     return job
